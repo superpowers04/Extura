@@ -1,3 +1,6 @@
+<h1 align="center"> Extura </h1>
+An addon to Figura that allows you to do some out of Figura-scope things
+
 <h1 align="center"> Figura </h1>
 <p align="center">
   <img alt="fabric" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/fabric_vector.svg">
