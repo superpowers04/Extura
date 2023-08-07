@@ -56,10 +56,13 @@ public class Configs {
             MISC = new ConfigType.Category("misc"),
             DEV = new ConfigType.Category("dev") {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
+            }},
+            EXTURA = new ConfigType.Category("extura") {{
+                this.name = this.name.copy().withStyle(ChatFormatting.LIGHT_PURPLE);
             }};
 
 
-    // -- nameplate -- // 
+    // -- nameplate -- //
 
 
     public static final ConfigType.BoolConfig
@@ -243,8 +246,9 @@ public class Configs {
                 this.tooltip = FiguraText.of(tooltip + "1")
                         .append("\n")
                         .append(FiguraText.of(tooltip + "2").withStyle(ChatFormatting.RED));
-            }},
-            CHAT_MESSAGES = new ConfigType.BoolConfig("chat_messages", DEV, false) {{
+            }};
+
+    public static final ConfigType.BoolConfig CHAT_MESSAGES = new ConfigType.BoolConfig("chat_messages", DEV, false) {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
                 String tooltip = "config.chat_messages.tooltip.";
                 this.tooltip = FiguraText.of(tooltip + "1")
@@ -270,6 +274,39 @@ public class Configs {
                     NetworkStuff.reAuth();
                 }
             };
+    public static final ConfigType.BoolConfig USE_SECURE_CLOUD = new ConfigType.BoolConfig("use_secure_cloud", DEV, true) {
+            @Override
+            public void onChange() {
+                super.onChange();
+                NetworkStuff.reAuth();
+            }
+            {
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.use_secure_cloud.tooltip");
+            }
+        };
+        public static final ConfigType.BoolConfig BLOCK_CLOUD = new ConfigType.BoolConfig("block_cloud", DEV, false) {
+            @Override
+            public void onChange() {
+                super.onChange();
+                NetworkStuff.reAuth();
+            }
+            {
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.block_cloud.tooltip");
+            }
+        };
+        public static final ConfigType.BoolConfig USE_MC_HOST_RESOLVER = new ConfigType.BoolConfig("use_mc_host_resolver", DEV, true) {
+            @Override
+            public void onChange() {
+                super.onChange();
+                NetworkStuff.reAuth();
+            }
+            {
+                this.name = this.name.copy();
+                this.tooltip = FiguraText.of("config.use_mc_host_resolver.tooltip");
+            }
+        };
     @SuppressWarnings("unused")
     public static final ConfigType.ButtonConfig
             CLEAR_CACHE = new ConfigType.ButtonConfig("clear_cache", DEV, () -> {
@@ -290,4 +327,19 @@ public class Configs {
     public static final ConfigType.BoolConfig
             FORCE_SMOOTH_AVATAR = new ConfigType.BoolConfig("force_smooth_avatar", DEV, false),
             GUI_FPS = new ConfigType.BoolConfig("gui_fps", DEV, false);
+
+// Extura
+    public static final ConfigType.BoolConfig GETBLOCKS_LIMIT = new ConfigType.BoolConfig("get_blocks_limit", EXTURA, false) {{
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.get_blocks_limit.tooltip");
+            }};
+    public static final ConfigType.BoolConfig EXPOSE_IO = new ConfigType.BoolConfig("expose_io", EXTURA, false) {{
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.expose_io.tooltip");
+            }};
+    public static final ConfigType.BoolConfig USE_GLOBAL_SCRIPTS = new ConfigType.BoolConfig("use_global_scripts", EXTURA, false) {{
+                this.name = this.name.copy();
+                this.tooltip = FiguraText.of("config.use_global_scripts.tooltip");
+            }};
+
 }

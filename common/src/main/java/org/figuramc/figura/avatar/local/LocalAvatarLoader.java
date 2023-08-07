@@ -10,6 +10,7 @@ import net.minecraft.server.packs.resources.Resource;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.avatar.UserData;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.FiguraToast;
 import org.figuramc.figura.parsers.AvatarMetadataParser;
 import org.figuramc.figura.parsers.BlockbenchModelParser;
@@ -114,11 +115,22 @@ public class LocalAvatarLoader {
         async(() -> {
             try {
                 // load as folder
+                 if (path.toString().endsWith(".moon")) {
+                    //NbtIo already closes the file stream
+                    CompoundTag ava = NbtIo.readCompressed(Files.newInputStream(finalPath));
+                    loadState = LoadState.SCRIPTS;
+//                    loadGlobalScripts(ava);
+                    ava.putBoolean("isMoon",true);
+                    loadGlobalScripts(nbt);
+                    target.loadAvatar(ava);
+                    return;
+                }
                 CompoundTag nbt = new CompoundTag();
 
                 // scripts
                 loadState = LoadState.SCRIPTS;
                 loadScripts(finalPath, nbt);
+                loadGlobalScripts(nbt);
 
                 // custom sounds
                 loadState = LoadState.SOUNDS;

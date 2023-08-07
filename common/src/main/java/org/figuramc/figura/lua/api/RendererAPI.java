@@ -5,19 +5,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.math.matrix.FiguraMat3;
+import org.figuramc.figura.math.matrix.FiguraMat4;
+import org.luaj.vm2.LuaError;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaFieldDoc;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
-import org.figuramc.figura.math.matrix.FiguraMat3;
-import org.figuramc.figura.math.matrix.FiguraMat4;
 import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.utils.LuaUtils;
-import org.luaj.vm2.LuaError;
 
 import java.util.UUID;
 
@@ -162,6 +162,24 @@ public class RendererAPI {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = @LuaMethodOverload(
+                    argumentTypes = Boolean.class,
+                    argumentNames = "smoothCamera"
+            ),
+            value = "renderer.set_smooth_camera")
+    public RendererAPI setSmoothCamera(boolean smoothCamera) {
+        Minecraft.getInstance().options.smoothCamera = smoothCamera;
+        return this;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("renderer.get_smooth_camera")
+    public boolean getSmoothCamera() {
+        return Minecraft.getInstance().options.smoothCamera;
+    }
+
+    @LuaWhitelist
     @LuaMethodDoc("renderer.is_upside_down")
     public boolean isUpsideDown() {
         return upsideDown;
@@ -197,6 +215,31 @@ public class RendererAPI {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload,
+                    @LuaMethodOverload(
+                            argumentTypes = Float.class,
+                            argumentNames = "sensitivity"
+                    )
+            },
+            aliases = "sensitivity",
+            value = "renderer.set_sensitivity"
+    )
+    public RendererAPI setSensitivity(Float sensitivity) {
+        Minecraft.getInstance().options.sensitivity().set(Mth.clamp(sensitivity.doubleValue(), 0D, 1D));
+        return this;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            value = "renderer.get_sensitivity"
+    )
+    public Double getSensitivity() {
+        return Minecraft.getInstance().options.sensitivity().get();
+    }
+
+    @LuaWhitelist
     public RendererAPI shadowRadius(Float shadowRadius) {
         return setShadowRadius(shadowRadius);
     }
@@ -224,6 +267,10 @@ public class RendererAPI {
     public FiguraVec3 getCameraPos() {
         return this.cameraPos;
     }
+
+    @LuaWhitelist
+    @LuaMethodDoc("renderer.get_delta_time")
+    public Float getDeltaTime() { return Minecraft.getInstance().getDeltaFrameTime(); }
 
     @LuaWhitelist
     @LuaMethodDoc(
@@ -427,10 +474,22 @@ public class RendererAPI {
             value = "renderer.set_post_effect"
     )
     public RendererAPI setPostEffect(String effect) {
-        this.postShader = effect == null ? null : LuaUtils.parsePath("shaders/post/" + effect + ".json");
+        if(effect == null)
+            this.postShader = null;
+        else
+            this.postShader = effect.endsWith(".json") ?
+                    LuaUtils.parsePath(effect) :
+                    LuaUtils.parsePath("shaders/post/" + effect + ".json");
         return this;
     }
 
+    @LuaWhitelist
+    @LuaMethodDoc(
+            value = "renderer.get_post_effect"
+    )
+    public String getPostEffect() {
+        return this.postShader.toString();
+    }
     @LuaWhitelist
     public RendererAPI postEffect(String effect) {
         return setPostEffect(effect);

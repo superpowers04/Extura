@@ -2,10 +2,13 @@ package org.figuramc.figura.lua.api.entity;
 
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.PlayerTeam;
+import org.luaj.vm2.LuaError;
+import org.luaj.vm2.LuaTable;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.NbtToLua;
@@ -13,9 +16,8 @@ import org.figuramc.figura.lua.ReadOnlyLuaTable;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
+import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.utils.EntityUtils;
-import org.luaj.vm2.LuaError;
-import org.luaj.vm2.LuaTable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +73,13 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
     public float getExperienceProgress() {
         checkEntity();
         return entity.experienceProgress;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("player.get_last_death_pos")
+    public FiguraVec3 getLastDeathPos() {
+        BlockPos deathPos = entity.getLastDeathLocation().get().pos();
+        return FiguraVec3.fromBlockPos(deathPos);
     }
 
     @LuaWhitelist
@@ -136,6 +145,12 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
     public boolean isFishing() {
         checkEntity();
         return entity.fishing != null;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("player.is_flying")
+    public boolean isFlying() {
+        return entity.getAbilities().flying;
     }
 
     @LuaWhitelist

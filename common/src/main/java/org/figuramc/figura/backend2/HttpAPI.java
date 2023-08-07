@@ -15,7 +15,7 @@ import java.util.function.BiConsumer;
 public class HttpAPI {
 
     private final String token;
-
+    private final String ModName = "Figura";
     public HttpAPI(String token) {
         this.token = token;
     }
@@ -29,14 +29,16 @@ public class HttpAPI {
     }
 
     protected static String getBackendAddress() {
-        ServerAddress backendIP = ServerAddress.parseString(Configs.SERVER_IP.value);
-        return "https://" + backendIP.getHost() + "/api";
+        if(Configs.BLOCK_CLOUD.value) return "https://invalidHost.thisisdumb/api";
+        String backendIP = Configs.USE_MC_HOST_RESOLVER.value ? ServerAddress.parseString(Configs.SERVER_IP.value).getHost() : Configs.SERVER_IP.value;
+        if(Configs.USE_SECURE_CLOUD.value) return "https://" + backendIP + "/api";
+        return "http://" + backendIP + "/api";
     }
 
     protected HttpRequest.Builder header(String url) {
         return HttpRequest
                 .newBuilder(getUri(url))
-                .header("user-agent", FiguraMod.MOD_NAME + "/" + FiguraMod.VERSION)
+                .header("user-agent", ModName+"/" + FiguraMod.VERSION)
                 .header("token", token);
     }
 

@@ -34,10 +34,10 @@ import java.util.UUID;
 public class FiguraMod {
 
     public static final String MOD_ID = "figura";
-    public static final String MOD_NAME = "Figura";
     public static final FiguraModMetadata METADATA = FiguraModMetadata.getMetadataForMod(MOD_ID);
-    public static final Version VERSION = new Version(PlatformUtils.getModVersionString());
-    public static final boolean DEBUG_MODE = false;
+    public static final String MOD_NAME = "Figura - Extura";
+    public static final Version VERSION = new Version(METADATA.getVersion().getFriendlyString());
+    public static final boolean DEBUG_MODE = true;
     public static final Calendar CALENDAR = Calendar.getInstance();
     public static final Path GAME_DIR = PlatformUtils.getGameDir().normalize();
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
@@ -147,7 +147,7 @@ public class FiguraMod {
 
     public static Style getAccentColor() {
         Avatar avatar = AvatarManager.getAvatarForPlayer(getLocalPlayerUUID());
-        int color = avatar != null ? ColorUtils.rgbToInt(ColorUtils.userInputHex(avatar.color, ColorUtils.Colors.AWESOME_BLUE.vec)) : ColorUtils.Colors.AWESOME_BLUE.hex;
+        int color = avatar != null ? ColorUtils.rgbToInt(ColorUtils.userInputHex(avatar.color, ColorUtils.Colors.PINK.vec)) : ColorUtils.Colors.PINK.hex;
         return Style.EMPTY.withColor(color);
     }
 
@@ -169,9 +169,9 @@ public class FiguraMod {
         Minecraft.getInstance().getProfiler().pop();
     }
 
-    public static <T> T popReturnProfiler(T var) {
+    public static <T> T popReturnProfiler(T vari) {
         Minecraft.getInstance().getProfiler().pop();
-        return var;
+        return vari;
     }
 
     public static void popProfiler(int times) {

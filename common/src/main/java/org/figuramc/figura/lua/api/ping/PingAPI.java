@@ -42,11 +42,12 @@ public class PingAPI {
         if (value == null) {
             map.remove(key);
             idMap.remove(id);
-        } else {
-            PingFunction func = new PingFunction(id, owner, value);
-            map.put(key, func);
-            idMap.put(id, key);
+            return;
         }
+        PingFunction func = new PingFunction(id, owner, value);
+        map.put(key, func);
+        idMap.put(id, key);
+
     }
 
     @Override

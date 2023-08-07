@@ -4,12 +4,13 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtIo;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.cards.CardBackground;
-import org.figuramc.figura.parsers.AvatarMetadataParser;
 import org.figuramc.figura.utils.FileTexture;
 import org.figuramc.figura.utils.IOUtils;
+import org.figuramc.figura.parsers.AvatarMetadataParser;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -167,6 +168,8 @@ public class LocalAvatarFetcher {
     public static boolean isAvatar(Path path) {
         if (!Files.exists(path))
             return false;
+        if (path.toString().toLowerCase().endsWith(".moon") || path.toString().toLowerCase().endsWith(".nbt"))
+            return true;
 
         Path metadata = path.resolve("avatar.json");
         return Files.exists(metadata) && !Files.isDirectory(metadata);
@@ -196,12 +199,13 @@ public class LocalAvatarFetcher {
      */
     public static class AvatarPath {
 
-        // im going insane... or better saying, crazy, speaking of which, I was crazy once
+        //im going insane... or better saying, crazy, speaking of which, I was crazy once
         protected final Path path, folder, theActualPathForThis; // murder, why does everything needs to be protected/private :sob:
         protected final String name, description;
         protected final CardBackground background;
+        protected final HashMap<String,String> cachedNames = new HashMap<>();
         protected Properties properties;
-        // icon
+        //icon
         protected final Path iconPath;
         protected boolean iconLoaded;
         protected FileTexture iconTexture;
@@ -235,8 +239,18 @@ public class LocalAvatarFetcher {
             CardBackground bg = CardBackground.DEFAULT;
             Path iconPath = null;
 
-            if (!(this instanceof FolderPath)) {
-                // metadata
+            if((path.toString().toLowerCase().endsWith(".moon") || path.toString().toLowerCase().endsWith(".nbt")) && !Configs.WARDROBE_FILE_NAMES.value){
+                try{
+                    if(cachedNames.containsKey(path.toString().toLowerCase())){name = cachedNames.get(path.toString().toLowerCase());}
+                    else{
+                        CompoundTag nbt = NbtIo.readCompressed(Files.newInputStream(path));
+                        CompoundTag metadata = nbt.getCompound("metadata");
+                        if(metadata.contains("name")) name = metadata.getString("name") + " (" + filename + ")";
+                        cachedNames.put(path.toString().toLowerCase(),name);
+                    }
+                }catch(Exception ignored){}
+            }else if (!(this instanceof FolderPath)) {
+                //metadata
                 try {
                     String str = IOUtils.readFile(path.resolve("avatar.json"));
                     AvatarMetadataParser.Metadata metadata = AvatarMetadataParser.read(str);

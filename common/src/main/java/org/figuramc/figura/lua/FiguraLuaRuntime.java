@@ -74,6 +74,10 @@ public class FiguraLuaRuntime {
         userGlobals.load(new TableLib());
         userGlobals.load(new JseStringLib());
         userGlobals.load(new JseMathLib());
+        if(avatar.isHost){
+            userGlobals.set("isHost", LuaValue.TRUE);
+            if(Configs.EXPOSE_IO.value) userGlobals.load(new JseIoLib());
+        }
 
         LuaC.install(userGlobals);
 
