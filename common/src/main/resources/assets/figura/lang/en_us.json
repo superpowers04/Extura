@@ -1759,5 +1759,26 @@
   "figura.docs.world.new_item": "Parses and create a new ItemStack from the given string\nA count and damage can be given, to be applied on this itemstack",
   "figura.docs.world.exists": "Checks whether or not a world currently exists\nThis will almost always be true, but might be false on some occasions such as while travelling between dimensions",
   "figura.docs.world.get_build_height": "Returns the minimum and maximum build height of the world, as varargs",
-  "figura.docs.world.get_spawn_point": "Returns a vector with the coordinates of the world spawn"
+  "figura.docs.world.get_spawn_point": "Returns a vector with the coordinates of the world spawn",
+  "figura.docs.world.get_nearby_entities": "Returns any nearby entities",
+
+
+  "figura.docs.world.linetraceBlock": "Returns the block, side, and pos of a linetrace",
+  "figura.docs.world.linetraceEntity": "Returns the entity and pos of a linetrace",
+
+
+  "figura.config.extura": "Extura - Advanced",
+  "figura.config.expose_io": "Expose IO",
+  "figura.config.expose_io.tooltip": "Expose the IO library to your Figura avatar",
+
+  "figura.config.get_blocks_limit": "Unlimited world.getBlocks",
+  "figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
+
+  "figura.config.use_global_scripts": "Global Scripts",
+  "figura.config.use_global_scripts.tooltip": "Toggles if scripts are loaded from the `global_scripts` directory in your Figura folder",
+
+  "figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
+  "figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used"
+
+
 }

@@ -34,9 +34,9 @@ import java.util.UUID;
 public class FiguraMod {
 
     public static final String MOD_ID = "figura";
-    public static final FiguraModMetadata METADATA = FiguraModMetadata.getMetadataForMod(MOD_ID);
     public static final String MOD_NAME = "Figura - Extura";
-    public static final Version VERSION = new Version(METADATA.getVersion().getFriendlyString());
+    public static final FiguraModMetadata METADATA = FiguraModMetadata.getMetadataForMod(MOD_ID);
+    public static final Version VERSION = new Version(PlatformUtils.getModVersionString());
     public static final boolean DEBUG_MODE = true;
     public static final Calendar CALENDAR = Calendar.getInstance();
     public static final Path GAME_DIR = PlatformUtils.getGameDir().normalize();

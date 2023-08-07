@@ -3,10 +3,10 @@
   "id": "figura",
   "version": "${version}",
 
-  "name": "Figura",
+  "name": "Figura - Extura",
   "description": "Extensive customization of the Player model",
   "authors": [
-    "skyrina"
+    "skyrina","ConstantDust - Extura","Superpowers04 - Extura"
   ],
   "contact": {
     "homepage": "https://github.com/FiguraMC/Figura",

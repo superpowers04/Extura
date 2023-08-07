@@ -5,6 +5,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.lua.api.AvatarAPI;
 import org.figuramc.figura.lua.api.HostAPI;
 import org.figuramc.figura.lua.api.RendererAPI;
@@ -23,6 +24,7 @@ import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.JseBaseLib;
+import org.luaj.vm2.lib.jse.JseIoLib;
 import org.luaj.vm2.lib.jse.JseMathLib;
 import org.luaj.vm2.lib.jse.JseStringLib;
 
