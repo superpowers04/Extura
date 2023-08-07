@@ -1778,7 +1778,7 @@
   "figura.config.use_global_scripts.tooltip": "Toggles if scripts are loaded from the `global_scripts` directory in your Figura folder",
 
   "figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
-  "figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used"
-
+  "figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used",
+  "figura.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it"
 
 }

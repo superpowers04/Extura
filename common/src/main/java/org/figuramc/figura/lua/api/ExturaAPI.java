@@ -1,11 +1,15 @@
 package org.figuramc.figura.lua.api;
 
+import org.figuramc.figura.config.ConfigType;
+import org.figuramc.figura.config.Configs;
 import org.luaj.vm2.LuaError;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 
+import java.lang.reflect.Field;
+import org.figuramc.figura.lua.docs.LuaMethodDoc;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -15,11 +19,27 @@ import org.figuramc.figura.lua.docs.LuaTypeDoc;
 public class ExturaAPI {
     private final Avatar owner;
     private final boolean isHost;
-    private final Integer VERSION = 2;
+    private final static Integer VERSION = 3;
 
     public ExturaAPI(Avatar owner) {
         this.owner = owner;
         this.isHost = owner.isHost;
+    }
+    @LuaWhitelist
+    @LuaMethodDoc("extura.get_figura_setting")
+    public Object getFiguraSetting(String arg) {
+        if (arg == null || !this.isHost) return null;
+        Field obj;
+        try {
+             obj = Configs.class.getDeclaredField(arg);
+        }catch(java.lang.NoSuchFieldException ignored){
+            return null;
+        }
+        try {
+            return ((ConfigType<?>) obj.get(null)).value;
+        }catch(java.lang.IllegalAccessException ignored){
+            return null;
+        }
     }
     @LuaWhitelist
     public Object __index(String arg) {
@@ -33,9 +53,10 @@ public class ExturaAPI {
 
     @LuaWhitelist
     public void __newindex(@LuaNotNil String key) {
-        switch (key) {
-            default -> throw new LuaError("Cannot assign value on key \"" + key + "\"");
-        }
+//        switch (key) {
+//            default ->
+        throw new LuaError("Cannot assign value on key \"" + key + "\"");
+//        }
     }
 
     @Override
