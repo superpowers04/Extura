@@ -1,6 +1,7 @@
 package org.figuramc.figura.lua;
 
 import org.figuramc.figura.animation.Animation;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.entries.FiguraAPI;
 import org.figuramc.figura.lua.api.*;
 import org.figuramc.figura.lua.api.action_wheel.Action;
@@ -157,7 +158,7 @@ public class FiguraAPIManager {
         put("pings", r -> r.ping = new PingAPI(r.owner));
         put("textures", r -> r.texture = new TextureAPI(r.owner));
         put("config", r -> new ConfigAPI(r.owner));
-        put("extura", r -> new ExturaAPI(r.owner));
+        if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
     }};
 
     private static final Set<FiguraAPI> ENTRYPOINTS = new HashSet<>();

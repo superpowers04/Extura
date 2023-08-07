@@ -337,6 +337,10 @@ public class Configs {
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
                 this.tooltip = FiguraText.of("config.expose_io.tooltip");
             }};
+        public static final ConfigType.BoolConfig EXPOSE_EXTURA_API = new ConfigType.BoolConfig("expose_extura_api", EXTURA, true) {{
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("expose_extura_api.tooltip");
+            }};
     public static final ConfigType.BoolConfig USE_GLOBAL_SCRIPTS = new ConfigType.BoolConfig("use_global_scripts", EXTURA, false) {{
                 this.name = this.name.copy();
                 this.tooltip = FiguraText.of("config.use_global_scripts.tooltip");
