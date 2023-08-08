@@ -5,6 +5,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.PlayerTeam;
 import org.luaj.vm2.LuaError;
@@ -200,6 +201,22 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
         map.put("collision_rule", team.getCollisionRule().name);
 
         return map;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = {ItemStack.class, Float.class},
+                            argumentNames = {"stack", "delta"}
+                    ),
+            },
+            value = "player.get_cooldown_percent"
+    )
+    public float getCoolDownPercent(@LuaNotNil ItemStack stack, Float delta) {
+        checkEntity();
+        if (delta == null) delta = 0f;
+        return this.entity.getCooldowns().getCooldownPercent(stack.getItem(), delta);
     }
 
     @Override
