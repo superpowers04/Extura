@@ -190,6 +190,7 @@ public class LocalAvatarLoader {
         List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
         if (scripts.size() == 0) return;
         CompoundTag scriptsNbt = new CompoundTag();
+        if(nbt.contains("scripts")) scriptsNbt = nbt.getCompound("scripts");
         String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
         for (Path script : scripts) {
             String name = script.toString()
