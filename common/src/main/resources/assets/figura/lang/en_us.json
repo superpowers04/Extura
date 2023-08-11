@@ -1795,7 +1795,7 @@
   "figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
 
   "figura.config.use_global_scripts": "Global Scripts",
-  "figura.config.use_global_scripts.tooltip": "Toggles if scripts are loaded from the `global_scripts` directory in your Figura folder",
+  "figura.config.use_global_scripts.tooltip": "Toggles if scripts are loaded from the `global_scripts` directory in your Figura folder. Note that they can override normal scripts if they have the same path/name",
 
   "figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
   "figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used",
