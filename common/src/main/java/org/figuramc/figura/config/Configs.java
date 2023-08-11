@@ -269,12 +269,45 @@ public class Configs {
     };
     public static final ConfigType.IPConfig
             SERVER_IP = new ConfigType.IPConfig("server_ip", DEV, "figura.moonlight-devs.org") {
-        @Override
-        public void onChange() {
-            super.onChange();
-            NetworkStuff.reAuth();
-        }
-    };
+                @Override
+                public void onChange() {
+                    super.onChange();
+                    NetworkStuff.reAuth();
+                }
+            };
+    public static final ConfigType.BoolConfig USE_SECURE_CLOUD = new ConfigType.BoolConfig("use_secure_cloud", DEV, true) {
+            @Override
+            public void onChange() {
+                super.onChange();
+                NetworkStuff.reAuth();
+            }
+            {
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.use_secure_cloud.tooltip");
+            }
+        };
+        public static final ConfigType.BoolConfig BLOCK_CLOUD = new ConfigType.BoolConfig("block_cloud", DEV, false) {
+            @Override
+            public void onChange() {
+                super.onChange();
+                NetworkStuff.reAuth();
+            }
+            {
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.block_cloud.tooltip");
+            }
+        };
+        public static final ConfigType.BoolConfig USE_MC_HOST_RESOLVER = new ConfigType.BoolConfig("use_mc_host_resolver", DEV, true) {
+            @Override
+            public void onChange() {
+                super.onChange();
+                NetworkStuff.reAuth();
+            }
+            {
+                this.name = this.name.copy();
+                this.tooltip = FiguraText.of("config.use_mc_host_resolver.tooltip");
+            }
+        };
     @SuppressWarnings("unused")
     public static final ConfigType.ButtonConfig
             CLEAR_CACHE = new ConfigType.ButtonConfig("clear_cache", DEV, () -> {
@@ -295,4 +328,21 @@ public class Configs {
     public static final ConfigType.BoolConfig
             FORCE_SMOOTH_AVATAR = new ConfigType.BoolConfig("force_smooth_avatar", DEV, false),
             GUI_FPS = new ConfigType.BoolConfig("gui_fps", DEV, false);
+// Extura
+    public static final ConfigType.BoolConfig GETBLOCKS_LIMIT = new ConfigType.BoolConfig("get_blocks_limit", EXTURA, false) {{
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.get_blocks_limit.tooltip");
+            }};
+    public static final ConfigType.BoolConfig EXPOSE_SENSITIVE_LIBRARIES = new ConfigType.BoolConfig("expose_sensitive_libraries", EXTURA, false) {{
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.expose_sensitive_libraries.tooltip");
+            }};
+        public static final ConfigType.BoolConfig EXPOSE_EXTURA_API = new ConfigType.BoolConfig("expose_extura_api", EXTURA, true) {{
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("expose_extura_api.tooltip");
+            }};
+    public static final ConfigType.BoolConfig USE_GLOBAL_SCRIPTS = new ConfigType.BoolConfig("use_global_scripts", EXTURA, false) {{
+                this.name = this.name.copy();
+                this.tooltip = FiguraText.of("config.use_global_scripts.tooltip");
+            }};
 }
