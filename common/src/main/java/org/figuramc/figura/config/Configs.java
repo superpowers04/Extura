@@ -34,7 +34,7 @@ public class Configs {
     // code to run when the config is initialized
     public static void init() {
         // test for unused configs
-        if (FiguraMod.DEBUG_MODE) {
+        if (FiguraMod.debugModeEnabled()) {
             ConfigType.Category debug = new ConfigType.Category("debug");
             new ConfigType.ColorConfig("color_test", debug, 0xFF72AD);
             new ConfigType.StringConfig("string_test", debug, "text");
@@ -56,13 +56,10 @@ public class Configs {
             MISC = new ConfigType.Category("misc"),
             DEV = new ConfigType.Category("dev") {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
-            }},
-            EXTURA = new ConfigType.Category("extura") {{
-                this.name = this.name.copy().withStyle(ChatFormatting.LIGHT_PURPLE);
             }};
 
 
-    // -- nameplate -- //
+    // -- nameplate -- // 
 
 
     public static final ConfigType.BoolConfig
@@ -117,12 +114,12 @@ public class Configs {
             };
     public static final ConfigType.PositiveIntConfig
             LOG_NUMBER_LENGTH = new ConfigType.PositiveIntConfig("log_number_length", SCRIPT, 5) {
-                @Override
-                public void onChange() {
-                    super.onChange();
-                    FiguraLuaPrinter.updateDecimalFormatting();
-                }
-            };
+        @Override
+        public void onChange() {
+            super.onChange();
+            FiguraLuaPrinter.updateDecimalFormatting();
+        }
+    };
 
 
     // -- RENDERING -- // 
@@ -131,10 +128,10 @@ public class Configs {
     public static final ConfigType.EnumConfig
             IRIS_COMPATIBILITY_FIX = new ConfigType.EnumConfig("iris_compatibility_fix", RENDERING, 1, 3),
             RENDER_DEBUG_PARTS_PIVOT = new ConfigType.EnumConfig("render_debug_parts_pivot", RENDERING, 1, 3) {{
-                    String tooltip = "config.render_debug_parts_pivot.tooltip";
-                    this.tooltip = FiguraText.of(tooltip,
-                            FiguraText.of(tooltip + ".cubes").setStyle(ColorUtils.Colors.AWESOME_BLUE.style),
-                            FiguraText.of(tooltip + ".groups").setStyle(ColorUtils.Colors.BLUE.style));
+                String tooltip = "config.render_debug_parts_pivot.tooltip";
+                this.tooltip = FiguraText.of(tooltip,
+                        FiguraText.of(tooltip + ".cubes").setStyle(ColorUtils.Colors.AWESOME_BLUE.style),
+                        FiguraText.of(tooltip + ".groups").setStyle(ColorUtils.Colors.BLUE.style));
             }};
     public static final ConfigType.BoolConfig
             ALLOW_FP_HANDS = new ConfigType.BoolConfig("allow_fp_hands", RENDERING, false),
@@ -213,14 +210,16 @@ public class Configs {
                     NetworkStuff.checkVersion();
                 }
             },
-            DEFAULT_PERMISSION_LEVEL = new ConfigType.EnumConfig("default_permission_level", MISC, 2, Permissions.Category.values().length) {{
-                List<Component> list = new ArrayList<>();
-                Permissions.Category[] categories = Permissions.Category.values();
-                for (Permissions.Category category : categories)
-                    list.add(category.text.copy());
-                this.enumList = list;
-                this.enumTooltip = null;
-            }
+            DEFAULT_PERMISSION_LEVEL = new ConfigType.EnumConfig("default_permission_level", MISC, 2, Permissions.Category.values().length) {
+                {
+                    List<Component> list = new ArrayList<>();
+                    Permissions.Category[] categories = Permissions.Category.values();
+                    for (Permissions.Category category : categories)
+                        list.add(category.text.copy());
+                    this.enumList = list;
+                    this.enumTooltip = null;
+                }
+
                 @Override
                 public void onChange() {
                     super.onChange();
@@ -232,8 +231,11 @@ public class Configs {
             EASTER_EGGS = new ConfigType.BoolConfig("easter_eggs", MISC, true);
 
 
-    // -- DEV -- // 
-
+    // -- DEV -- //
+    public static final ConfigType.BoolConfig
+            DEBUG_MODE = new ConfigType.BoolConfig("debug_mode", DEV, false, false);
+    public static final ConfigType.BoolConfig
+            LOCAL_ASSETS = new ConfigType.BoolConfig("local_assets", DEV, false, false);
 
     public static final ConfigType.BoolConfig
             CONNECTION_TOASTS = new ConfigType.BoolConfig("connection_toasts", DEV, false),
@@ -242,13 +244,12 @@ public class Configs {
             LOG_PINGS = new ConfigType.EnumConfig("log_pings", DEV, 0, 3);
     public static final ConfigType.BoolConfig
             SYNC_PINGS = new ConfigType.BoolConfig("sync_pings", DEV, false) {{
-                String tooltip = "config.sync_pings.tooltip.";
-                this.tooltip = FiguraText.of(tooltip + "1")
-                        .append("\n")
-                        .append(FiguraText.of(tooltip + "2").withStyle(ChatFormatting.RED));
-            }};
-
-    public static final ConfigType.BoolConfig CHAT_MESSAGES = new ConfigType.BoolConfig("chat_messages", DEV, false) {{
+        String tooltip = "config.sync_pings.tooltip.";
+        this.tooltip = FiguraText.of(tooltip + "1")
+                .append("\n")
+                .append(FiguraText.of(tooltip + "2").withStyle(ChatFormatting.RED));
+    }},
+            CHAT_MESSAGES = new ConfigType.BoolConfig("chat_messages", DEV, false) {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
                 String tooltip = "config.chat_messages.tooltip.";
                 this.tooltip = FiguraText.of(tooltip + "1")
@@ -259,63 +260,30 @@ public class Configs {
             }};
     public static final ConfigType.FolderConfig
             MAIN_DIR = new ConfigType.FolderConfig("main_dir", DEV, "") {
-                @Override
-                public void onChange() {
-                    super.onChange();
-                    PermissionManager.reinit();
-                    LocalAvatarFetcher.reinit();
-                }
+        @Override
+        public void onChange() {
+            super.onChange();
+            PermissionManager.reinit();
+            LocalAvatarFetcher.reinit();
+        }
     };
     public static final ConfigType.IPConfig
             SERVER_IP = new ConfigType.IPConfig("server_ip", DEV, "figura.moonlight-devs.org") {
-                @Override
-                public void onChange() {
-                    super.onChange();
-                    NetworkStuff.reAuth();
-                }
-            };
-    public static final ConfigType.BoolConfig USE_SECURE_CLOUD = new ConfigType.BoolConfig("use_secure_cloud", DEV, true) {
-            @Override
-            public void onChange() {
-                super.onChange();
-                NetworkStuff.reAuth();
-            }
-            {
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.use_secure_cloud.tooltip");
-            }
-        };
-        public static final ConfigType.BoolConfig BLOCK_CLOUD = new ConfigType.BoolConfig("block_cloud", DEV, false) {
-            @Override
-            public void onChange() {
-                super.onChange();
-                NetworkStuff.reAuth();
-            }
-            {
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.block_cloud.tooltip");
-            }
-        };
-        public static final ConfigType.BoolConfig USE_MC_HOST_RESOLVER = new ConfigType.BoolConfig("use_mc_host_resolver", DEV, true) {
-            @Override
-            public void onChange() {
-                super.onChange();
-                NetworkStuff.reAuth();
-            }
-            {
-                this.name = this.name.copy();
-                this.tooltip = FiguraText.of("config.use_mc_host_resolver.tooltip");
-            }
-        };
+        @Override
+        public void onChange() {
+            super.onChange();
+            NetworkStuff.reAuth();
+        }
+    };
     @SuppressWarnings("unused")
     public static final ConfigType.ButtonConfig
             CLEAR_CACHE = new ConfigType.ButtonConfig("clear_cache", DEV, () -> {
-                CacheAvatarLoader.clearCache();
-                LocalAvatarFetcher.clearCache();
-                ConfigScreen.clearCache();
-                FiguraRuntimeResources.clearCache();
-                FiguraToast.sendToast(FiguraText.of("toast.cache_clear"));
-            }),
+        CacheAvatarLoader.clearCache();
+        LocalAvatarFetcher.clearCache();
+        ConfigScreen.clearCache();
+        FiguraRuntimeResources.clearCache();
+        FiguraToast.sendToast(FiguraText.of("toast.cache_clear"));
+    }),
             REDOWNLOAD_ASSETS = new ConfigType.ButtonConfig("redownload_assets", DEV, () -> {
                 FiguraRuntimeResources.init();
                 Minecraft.getInstance().reloadResourcePacks();
@@ -327,23 +295,4 @@ public class Configs {
     public static final ConfigType.BoolConfig
             FORCE_SMOOTH_AVATAR = new ConfigType.BoolConfig("force_smooth_avatar", DEV, false),
             GUI_FPS = new ConfigType.BoolConfig("gui_fps", DEV, false);
-
-// Extura
-    public static final ConfigType.BoolConfig GETBLOCKS_LIMIT = new ConfigType.BoolConfig("get_blocks_limit", EXTURA, false) {{
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.get_blocks_limit.tooltip");
-            }};
-    public static final ConfigType.BoolConfig EXPOSE_SENSITIVE_LIBRARIES = new ConfigType.BoolConfig("expose_sensitive_libraries", EXTURA, false) {{
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.expose_sensitive_libraries.tooltip");
-            }};
-        public static final ConfigType.BoolConfig EXPOSE_EXTURA_API = new ConfigType.BoolConfig("expose_extura_api", EXTURA, true) {{
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("expose_extura_api.tooltip");
-            }};
-    public static final ConfigType.BoolConfig USE_GLOBAL_SCRIPTS = new ConfigType.BoolConfig("use_global_scripts", EXTURA, false) {{
-                this.name = this.name.copy();
-                this.tooltip = FiguraText.of("config.use_global_scripts.tooltip");
-            }};
-
 }
