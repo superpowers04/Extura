@@ -56,6 +56,9 @@ public class Configs {
             MISC = new ConfigType.Category("misc"),
             DEV = new ConfigType.Category("dev") {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
+            }},
+            EXTURA = new ConfigType.Category("extura") {{
+                this.name = this.name.copy().withStyle(ChatFormatting.LIGHT_PURPLE);
             }};
 
 
