@@ -333,9 +333,9 @@ public class Configs {
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
                 this.tooltip = FiguraText.of("config.get_blocks_limit.tooltip");
             }};
-    public static final ConfigType.BoolConfig EXPOSE_IO = new ConfigType.BoolConfig("expose_io", EXTURA, false) {{
+    public static final ConfigType.BoolConfig EXPOSE_SENSITIVE_LIBRARIES = new ConfigType.BoolConfig("expose_sensitive_libraries", EXTURA, false) {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.expose_io.tooltip");
+                this.tooltip = FiguraText.of("config.expose_sensitive_libraries.tooltip");
             }};
         public static final ConfigType.BoolConfig EXPOSE_EXTURA_API = new ConfigType.BoolConfig("expose_extura_api", EXTURA, true) {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);

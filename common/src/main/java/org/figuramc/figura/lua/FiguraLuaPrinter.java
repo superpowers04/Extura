@@ -119,7 +119,9 @@ public class FiguraLuaPrinter {
 
         owner.errorText = TextUtils.replaceTabs(Component.literal(message).withStyle(ColorUtils.Colors.LUA_ERROR.style));
 
-        if ((owner.entityType == EntityType.PLAYER && !Configs.LOG_OTHERS.value && !FiguraMod.isLocal(owner.owner)) || owner.permissions.getCategory() == Permissions.Category.BLOCKED)
+        if (!FiguraMod.isLocal(owner.owner) && 
+            ((!Configs.LOG_OTHERS.value && owner.entityType == EntityType.PLAYER)
+            || owner.permissions.getCategory() == Permissions.Category.BLOCKED))
             return;
 
         chatQueue.offer(component); // bypass the char limit filter
@@ -191,12 +193,9 @@ public class FiguraLuaPrinter {
                 text.append(TextUtils.tryParseJson(args.arg(i + 1).tojstring()));
 
             TextUtils.allowScriptEvents = false;
+            
+            sendLuaChatMessage(!local ? TextUtils.removeClickableObjects(text) : text);
 
-            if (!local) {
-                sendLuaChatMessage(TextUtils.removeClickableObjects(text));
-            } else {
-                sendLuaChatMessage(text);
-            }
 
             return LuaValue.valueOf(text.getString());
         }
@@ -350,22 +349,17 @@ public class FiguraLuaPrinter {
     }
 
     private static Style getTypeColor(LuaValue value) {
-        if (value.istable())
-            return ColorUtils.Colors.AWESOME_BLUE.style;
-        else if (!(value instanceof LuaString) && value.isnumber())
-            return ColorUtils.Colors.BLUE.style;
-        else if (value.isnil())
-            return ColorUtils.Colors.LUA_ERROR.style;
-        else if (value.isboolean())
-            return ColorUtils.Colors.LUA_PING.style;
-        else if (value.isfunction())
-            return Style.EMPTY.withColor(ChatFormatting.GREEN);
-        else if (value.isuserdata())
-            return Style.EMPTY.withColor(ChatFormatting.YELLOW);
-        else if (value.isthread())
-            return Style.EMPTY.withColor(ChatFormatting.GOLD);
-        else
-            return Style.EMPTY.withColor(ChatFormatting.WHITE);
+
+        switch(value.type()){
+            case 5: return ColorUtils.Colors.PURPLE.style; // Table
+            case 0: return ColorUtils.Colors.LUA_ERROR.style; // Nil
+            case 1: return ColorUtils.Colors.LUA_PING.style; // Bool
+            case 2: return ColorUtils.Colors.BLUE.style; // Number
+            case 3: return Style.EMPTY.withColor(ChatFormatting.GREEN); // String
+            case 7: return Style.EMPTY.withColor(ChatFormatting.YELLOW); // Userdate
+            case 8: return Style.EMPTY.withColor(ChatFormatting.GOLD); // Thread
+        	default: return Style.EMPTY.withColor(ChatFormatting.WHITE); // Your mother
+        }
     }
 
     // -- SLOW PRINTING OF LOG --// 

@@ -23,10 +23,7 @@ import org.figuramc.figura.permissions.Permissions;
 import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
-import org.luaj.vm2.lib.jse.JseBaseLib;
-import org.luaj.vm2.lib.jse.JseIoLib;
-import org.luaj.vm2.lib.jse.JseMathLib;
-import org.luaj.vm2.lib.jse.JseStringLib;
+import org.luaj.vm2.lib.jse.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -76,15 +73,23 @@ public class FiguraLuaRuntime {
         userGlobals.load(new TableLib());
         userGlobals.load(new JseStringLib());
         userGlobals.load(new JseMathLib());
+        userGlobals.set("_VERSION",LuaValue.valueOf("Lua 5.2 - Figura"));
         if(avatar.isHost){
             userGlobals.set("isHost", LuaValue.TRUE);
-            if(Configs.EXPOSE_IO.value) userGlobals.load(new JseIoLib());
+            if(Configs.EXPOSE_SENSITIVE_LIBRARIES.value){
+                userGlobals.load(new JseIoLib());
+                userGlobals.load(new JseOsLib());
+                userGlobals.load(new CoroutineLib());
+                userGlobals.set("expose_sensitive_libraries", LuaValue.TRUE);
+            }
+        }else{
+            userGlobals.set("isHost", LuaValue.FALSE);
         }
-
         LuaC.install(userGlobals);
 
         userGlobals.load(new DebugLib());
         setHookFunction = userGlobals.get("debug").get("sethook");
+
 
         setupFiguraSandbox();
 

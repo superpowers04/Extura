@@ -160,7 +160,7 @@ public class BlockbenchModelParser {
                     FiguraMod.LOGGER.error("", e);
 
                 //otherwise, load from the source stored in the model
-                source = Base64.getDecoder().decode(texture.source.substring("data:image/png;base64,".length()));
+                source = Base64.getDecoder().decode(texture.source.replaceFirst("data:image/png;base64,",""));
                 path = folders + modelName + "." + name;
                 FiguraMod.debug("Loaded {} Texture \"{}\" from {}", textureType.toUpperCase(), name, path);
             }

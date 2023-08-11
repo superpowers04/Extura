@@ -1776,8 +1776,12 @@
 
 
   "figura.config.extura": "Extura - Advanced",
-  "figura.config.expose_io": "Expose IO",
-  "figura.config.expose_io.tooltip": "Expose the IO library to your Figura avatar",
+  "figura.config.expose_extura_api": "Expose Extura API",
+  "figura.config.expose_extura_api.tooltip": "Expose the Extura API to all Figura avatars",
+  "figura.config.expose_http_api": "Expose HTTP API",
+  "figura.config.expose_http_api.tooltip": "Expose the HTTP API to all Figura avatars",
+  "figura.config.expose_sensitive_libraries": "Expose sensitive lua libraries/functions",
+  "figura.config.expose_sensitive_libraries.tooltip": "Exposes io, os, debug, dofile, loadfile, http and collectGarbage to your Figura avatar",
 
   "figura.config.get_blocks_limit": "Unlimited world.getBlocks",
   "figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
