@@ -8,7 +8,12 @@ import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.net.*;
+
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 
 @LuaWhitelist
@@ -39,6 +44,28 @@ public class ExturaAPI {
             return ((ConfigType<?>) obj.get(null)).value;
         }catch(java.lang.IllegalAccessException ignored){
             return null;
+        }
+    }
+    @LuaWhitelist
+    @LuaMethodDoc("extura.http_get")
+    public Object httpGet(String arg,boolean addNewlines) {
+        if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return null;
+        try{
+            // https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
+            URLConnection connec = new URI(arg).toURL().openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(connec.getInputStream()));
+            String ret = "";
+            String inLine;
+            if(addNewlines){
+                while ((inLine = in.readLine()) != null) ret += "\n" + inLine;
+                return ret;
+            }
+            while ((inLine = in.readLine()) != null) ret += inLine;
+            return ret;
+        }catch (URISyntaxException | MalformedURLException err) {
+            throw new LuaError("Unable to parse URL: " + err);
+        }catch(IOException err){
+            throw new LuaError("Unable to send request: " + err);
         }
     }
     @LuaWhitelist

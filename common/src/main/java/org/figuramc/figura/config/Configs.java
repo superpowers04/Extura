@@ -43,7 +43,7 @@ public class Configs {
     }
 
 
-    // -- categories -- // 
+    // -- categories -- //
 
 
     public static final ConfigType.Category
@@ -62,7 +62,7 @@ public class Configs {
             }};
 
 
-    // -- nameplate -- // 
+    // -- nameplate -- //
 
 
     public static final ConfigType.BoolConfig
@@ -96,7 +96,7 @@ public class Configs {
             }};
 
 
-    // -- script -- // 
+    // -- script -- //
 
 
     public static final ConfigType.EnumConfig
@@ -125,7 +125,7 @@ public class Configs {
     };
 
 
-    // -- RENDERING -- // 
+    // -- RENDERING -- //
 
 
     public static final ConfigType.EnumConfig
@@ -141,7 +141,7 @@ public class Configs {
             FIRST_PERSON_MATRICES = new ConfigType.BoolConfig("first_person_matrices", RENDERING, true);
 
 
-    // -- ACTION WHEEL -- // 
+    // -- ACTION WHEEL -- //
 
 
     public static final ConfigType.KeybindConfig
@@ -157,7 +157,7 @@ public class Configs {
             ACTION_WHEEL_DECORATIONS = new ConfigType.BoolConfig("action_wheel_decorations", ACTION_WHEEL, true);
 
 
-    // -- UI -- // 
+    // -- UI -- //
 
 
     public static final ConfigType.BoolConfig
@@ -180,7 +180,7 @@ public class Configs {
             REDUCED_MOTION = new ConfigType.BoolConfig("reduced_motion", UI, false);
 
 
-    // -- PAPERDOLL -- // 
+    // -- PAPERDOLL -- //
 
 
     public static final ConfigType.BoolConfig
@@ -196,7 +196,7 @@ public class Configs {
             PAPERDOLL_YAW = new ConfigType.FloatConfig("paperdoll_yaw", PAPERDOLL, 20);
 
 
-    // -- MISC -- // 
+    // -- MISC -- //
 
 
     public static final ConfigType.KeybindConfig
@@ -347,5 +347,9 @@ public class Configs {
     public static final ConfigType.BoolConfig USE_GLOBAL_SCRIPTS = new ConfigType.BoolConfig("use_global_scripts", EXTURA, false) {{
                 this.name = this.name.copy();
                 this.tooltip = FiguraText.of("config.use_global_scripts.tooltip");
+            }};
+    public static final ConfigType.BoolConfig EXPOSE_HTTP = new ConfigType.BoolConfig("expose_http", EXTURA, false) {{
+                this.name = this.name.copy();
+                this.tooltip = FiguraText.of("config.expose_http.tooltip");
             }};
 }
