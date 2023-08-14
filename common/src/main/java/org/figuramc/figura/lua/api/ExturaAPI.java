@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.*;
+import java.util.concurrent.CompletableFuture;
 
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
+import org.luaj.vm2.LuaFunction;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -48,7 +50,7 @@ public class ExturaAPI {
     }
     @LuaWhitelist
     @LuaMethodDoc("extura.http_get")
-    public Object httpGet(String arg,boolean addNewlines) {
+    public Object httpGet(String arg) {
         if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return null;
         try{
             // https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
@@ -56,10 +58,6 @@ public class ExturaAPI {
             BufferedReader in = new BufferedReader(new InputStreamReader(connec.getInputStream()));
             String ret = "";
             String inLine;
-            if(addNewlines){
-                while ((inLine = in.readLine()) != null) ret += "\n" + inLine;
-                return ret;
-            }
             while ((inLine = in.readLine()) != null) ret += inLine;
             return ret;
         }catch (URISyntaxException | MalformedURLException err) {
@@ -67,6 +65,28 @@ public class ExturaAPI {
         }catch(IOException err){
             throw new LuaError("Unable to send request: " + err);
         }
+    }
+    @LuaWhitelist
+    @LuaMethodDoc("extura.async_http_get")
+    public void asyncHttpGet(String arg, LuaFunction func) {
+        if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return;
+        CompletableFuture.runAsync(() -> {
+            try{
+                // https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
+                URLConnection connec = new URI(arg).toURL().openConnection();
+                BufferedReader in = new BufferedReader(new InputStreamReader(connec.getInputStream()));
+                String ret = "";
+                String inLine;
+                while ((inLine = in.readLine()) != null) ret += inLine;
+                func.call(ret);
+                return;
+            }catch (URISyntaxException | MalformedURLException err) {
+                throw new LuaError("Unable to parse URL: " + err);
+            }catch(IOException err){
+                throw new LuaError("Unable to send request: " + err);
+            }
+        });
+        return;
     }
     @LuaWhitelist
     public Object __index(String arg) {
