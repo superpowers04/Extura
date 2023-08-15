@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PlayerRideableJumping;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.gui.ActionWheel;
@@ -34,7 +35,50 @@ public class GuiMixin {
         if (!AvatarManager.panic)
             FiguraGui.renderOverlays(guiGraphics);
     }
-
+    @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
+    private void renderHotbar(float tickDelta, GuiGraphics graphics, CallbackInfo ci) {
+        Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || !avatar.luaRuntime.renderer.renderHotbar)
+            return;
+        ci.cancel();
+    }
+    @Inject(at = @At("HEAD"), method = "renderEffects", cancellable = true)
+    private void renderEffects(GuiGraphics graphics, CallbackInfo ci) {
+        Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || !avatar.luaRuntime.renderer.renderEffects)
+            return;
+        ci.cancel();
+    }
+    @Inject(at = @At("HEAD"), method = "renderJumpMeter", cancellable = true)
+    private void renderJumpMeter(PlayerRideableJumping mount, GuiGraphics graphics, int x, CallbackInfo ci) {
+        Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || !avatar.luaRuntime.renderer.renderJumpMeter)
+            return;
+        ci.cancel();
+    }
+    @Inject(at = @At("HEAD"), method = "renderExperienceBar", cancellable = true)
+    private void renderExperienceBar(GuiGraphics graphics, int x, CallbackInfo ci) {
+        Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || !avatar.luaRuntime.renderer.renderExperienceBar)
+            return;
+        ci.cancel();
+    }
+    @Inject(at = @At("HEAD"), method = "renderSelectedItemName", cancellable = true)
+    private void renderSelectedItemName(GuiGraphics graphics, CallbackInfo ci) {
+        Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null ||
+                !avatar.luaRuntime.renderer.renderSelectedItemName)
+            return;
+        ci.cancel();
+    }
+    @Inject(at = @At("HEAD"), method = "renderPlayerHealth", cancellable = true)
+    private void renderPlayerHealth(GuiGraphics graphics, CallbackInfo ci) {
+        Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null ||
+                !avatar.luaRuntime.renderer.renderPlayerHealth)
+            return;
+        ci.cancel();
+    }
     @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
     private void renderCrosshair(GuiGraphics guiGraphics, CallbackInfo ci) {
         crosshairOffset = null;

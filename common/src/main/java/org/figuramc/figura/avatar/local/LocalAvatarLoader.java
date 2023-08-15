@@ -125,9 +125,15 @@ public class LocalAvatarLoader {
                     return;
                 }
                 CompoundTag nbt = new CompoundTag();
-
+                CompoundTag exturaOnly = new CompoundTag();
                 // scripts
                 loadState = LoadState.SCRIPTS;
+                loadScripts(finalPath, nbt);
+                Path hostOnly = finalPath.resolve(".hostonly");
+//                if(Files.exists(hostOnly)){
+//                    loadScripts(hostOnly, exturaOnly);
+//
+//                }
                 loadScripts(finalPath, nbt);
                 loadGlobalScripts(nbt);
 
@@ -150,7 +156,8 @@ public class LocalAvatarLoader {
                 nbt.put("metadata", AvatarMetadataParser.parse(metadata, IOUtils.getFileNameOrEmpty(finalPath)));
                 AvatarMetadataParser.injectToModels(metadata, models);
                 AvatarMetadataParser.injectToTextures(metadata, textures);
-
+                if(!exturaOnly.isEmpty())
+                    nbt.put("exturaOnly",exturaOnly);
                 // return :3
                 if (!models.isEmpty())
                     nbt.put("models", models);

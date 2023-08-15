@@ -159,6 +159,7 @@ public class FiguraAPIManager {
         put("textures", r -> r.texture = new TextureAPI(r.owner));
         put("config", r -> new ConfigAPI(r.owner));
         if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
+
     }};
 
     private static final Set<FiguraAPI> ENTRYPOINTS = new HashSet<>();
