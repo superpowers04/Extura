@@ -26,11 +26,10 @@ import org.luaj.vm2.LuaFunction;
 public class ExturaAPI {
     private final Avatar owner;
     private final boolean isHost;
-    private final static Integer VERSION = 3;
+    private final static Integer VERSION = 4;
 
     public ExturaAPI(Avatar owner) {
-        this.owner = owner;
-        this.isHost = owner.isHost;
+        this.isHost = (this.owner = owner).isHost;
     }
     @LuaWhitelist
     @LuaMethodDoc("extura.get_figura_setting")
