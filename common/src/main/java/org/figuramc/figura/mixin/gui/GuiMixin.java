@@ -38,28 +38,28 @@ public class GuiMixin {
     @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
     private void renderHotbar(float tickDelta, GuiGraphics graphics, CallbackInfo ci) {
         Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
-        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || !avatar.luaRuntime.renderer.renderHotbar)
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderHotbar)
             return;
         ci.cancel();
     }
     @Inject(at = @At("HEAD"), method = "renderEffects", cancellable = true)
     private void renderEffects(GuiGraphics graphics, CallbackInfo ci) {
         Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
-        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || !avatar.luaRuntime.renderer.renderEffects)
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderEffects)
             return;
         ci.cancel();
     }
     @Inject(at = @At("HEAD"), method = "renderJumpMeter", cancellable = true)
     private void renderJumpMeter(PlayerRideableJumping mount, GuiGraphics graphics, int x, CallbackInfo ci) {
         Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
-        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || !avatar.luaRuntime.renderer.renderJumpMeter)
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderJumpMeter)
             return;
         ci.cancel();
     }
     @Inject(at = @At("HEAD"), method = "renderExperienceBar", cancellable = true)
     private void renderExperienceBar(GuiGraphics graphics, int x, CallbackInfo ci) {
         Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
-        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || !avatar.luaRuntime.renderer.renderExperienceBar)
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderExperienceBar)
             return;
         ci.cancel();
     }
@@ -67,7 +67,7 @@ public class GuiMixin {
     private void renderSelectedItemName(GuiGraphics graphics, CallbackInfo ci) {
         Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
         if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null ||
-                !avatar.luaRuntime.renderer.renderSelectedItemName)
+                avatar.luaRuntime.renderer.renderSelectedItemName)
             return;
         ci.cancel();
     }
@@ -75,7 +75,7 @@ public class GuiMixin {
     private void renderPlayerHealth(GuiGraphics graphics, CallbackInfo ci) {
         Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
         if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null ||
-                !avatar.luaRuntime.renderer.renderPlayerHealth)
+                avatar.luaRuntime.renderer.renderPlayerHealth)
             return;
         ci.cancel();
     }
