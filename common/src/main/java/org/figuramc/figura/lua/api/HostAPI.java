@@ -91,11 +91,16 @@ public class HostAPI {
             ),
             value = "host.set_unlock_cursor")
     public HostAPI setUnlockCursor(boolean bool) {
-        if(!isHost) return this;
+        if(!this.isHost) return this;
         unlockCursor = bool;
         return this;
     }
-
+    @LuaWhitelist
+    @LuaMethodDoc("host.allowExturaCheats")
+    public Boolean allowExturaCheats() {
+        LocalPlayer player = this.minecraft.player;
+        return (this.isHost && player != null && (player.hasPermissions(3) || this.minecraft.isLocalServer()));
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
@@ -112,7 +117,7 @@ public class HostAPI {
             value = "host.set_title_times"
     )
     public HostAPI setTitleTimes(Object x, Double y, Double z) {
-        if (!isHost()) return this;
+        if (!this.isHost) return this;
         FiguraVec3 times = LuaUtils.parseVec3("setTitleTimes", x, y, z);
         this.minecraft.gui.setTimes((int) times.x, (int) times.y, (int) times.z);
         return this;
@@ -207,7 +212,7 @@ public class HostAPI {
             value = "host.send_chat_message"
     )
     public HostAPI sendChatMessage(@LuaNotNil String message) {
-        if (!isHost() || !Configs.CHAT_MESSAGES.value) return this;
+        if (!this.isHost || !Configs.CHAT_MESSAGES.value) return this;
         ClientPacketListener connection = this.minecraft.getConnection();
         if (connection != null) connection.sendChat(message);
         return this;
@@ -222,7 +227,7 @@ public class HostAPI {
             value = "host.send_chat_command"
     )
     public HostAPI sendChatCommand(@LuaNotNil String command) {
-        if (!isHost() || !Configs.CHAT_MESSAGES.value) return this;
+        if (!this.isHost || !Configs.CHAT_MESSAGES.value) return this;
         ClientPacketListener connection = this.minecraft.getConnection();
         if (connection != null) connection.sendCommand(command.startsWith("/") ? command.substring(1) : command);
         return this;
@@ -251,7 +256,7 @@ public class HostAPI {
             value = "host.get_chat_message"
     )
     public Map<String, Object> getChatMessage(int index) {
-        if (!isHost())
+        if (!this.isHost)
             return null;
 
         index--;
@@ -288,7 +293,7 @@ public class HostAPI {
             },
             value = "host.set_chat_message")
     public HostAPI setChatMessage(int index, String newMessage, FiguraVec3 backgroundColor) {
-        if (!isHost()) return this;
+        if (!this.isHost) return this;
 
         index--;
         List<GuiMessage> messages = ((ChatComponentAccessor) this.minecraft.gui.getChat()).getAllMessages();
@@ -320,7 +325,7 @@ public class HostAPI {
             value = "host.swing_arm"
     )
     public HostAPI swingArm(boolean offhand) {
-        if (isHost() && this.minecraft.player != null)
+        if (this.isHost && this.minecraft.player != null)
             this.minecraft.player.swing(offhand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         return this;
     }
@@ -340,7 +345,7 @@ public class HostAPI {
             value = "host.get_slot"
     )
     public ItemStackAPI getSlot(@LuaNotNil Object slot) {
-        if (!isHost()) return null;
+        if (!this.isHost) return null;
         Entity e = this.owner.luaRuntime.getUser();
         return ItemStackAPI.verify(e.getSlot(LuaUtils.parseSlot(slot, null)).get());
     }
@@ -356,7 +361,7 @@ public class HostAPI {
             value = "host.set_slot"
     )
     public HostAPI setSlot(@LuaNotNil Object slot, Object item) {
-        if (!isHost() || (slot == null && item == null) || this.minecraft.gameMode == null || this.minecraft.player == null || !this.minecraft.gameMode.getPlayerMode().isCreative())
+        if (!this.isHost || (slot == null && item == null) || this.minecraft.gameMode == null || this.minecraft.player == null || !this.minecraft.gameMode.getPlayerMode().isCreative())
             return this;
 
         Inventory inventory = this.minecraft.player.getInventory();
@@ -391,7 +396,7 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.get_chat_color")
     public Integer getChatColor() {
-        return isHost() ? this.chatColor : null;
+        return this.isHost ? this.chatColor : null;
     }
 
     @LuaWhitelist
@@ -410,7 +415,7 @@ public class HostAPI {
             value = "host.set_chat_color"
     )
     public HostAPI setChatColor(Object x, Double y, Double z) {
-        if (isHost()) this.chatColor = x == null ? null : ColorUtils.rgbToInt(LuaUtils.parseVec3("setChatColor", x, y, z));
+        if (this.isHost) this.chatColor = x == null ? null : ColorUtils.rgbToInt(LuaUtils.parseVec3("setChatColor", x, y, z));
         return this;
     }
 
@@ -422,7 +427,7 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.get_chat_text")
     public String getChatText() {
-        if (isHost() && this.minecraft.screen instanceof ChatScreen chat)
+        if (this.isHost && this.minecraft.screen instanceof ChatScreen chat)
             return ((ChatScreenAccessor) chat).getInput().getValue();
 
         return null;
@@ -438,7 +443,7 @@ public class HostAPI {
             value = "host.set_chat_text"
     )
     public HostAPI setChatText(@LuaNotNil String text) {
-        if (isHost() && Configs.CHAT_MESSAGES.value && this.minecraft.screen instanceof ChatScreen chat)
+        if (this.isHost && Configs.CHAT_MESSAGES.value && this.minecraft.screen instanceof ChatScreen chat)
             ((ChatScreenAccessor) chat).getInput().setValue(text);
         return this;
     }
@@ -451,15 +456,14 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.get_screen")
     public String getScreen() {
-        if (!isHost() || this.minecraft.screen == null)
-            return null;
+        if (!this.isHost || this.minecraft.screen == null) return null;
         return this.minecraft.screen.getClass().getName();
     }
 
     @LuaWhitelist
     @LuaMethodDoc("host.get_screen_slot_count")
     public Integer getScreenSlotCount() {
-        if (isHost() && this.minecraft.screen instanceof AbstractContainerScreen<?> screen)
+        if (this.isHost && this.minecraft.screen instanceof AbstractContainerScreen<?> screen)
             return screen.getMenu().slots.size();
         return null;
     }
@@ -470,7 +474,7 @@ public class HostAPI {
             @LuaMethodOverload(argumentTypes = Integer.class, argumentNames = "slot")
     }, value = "host.get_screen_slot")
     public ItemStackAPI getScreenSlot(@LuaNotNil Object slot) {
-        if (!isHost() || !(this.minecraft.screen instanceof AbstractContainerScreen<?> screen))
+        if (!this.isHost || !(this.minecraft.screen instanceof AbstractContainerScreen<?> screen))
             return null;
 
         NonNullList<Slot> slots = screen.getMenu().slots;
@@ -483,13 +487,13 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.is_chat_open")
     public boolean isChatOpen() {
-        return isHost() && this.minecraft.screen instanceof ChatScreen;
+        return this.isHost && this.minecraft.screen instanceof ChatScreen;
     }
 
     @LuaWhitelist
     @LuaMethodDoc("host.is_container_open")
     public boolean isContainerOpen() {
-        return isHost() && this.minecraft.screen instanceof AbstractContainerScreen;
+        return this.isHost && this.minecraft.screen instanceof AbstractContainerScreen;
     }
 
     @LuaWhitelist
@@ -500,7 +504,7 @@ public class HostAPI {
             ),
             value = "host.screenshot")
     public FiguraTexture screenshot(@LuaNotNil String name) {
-        if (!isHost()) return null;
+        if (!this.isHost) return null;
 
         NativeImage img = Screenshot.takeScreenshot(this.minecraft.getMainRenderTarget());
         return owner.luaRuntime.texture.register(name, img, true);
@@ -509,7 +513,7 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.is_avatar_uploaded")
     public boolean isAvatarUploaded() {
-        return isHost() && AvatarManager.localUploaded;
+        return this.isHost && AvatarManager.localUploaded;
     }
 
     @LuaWhitelist
@@ -519,7 +523,7 @@ public class HostAPI {
 
         List<Map<String, Object>> list = new ArrayList<>();
         LocalPlayer player = this.minecraft.player;
-        if (!isHost() || player == null)
+        if (!this.isHost || player == null)
             return list;
 
         for (MobEffectInstance effect : player.getActiveEffects()) {
@@ -538,7 +542,7 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.get_clipboard")
     public String getClipboard() {
-        return isHost() ? this.minecraft.keyboardHandler.getClipboard() : null;
+        return this.isHost ? this.minecraft.keyboardHandler.getClipboard() : null;
     }
 
     @LuaWhitelist
@@ -550,7 +554,7 @@ public class HostAPI {
             aliases = "clipboard",
             value = "host.set_clipboard")
     public HostAPI setClipboard(@LuaNotNil String text) {
-        if (isHost()) this.minecraft.keyboardHandler.setClipboard(text);
+        if (this.isHost) this.minecraft.keyboardHandler.setClipboard(text);
         return this;
     }
 
@@ -562,7 +566,7 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.get_attack_charge")
     public float getAttackCharge() {
-        if(!isHost()) return 0;
+        if(!this.isHost) return 0;
         LocalPlayer player = this.minecraft.player;
         if (player != null)
             return player.getAttackStrengthScale(0f);
@@ -572,7 +576,7 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.is_jumping")
     public boolean isJumping() {
-        if(!isHost()) return false;
+        if(!this.isHost) return false;
         LocalPlayer player = this.minecraft.player;
         if (player != null)
             return ((LivingEntityAccessor) player).isJumping();
@@ -583,7 +587,7 @@ public class HostAPI {
     @LuaMethodDoc("host.is_flying")
     public boolean isFlying() {
         LocalPlayer player = this.minecraft.player;
-        if (isHost() && player != null)
+        if (this.isHost && player != null)
             return player.getAbilities().flying;
         return false;
     }
@@ -597,7 +601,7 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.get_air")
     public int getAir() {
-        if(!isHost()) return 0;
+        if(!this.isHost) return 0;
         LocalPlayer player = this.minecraft.player;
         if (player != null) return player.getAirSupply();
         return 0;
@@ -606,13 +610,13 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.get_pick_block")
     public Object[] getPickBlock() {
-        return isHost() ? LuaUtils.parseBlockHitResult(minecraft.hitResult) : null;
+        return this.isHost ? LuaUtils.parseBlockHitResult(minecraft.hitResult) : null;
     }
 
     @LuaWhitelist
     @LuaMethodDoc("host.get_pick_entity")
     public EntityAPI<?> getPickEntity() {
-        return isHost() && minecraft.crosshairPickEntity != null ? EntityAPI.wrap(minecraft.crosshairPickEntity) : null;
+        return this.isHost ? EntityAPI.wrap(minecraft.crosshairPickEntity) : null;
     }
 
     @LuaWhitelist
@@ -626,10 +630,9 @@ public class HostAPI {
             value = "host.set_velocity"
     )
     public void setVelocity(Object x, Double y, Double z) {
-        if(!isHost()) return;
-        FiguraVec3 vec = LuaUtils.parseVec3("player_setVelocity", x, y, z);
-        LocalPlayer player = this.minecraft.player;
-        if (player != null) { player.setDeltaMovement(new Vec3(vec.x, vec.y, vec.z)); }
+        if(!allowExturaCheats()) return;
+        this.minecraft.player.setDeltaMovement(LuaUtils.parseVec3("player_setVelocity", x, y, z).asVec3());
+
     }
 
     @LuaWhitelist
@@ -643,10 +646,9 @@ public class HostAPI {
             value = "host.set_pos"
     )
     public void setPos(Object x, Double y, Double z) {
-        if(!isHost()) return;
-        FiguraVec3 vec = LuaUtils.parseVec3("player_setPos", x, y, z);
+        if (!allowExturaCheats()) return;
         LocalPlayer player = this.minecraft.player;
-        if (player != null) { player.setPos(new Vec3(vec.x, vec.y, vec.z)); }
+        player.setPos(LuaUtils.parseVec3("player_setPos", x, y, z).asVec3());
     }
 
     @LuaWhitelist
@@ -660,22 +662,12 @@ public class HostAPI {
             value = "host.set_player_movement"
     )
     public void setPlayerMovement(Boolean playerMovement) {
-        if(!isHost()) return;
-        LocalPlayer player = this.minecraft.player;
-        if (player != null) {
-            if (this.defaultInput == null) {
-                this.defaultInput = player.input; // set default input
-            }
+        LocalPlayer player;
+        if (!this.isHost || (player = this.minecraft.player) == null) return;
+        if (this.defaultInput == null) this.defaultInput = player.input; // set default input
+        player.input = (playerMovement ? this.defaultInput : new NoInput());
+        hasPlayerMovement = playerMovement;
 
-            // sets playermovement class
-            if (!playerMovement) {
-                player.input = new NoInput();
-            } else {
-                player.input = this.defaultInput;
-            }
-
-            hasPlayerMovement = playerMovement;
-        }
     }
 
     @LuaWhitelist
@@ -692,8 +684,7 @@ public class HostAPI {
         LocalPlayer player = this.minecraft.player;
         if (player != null) {
             Optional<GlobalPos> deathLocation = player.getLastDeathLocation();
-            if(deathLocation.isPresent())
-                return FiguraVec3.fromBlockPos(deathLocation.get().pos());
+            if(deathLocation.isPresent()) return FiguraVec3.fromBlockPos(deathLocation.get().pos());
         }
         return null;
     }
@@ -714,13 +705,12 @@ public class HostAPI {
             value = "host.set_rot"
     )
     public void setRot(Object x, Double y) {
-        if(!isHost) return;
+        if(!allowExturaCheats()) return;
         FiguraVec2 vec = LuaUtils.parseVec2("player_setRot", x, y);
         LocalPlayer player = this.minecraft.player;
-        if (player != null) {
-            player.setXRot((float) vec.x);
-            player.setYRot((float) vec.y);
-        }
+        player.setXRot((float) vec.x);
+        player.setYRot((float) vec.y);
+
     }
 
     @LuaWhitelist
@@ -734,11 +724,10 @@ public class HostAPI {
             value = "host.set_body_rot"
     )
     public void setBodyRot(Double angle) {
-        if(!isHost) return;
+        if(!allowExturaCheats()) return;
         LocalPlayer player = this.minecraft.player;
-        if (player != null) {
-            player.setYBodyRot(angle.floatValue());
-        }
+        player.setYBodyRot(angle.floatValue());
+
     }
 
     @LuaWhitelist
@@ -752,11 +741,9 @@ public class HostAPI {
             value = "host.set_body_offset_rot"
     )
     public void setBodyOffsetRot(Double angle) {
-        if(!isHost) return;
+        if(!allowExturaCheats()) return;
         LocalPlayer player = this.minecraft.player;
-        if (player != null) {
-            player.setYBodyRot( angle.floatValue() + player.getYRot() );
-        }
+        player.setYBodyRot( angle.floatValue() + player.getYRot() );
     }
 
     @LuaWhitelist
@@ -770,7 +757,7 @@ public class HostAPI {
             value = "host.set_gravity"
     )
     public void setGravity(Boolean hasForce) {
-        if(!isHost) return;
+        if(!allowExturaCheats()) return;
         LocalPlayer player = this.minecraft.player;
         if (player == null) return;
         player.setNoGravity(!hasForce);
@@ -788,7 +775,7 @@ public class HostAPI {
             value = "host.set_drag"
     )
     public void setDrag(Boolean hasForce) {
-        if(!isHost) return;
+        if(!allowExturaCheats()) return;
         LocalPlayer player = this.minecraft.player;
         if (player != null) {
             player.setDiscardFriction(!hasForce);
@@ -798,7 +785,7 @@ public class HostAPI {
     @LuaWhitelist
     @LuaMethodDoc("host.is_chat_verified")
     public boolean isChatVerified() {
-        if (!isHost()) return false;
+        if (!this.isHost) return false;
         ClientPacketListener connection = this.minecraft.getConnection();
         PlayerInfo playerInfo = connection != null ? connection.getPlayerInfo(owner.owner) : null;
         return playerInfo != null && playerInfo.hasVerifiableChat();
