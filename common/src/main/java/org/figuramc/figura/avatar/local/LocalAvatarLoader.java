@@ -118,7 +118,6 @@ public class LocalAvatarLoader {
                     //NbtIo already closes the file stream
                     CompoundTag ava = NbtIo.readCompressed(Files.newInputStream(finalPath));
                     loadState = LoadState.SCRIPTS;
-//                    loadGlobalScripts(ava);
                     ava.putBoolean("isMoon",true);
                     loadGlobalScripts(ava);
                     target.loadAvatar(ava);

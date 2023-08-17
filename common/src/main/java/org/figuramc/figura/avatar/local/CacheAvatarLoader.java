@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.UserData;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.utils.IOUtils;
 
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class CacheAvatarLoader {
 
     public static void init() {
+        if(!Configs.ANNUAL_CACHE_DELETION.value) return;
         LocalAvatarLoader.async(() -> {
             Path file = getAvatarCacheDirectory();
             if (!(Files.exists(file) && Files.isDirectory(file)))
@@ -23,7 +25,6 @@ public class CacheAvatarLoader {
             List<Path> children = IOUtils.listPaths(file);
             if (children == null)
                 return;
-
             for (Path child : children) {
                 try {
                     FileTime time = Files.getLastModifiedTime(child);
@@ -80,6 +81,7 @@ public class CacheAvatarLoader {
     }
 
     public static void clearCache() {
+
         LocalAvatarLoader.async(() -> {
             Path file = getAvatarCacheDirectory();
 

@@ -352,4 +352,8 @@ public class Configs {
                 this.name = this.name.copy();
                 this.tooltip = FiguraText.of("config.expose_http.tooltip");
             }};
+    public static final ConfigType.BoolConfig ANNUAL_CACHE_DELETION = new ConfigType.BoolConfig("annual_cache_deletion", EXTURA, true) {{
+                this.name = this.name.copy();
+                this.tooltip = FiguraText.of("config.annual_cache_deletion.tooltip");
+            }};
 }
