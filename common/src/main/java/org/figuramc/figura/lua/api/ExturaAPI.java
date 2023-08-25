@@ -66,6 +66,14 @@ public class ExturaAPI {
         }
     }
     @LuaWhitelist
+    @LuaMethodDoc("extura.async_lua_function")
+    public void asyncLuaFunction(LuaFunction func) {
+        if (!this.isHost) return;
+        CompletableFuture.runAsync(() -> {
+            func.call();
+        });
+    }
+    @LuaWhitelist
     @LuaMethodDoc("extura.async_http_get")
     public void asyncHttpGet(String arg, LuaFunction func) {
         if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return;
@@ -89,7 +97,6 @@ public class ExturaAPI {
     }
     @LuaWhitelist
     public Object __index(String arg) {
-        if (arg == null) return null;
         return switch (arg) {
         	case "isHost" -> isHost;
         	case "version" -> VERSION;

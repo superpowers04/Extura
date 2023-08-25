@@ -23,13 +23,11 @@ public class CacheAvatarLoader {
                 return;
 
             List<Path> children = IOUtils.listPaths(file);
-            if (children == null)
-                return;
+            if (children == null) return;
             for (Path child : children) {
                 try {
                     FileTime time = Files.getLastModifiedTime(child);
-                    long diff = System.currentTimeMillis() - time.toMillis();
-                    long elapsed = TimeUnit.MILLISECONDS.toDays(diff);
+                    long elapsed = TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - time.toMillis());
                     if (elapsed > 7) {
                         if (Files.deleteIfExists(child)) {
                             FiguraMod.debug("Successfully deleted cache avatar \"{}\" with \"{}\" days old", IOUtils.getFileNameOrEmpty(child), elapsed);
