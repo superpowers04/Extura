@@ -245,7 +245,7 @@ public class LocalAvatarFetcher {
                     else{
                         CompoundTag nbt = NbtIo.readCompressed(Files.newInputStream(path));
                         CompoundTag metadata = nbt.getCompound("metadata");
-                        if(metadata.contains("name")) name = metadata.getString("name") + " (" + filename + ")";
+                        if(metadata.contains("name")) name = metadata.getString("name") + " (" + Files.getLastModifiedTime(path) + ")";
                         cachedNames.put(path.toString().toLowerCase(),name);
                     }
                 }catch(Exception ignored){}
