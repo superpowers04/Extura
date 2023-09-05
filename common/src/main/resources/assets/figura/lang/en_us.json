@@ -1,5 +1,5 @@
 {
-  "figura": "Figura - Extura",
+  "figura": "Figura",
   "figura.tab": "  ",
   "figura.ellipsis": "...",
 
@@ -149,6 +149,36 @@
   "figura.badges.no_permissions.sounds": "Reached Sounds limit",
   "figura.badges.no_permissions.custom_sounds": "Could not use Custom Sounds",
   "figura.badges.no_permissions.vanilla_model_edit": "Tried to change the Vanilla Model",
+  
+  "figura.emoji.face_angry": "Angry",
+  "figura.emoji.face_biba": "Biba",
+  "figura.emoji.face_fear": "Fear",
+  "figura.emoji.face_happy": "Happy",
+  "figura.emoji.face_misc": "Miscellaneous Faces",
+  "figura.emoji.face_nervous": "Nervous",
+  "figura.emoji.face_sad": "Sad",
+  "figura.emoji.face_silly": "Silly",
+
+  "figura.emoji.animal": "Animals",
+  "figura.emoji.food": "Foods",
+  "figura.emoji.hand": "Hands",
+  "figura.emoji.heart": "Hearts",
+  "figura.emoji.nature": "Nature",
+
+  "figura.emoji.animated": "Animated",
+  "figura.emoji.symbol": "Symbols",
+  "figura.emoji.object": "Objects",
+  "figura.emoji.logo": "Logos",
+  "figura.emoji.misc": "Miscellaneous",
+
+  "figura.emoji.portrait": "Portraits",
+  "figura.emoji.pride": "Pride",
+
+  "figura.emoji.reference": "References",
+  "figura.emoji.reference_bloons": "Bloons References",
+  "figura.emoji.reference_logo": "Logo References",
+  "figura.emoji.reference_retro": "Retro References",
+  "figura.emoji.meme": "Memes",
 
   "figura.gui.on": "ON",
   "figura.gui.off": "OFF",
@@ -169,7 +199,7 @@
   "figura.gui.new_version.tooltip": "A new version of Figura is available! %s\nClick to download it in your browser!",
   "figura.gui.old_version.tooltip": "Are you a time traveler? The latest version is %s",
   "figura.gui.clear": "Clear",
-  "figura.gui.not_available_yet": "Not available yet ❤",
+  "figura.gui.not_available_yet": "Not available yet",
 
   "figura.gui.text_hint.any": "Text",
   "figura.gui.text_hint.int": "Integer",
@@ -270,7 +300,7 @@
   "figura.gui.status.script": "Script",
   "figura.gui.status.script.0": "none",
   "figura.gui.status.script.1": "This Avatar script contains an error",
-  "figura.gui.status.script.2": "This Avatar script targets a newer version of Figura or Extura",
+  "figura.gui.status.script.2": "This Avatar script targets a newer version of Figura",
   "figura.gui.status.script.3": "ok",
 
   "figura.gui.status.backend": "Cloud",
@@ -312,9 +342,7 @@
   "figura.gui.help.lua_manual": "Lua Manual",
   "figura.gui.help.external_wiki": "Online Wiki",
   "figura.gui.help.lua_version": "Lua Version: %s",
-  "figura.gui.help.figura_version": "Figura (Extura) Version: %s",
-  "figura.gui.help.credits": "Made with love ❤ - by %s",
-
+  "figura.gui.help.figura_version": "Figura Version: %s",
 
   "figura.config.nameplate": "Nameplate",
   "figura.config.nameplate.tooltip": "Nameplate settings",
@@ -616,17 +644,11 @@
   "figura.config.chat_messages.tooltip.2": "This is a dangerous option, as the chat messages will still be signed",
   "figura.config.chat_messages.tooltip.3": "Figura does not take any responsibility for the usage of this feature",
 
-
-
   "figura.config.main_dir": "Figura Folder Location",
   "figura.config.main_dir.tooltip": "Changes the location of the Figura folder",
 
   "figura.config.server_ip": "Figura Cloud IP",
   "figura.config.server_ip.tooltip": "Sets the IP of the cloud used for Figura's multiplayer features",
-  "figura.config.use_secure_cloud": "(Extura) Secure Cloud",
-  "figura.config.use_secure_cloud.tooltip": "Whether to use a Secure Connection for the cloud",
-  "figura.config.block_cloud": "(Extura) Disable cloud",
-  "figura.config.block_cloud.tooltip": "Disable Figura's multiplayer features",
 
   "figura.config.clear_cache": "Clear Cache",
   "figura.config.clear_cache.tooltip": "Clears the cache files\nRemoves things like cached Avatars and UI states\nWill not clear settings nor saved permissions",
@@ -1172,7 +1194,6 @@
   "figura.docs.host.get_air": "Gets the remaining amount of air of the player",
   "figura.docs.host.get_pick_block": "Returns the current targeted block set by the client\nReturns a vararg of the block, the hit position and the block face the hit collided",
   "figura.docs.host.get_pick_entity": "Returns the current targeted entity set by the client",
-  "figura.docs.host.set_natural_forces": "Sets if the player is effected by gravity and drag",
 
 
   "figura.docs.itemstack": "A proxy for an item stack from Minecraft",
@@ -1756,7 +1777,7 @@
   "figura.docs.world": "A global API dedicated to reading information from the Minecraft world\nAccessed using the name \"world\"",
   "figura.docs.world.get_biome": "Gets the Biome located at the given position",
   "figura.docs.world.get_block_state": "Gets the BlockState of the block at the given position",
-  "figura.docs.world.get_blocks": "Gets a list of all BlockStates in the specified area",
+  "figura.docs.world.get_blocks": "Gets a list of all BlockStates in the specified area\nThe maximum area size is 8 x 8 x 8",
   "figura.docs.world.get_redstone_power": "Gets the redstone power level of the block at the given position",
   "figura.docs.world.get_strong_redstone_power": "Gets the direct redstone power level of the block at the given position",
   "figura.docs.world.get_time": "Gets the current game time of the world\nIf delta is passed in, then it adds delta to the time\nThe default value of delta is zero",
@@ -1776,34 +1797,5 @@
   "figura.docs.world.new_item": "Parses and create a new ItemStack from the given string\nA count and damage can be given, to be applied on this itemstack",
   "figura.docs.world.exists": "Checks whether or not a world currently exists\nThis will almost always be true, but might be false on some occasions such as while travelling between dimensions",
   "figura.docs.world.get_build_height": "Returns the minimum and maximum build height of the world, as varargs",
-  "figura.docs.world.get_spawn_point": "Returns a vector with the coordinates of the world spawn",
-  "figura.docs.world.get_nearby_entities": "Returns any nearby entities",
-
-
-  "figura.docs.world.linetraceBlock": "Returns the block, side, and pos of a linetrace",
-  "figura.docs.world.linetraceEntity": "Returns the entity and pos of a linetrace",
-
-
-  "figura.config.extura": "Extura - Advanced",
-  "figura.config.expose_extura_api": "Expose Extura API",
-  "figura.config.expose_extura_api.tooltip": "Expose the Extura API to *ALL* Figura avatars",
-  "figura.config.annual_cache_deletion": "Delete cache weekly",
-  "figura.config.annual_cache_deletion.tooltip": "Delete cached avatars after 7 days",
-  "figura.config.expose_http": "Expose HTTP",
-  "figura.config.expose_http.tooltip": "Exposes extura.getHttp to *ALL* Figura avatars",
-  "figura.config.expose_sensitive_libraries": "Expose sensitive lua libraries/functions",
-  "figura.config.expose_sensitive_libraries.tooltip": "Exposes io, os, debug, dofile, loadfile, extura.getHttp and collectGarbage to *YOUR* Figura avatar",
-
-  "figura.config.get_blocks_limit": "Unlimited world.getBlocks",
-  "figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
-
-  "figura.config.use_global_scripts": "Global Scripts",
-  "figura.config.use_global_scripts.tooltip": "Toggles if scripts are loaded from the `global_scripts` directory in your Figura folder. Note that they can override normal scripts if they have the same path/name",
-
-  "figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
-  "figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used",
-  "figura.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
-
-
-  "figura.extura.httpGet": "Makes an http request to a url"
+  "figura.docs.world.get_spawn_point": "Returns a vector with the coordinates of the world spawn"
 }
