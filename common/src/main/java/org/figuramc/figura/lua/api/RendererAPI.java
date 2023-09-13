@@ -207,7 +207,7 @@ public class RendererAPI {
     @LuaWhitelist
     @LuaMethodDoc("renderer.is_upside_down")
     public boolean isUpsideDown() {
-        return upsideDown;
+        return upsideDown != null ? upsideDown : false;
     }
 
     @LuaWhitelist
@@ -612,13 +612,13 @@ public class RendererAPI {
     @LuaWhitelist
     @LuaMethodDoc("renderer.get_primary_fire_texture")
     public String getPrimaryFireTexture() {
-        return fireLayer1.toString();
+        return fireLayer1 != null ? fireLayer1.toString() : "";
     }
 
     @LuaWhitelist
     @LuaMethodDoc("renderer.get_secondary_fire_texture")
     public String getSecondaryFireTexture() {
-        return fireLayer2.toString();
+        return fireLayer2 != null ? fireLayer2.toString() : "";
     }
 
     @LuaWhitelist
