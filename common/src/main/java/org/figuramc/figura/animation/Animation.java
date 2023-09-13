@@ -9,6 +9,7 @@ import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.model.FiguraModelPart;
 import org.luaj.vm2.LuaError;
+import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 import java.util.*;
@@ -18,6 +19,7 @@ import java.util.*;
         name = "Animation",
         value = "animation"
 )
+// Stole lua AnimationChannel and keyframe stuff from https://github.com/FiguraMC/Figura/pull/41
 public class Animation {
 
     private final Avatar owner;
@@ -606,6 +608,32 @@ public class Animation {
         ONCE,
         HOLD
     }
+    @LuaWhitelist
+    @LuaMethodDoc("animation.getChannels")
+    public LuaTable getChannels() {
+        LuaTable ret = new LuaTable();
+        for (Map.Entry<FiguraModelPart, List<Animation.AnimationChannel>> entry : animationParts) {
+            List<AnimationChannel> value = new ArrayList<>(entry.getValue());
+            ret.set((LuaValue) owner.luaRuntime.typeManager.javaToLua(entry.getKey()), (LuaValue) owner.luaRuntime.typeManager.javaToLua(value));
+        }
+        return ret;
+    }
+    @LuaWhitelist
+    @LuaTypeDoc(
+            name = "AnimationChannel",
+            value = "animation_channel"
+    )
+    public record AnimationChannel(TransformType type, Keyframe... keyframes) {
 
-    public record AnimationChannel(TransformType type, Keyframe... keyframes) {}
+        @LuaWhitelist
+        @LuaMethodDoc("animation.get_keyframes")
+        public List<Keyframe> getKeyframes() {
+            return List.of(keyframes);
+        }
+        @LuaWhitelist
+        @LuaMethodDoc("animation.get_type")
+        public String getType() {
+            return type.toString();
+        }
+    }
 }
