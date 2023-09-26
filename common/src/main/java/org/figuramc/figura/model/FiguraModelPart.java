@@ -3,6 +3,7 @@ package org.figuramc.figura.model;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.phys.Vec3;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
@@ -359,6 +360,35 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public FiguraModelPart setRot(Object x, Double y, Double z) {
         FiguraVec3 vec = LuaUtils.parseVec3("setRot", x, y, z);
         this.customization.setRot(vec);
+        return this;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = FiguraVec3.class,
+                            argumentNames = "pos"
+                    ),
+                    @LuaMethodOverload(
+                            argumentTypes = {Double.class, Double.class, Double.class},
+                            argumentNames = {"x", "y", "z"}
+                    )
+            },
+            aliases = "rot",
+            value = "model_part.point_at"
+    )
+    public FiguraModelPart pointAt(Object x, Double y, Double z) {
+        FiguraVec3 start = this.savedPartToWorldMat.copy().apply(0D,0D,0D);
+        FiguraVec3 end = LuaUtils.parseVec3("pointAt", x, y, z);
+
+        Vec3 dir = end.asVec3().subtract(start.asVec3()).normalize();
+        double yaw = Math.atan2(dir.x, dir.z);
+        double pitch = Math.asin(dir.y);
+
+        Vec3 rot = new Vec3(Math.toDegrees(pitch), Math.toDegrees(yaw), 0);
+
+        this.customization.setRot(rot.x, rot.y, rot.z);
         return this;
     }
 
@@ -852,6 +882,11 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     @LuaMethodDoc("model_part.part_to_world_matrix")
     public FiguraMat4 partToWorldMatrix() {
         return this.savedPartToWorldMat.copy();
+    }
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.part_to_world")
+    public FiguraVec3 partToWorld() {
+        return this.savedPartToWorldMat.copy().apply(0D,0D,0D);
     }
 
     @LuaWhitelist
