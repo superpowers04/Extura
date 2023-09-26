@@ -3,19 +3,15 @@ package org.figuramc.figura.model;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.world.phys.Vec3;
 import org.figuramc.figura.avatar.Avatar;
-import org.figuramc.figura.math.matrix.FiguraMat3;
-import org.figuramc.figura.math.matrix.FiguraMat4;
-import org.figuramc.figura.model.rendertasks.*;
-import org.luaj.vm2.LuaError;
-import org.luaj.vm2.LuaFunction;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaFieldDoc;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
+import org.figuramc.figura.math.matrix.FiguraMat3;
+import org.figuramc.figura.math.matrix.FiguraMat4;
 import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.model.rendering.ImmediateAvatarRenderer;
@@ -23,8 +19,10 @@ import org.figuramc.figura.model.rendering.Vertex;
 import org.figuramc.figura.model.rendering.texture.FiguraTexture;
 import org.figuramc.figura.model.rendering.texture.FiguraTextureSet;
 import org.figuramc.figura.model.rendering.texture.RenderTypes;
+import org.figuramc.figura.model.rendertasks.*;
 import org.figuramc.figura.utils.LuaUtils;
 import org.figuramc.figura.utils.ui.UIHelper;
+import org.luaj.vm2.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +54,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public Map<String, RenderTask> renderTasks = new ConcurrentHashMap<>();
 
     public List<FiguraTextureSet> textures;
-    public int textureWidth = -1, textureHeight = -1; //If the part has multiple textures, then these are -1.
+    public int textureWidth = -1, textureHeight = -1; // If the part has multiple textures, then these are -1.
 
     public boolean animated = false;
     public int animationOverride = 0;
@@ -68,13 +66,13 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
 
     @LuaWhitelist
     @LuaFieldDoc("model_part.pre_render")
-    public LuaFunction preRender; //before calculations
+    public LuaFunction preRender; // before calculations
     @LuaWhitelist
     @LuaFieldDoc("model_part.mid_render")
-    public LuaFunction midRender; //before pushing
+    public LuaFunction midRender; // before pushing
     @LuaWhitelist
     @LuaFieldDoc("model_part.post_render")
-    public LuaFunction postRender; //after children
+    public LuaFunction postRender; // after children
 
     public FiguraModelPart(Avatar owner, String name, PartCustomization customization, Map<Integer, List<Vertex>> vertices, List<FiguraModelPart> children) {
         this.owner = owner;
@@ -109,12 +107,12 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         if (vanillaModelData == null)
             return;
 
-        //get part data
+        // get part data
         VanillaModelData.PartData partData = vanillaModelData.partMap.get(this.parentType);
         if (partData == null)
             return;
 
-        //apply vanilla transforms
+        // apply vanilla transforms
         customization.vanillaVisible = partData.visible;
 
         FiguraVec3 defaultPivot = parentType.offset.copy();
@@ -131,7 +129,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             customization.offsetPos(defaultPivot);
         }
 
-        //customization.offsetPivot(pivot);
+        // customization.offsetPivot(pivot);
         if (!overrideVanillaRot())
             customization.offsetRot(partData.rot);
     }
@@ -172,7 +170,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         customization.setMatrix(prevPartToView);
     }
 
-    // -- animations -- //
+    // -- animations -- // 
 
     public void animPosition(FiguraVec3 vec, boolean merge) {
         if (merge) {
@@ -211,7 +209,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         }
     }
 
-    //-- LUA BUSINESS --//
+    // -- LUA BUSINESS --// 
 
 
     @LuaWhitelist
@@ -361,35 +359,6 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public FiguraModelPart setRot(Object x, Double y, Double z) {
         FiguraVec3 vec = LuaUtils.parseVec3("setRot", x, y, z);
         this.customization.setRot(vec);
-        return this;
-    }
-
-    @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = {
-                    @LuaMethodOverload(
-                            argumentTypes = FiguraVec3.class,
-                            argumentNames = "pos"
-                    ),
-                    @LuaMethodOverload(
-                            argumentTypes = {Double.class, Double.class, Double.class},
-                            argumentNames = {"x", "y", "z"}
-                    )
-            },
-            aliases = "rot",
-            value = "model_part.point_at"
-    )
-    public FiguraModelPart pointAt(Object x, Double y, Double z) {
-        FiguraVec3 start = this.savedPartToWorldMat.copy().apply(0D,0D,0D);
-        FiguraVec3 end = LuaUtils.parseVec3("pointAt", x, y, z);
-
-        Vec3 dir = end.asVec3().subtract(start.asVec3()).normalize();
-        double yaw = Math.atan2(dir.x, dir.z);
-        double pitch = Math.asin(dir.y);
-
-        Vec3 rot = new Vec3(Math.toDegrees(pitch), Math.toDegrees(yaw), 0);
-
-        this.customization.setRot(rot.x, rot.y, rot.z);
         return this;
     }
 
@@ -722,6 +691,67 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc("model_part.get_primary_texture")
+    public Varargs getPrimaryTexture() {
+        return LuaValue.varargsOf(getTextureType(customization.primaryTexture), getTextureValue(customization.primaryTexture));
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.get_secondary_texture")
+    public Object getSecondaryTexture() {
+        return LuaValue.varargsOf(getTextureType(customization.secondaryTexture), getTextureValue(customization.secondaryTexture));
+    }
+
+    private LuaValue getTextureType(TextureCustomization tex) {
+        if (tex == null) return LuaValue.valueOf(FiguraTextureSet.OverrideType.PRIMARY.name());
+        return LuaValue.valueOf(tex.getOverrideType().name());
+    }
+
+    private LuaValue getTextureValue(TextureCustomization tex) {
+        if (tex == null) return LuaValue.NIL;
+        Object val = tex.getValue();
+        if (val == null) return LuaValue.NIL;
+        if (val instanceof String str) return LuaValue.valueOf(str);
+        return LuaValue.userdataOf(val);
+    }
+
+
+
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.get_primary_defined_textures")
+    public Object getPrimaryDefinedTextures(Integer value) {
+        if (customization.primaryTexture == null) {
+            LuaTable tbl = new LuaTable();
+            FiguraTexture[] arr = this.textures.get(value).textures;
+            tbl.set("main", arr[0] == null ? LuaValue.NIL : LuaValue.userdataOf(arr[0]));
+            tbl.set("emissive", arr[1] == null ? LuaValue.NIL : LuaValue.userdataOf(arr[1]));
+            tbl.set("specular", arr[2] == null ? LuaValue.NIL : LuaValue.userdataOf(arr[2]));
+            tbl.set("normal", arr[3] == null ? LuaValue.NIL : LuaValue.userdataOf(arr[3]));
+            return tbl;
+        }
+        return new LuaTable() {{
+            set("main", LuaValue.userdataOf(customization.primaryTexture.getTexture(owner, textures.get(value == null ? 0 : value))));
+        }};
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.get_secondary_defined_textures")
+    public Object getSecondaryDefinedTextures(Integer value) {
+        if (customization.secondaryTexture == null) {
+            LuaTable tbl = new LuaTable();
+            FiguraTexture[] arr = this.textures.get(value).textures;
+            tbl.set("main", arr[0] == null ? LuaValue.NIL : LuaValue.userdataOf(arr[0]));
+            tbl.set("emissive", arr[1] == null ? LuaValue.NIL : LuaValue.userdataOf(arr[1]));
+            tbl.set("specular", arr[2] == null ? LuaValue.NIL : LuaValue.userdataOf(arr[2]));
+            tbl.set("normal", arr[3] == null ? LuaValue.NIL : LuaValue.userdataOf(arr[3]));
+            return tbl;
+        }
+        return new LuaTable() {{
+            set("main", LuaValue.userdataOf(customization.secondaryTexture.getTexture(owner, textures.get(value == null ? 0 : value))));
+        }};
+    }
+
+    @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
                     @LuaMethodOverload(
@@ -742,9 +772,11 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     )
     public FiguraModelPart setPrimaryTexture(String type, Object x) {
         try {
-            this.customization.primaryTexture = type == null ? null : Pair.of(FiguraTextureSet.OverrideType.valueOf(type.toUpperCase()), x);
+            FiguraTextureSet.OverrideType overrideType = FiguraTextureSet.OverrideType.valueOf(type.toUpperCase());
+            checkTexture(overrideType, x);
+            this.customization.primaryTexture = type == null ? null : new TextureCustomization(overrideType, x);
             return this;
-        } catch (Exception ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new LuaError("Invalid texture override type: " + type);
         }
     }
@@ -770,10 +802,24 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     )
     public FiguraModelPart setSecondaryTexture(String type, Object x) {
         try {
-            this.customization.secondaryTexture = type == null ? null : Pair.of(FiguraTextureSet.OverrideType.valueOf(type.toUpperCase()), x);
+            FiguraTextureSet.OverrideType overrideType = FiguraTextureSet.OverrideType.valueOf(type.toUpperCase());
+            checkTexture(overrideType, x);
+            this.customization.secondaryTexture = type == null ? null : new TextureCustomization(overrideType, x);
             return this;
-        } catch (Exception ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new LuaError("Invalid texture override type: " + type);
+        }
+    }
+
+    private void checkTexture(FiguraTextureSet.OverrideType type, Object value) {
+        if (type.argumentType == null && value == null) return;
+
+        if (type.argumentType == null) {
+            throw new LuaError("\""+type.name()+"\n texture type requires no arguments!");
+        }
+
+        if (value == null || type.argumentType != value.getClass()) {
+            throw new LuaError("\""+type.name()+"\" texture type requires argument type: " + type.typeName);
         }
     }
 
@@ -807,11 +853,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public FiguraMat4 partToWorldMatrix() {
         return this.savedPartToWorldMat.copy();
     }
-    @LuaWhitelist
-    @LuaMethodDoc("model_part.part_to_world")
-    public FiguraVec3 partToWorld() {
-        return this.savedPartToWorldMat.copy().apply(0D,0D,0D);
-    }
+
     @LuaWhitelist
     @LuaMethodDoc("model_part.get_texture_size")
     public FiguraVec2 getTextureSize() {
@@ -1408,7 +1450,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         return newer;
     }
 
-    //-- METAMETHODS --//
+    // -- METAMETHODS --// 
     @LuaWhitelist
     public Object __index(String key) {
         if (key == null) return null;
