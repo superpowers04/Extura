@@ -447,8 +447,9 @@ public class WorldAPI {
     @LuaMethodDoc(
             value = "world.linetrace_block"
     )
-    public HashMap<String, Object> linetraceBlock(boolean fluid, Object x, Object y, Double z, Object w, Double t, Double h)  return raycastBlock(block,x,y,z,w,t,h);
-
+    public HashMap<String, Object> linetraceBlock(boolean fluid, Object x, Object y, Double z, Object w, Double t, Double h) {
+        return raycastBlock(fluid, x, y, z, w, t, h);
+    }
 
     @LuaWhitelist
     @LuaMethodDoc(
@@ -495,8 +496,9 @@ public class WorldAPI {
     @LuaMethodDoc(
             value = "world.linetrace_entity"
     )
-    public HashMap<String, Object> linetraceEntity(Object x, Object y, Double z, Object w, Double t, Double h)  return raycastEntity(x,y,z,w,t,h);
-
+    public HashMap<String, Object> linetraceEntity(Object x, Object y, Double z, Object w, Double t, Double h) {
+        return raycastEntity(x, y, z, w, t, h);
+    }
     @LuaWhitelist
     @LuaMethodDoc("world.avatar_vars")
     public static Map<String, LuaTable> avatarVars() {
