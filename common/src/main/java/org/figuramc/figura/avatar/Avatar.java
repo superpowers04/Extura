@@ -920,6 +920,22 @@ public class Avatar {
         CompoundTag scriptsNbt = nbt.getCompound("scripts");
         for (String s : scriptsNbt.getAllKeys())
             scripts.put(s, new String(scriptsNbt.getByteArray(s), StandardCharsets.UTF_8));
+        /* Extura stuff*/
+        if (nbt.contains("exturaOnly")){
+            CompoundTag exturaNbt = nbt.getCompound("exturaOnly");
+            for (String s : exturaNbt.getAllKeys())
+                scripts.put(s, new String(exturaNbt.getByteArray(s), StandardCharsets.UTF_8));
+        }
+        if (isHost && nbt.contains("exturaHostOnly")){
+            CompoundTag exturaNbt = nbt.getCompound("exturaHostOnly");
+            for (String s : exturaNbt.getAllKeys())
+                scripts.put(s, new String(exturaNbt.getByteArray(s), StandardCharsets.UTF_8));
+        }
+        if (isHost && nbt.contains("localOnly")){
+            CompoundTag exturaNbt = nbt.getCompound("localOnly");
+            nbt.remove("localOnly");
+            for (String s : exturaNbt.getAllKeys()) scripts.put(s, new String(exturaNbt.getByteArray(s), StandardCharsets.UTF_8));
+        }
 
         CompoundTag metadata = nbt.getCompound("metadata");
 

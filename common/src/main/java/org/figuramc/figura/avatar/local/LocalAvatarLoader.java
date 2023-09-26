@@ -124,15 +124,11 @@ public class LocalAvatarLoader {
                     return;
                 }
                 CompoundTag nbt = new CompoundTag();
-                CompoundTag exturaOnly = new CompoundTag();
+
                 // scripts
                 loadState = LoadState.SCRIPTS;
-                loadScripts(finalPath, nbt);
-                Path hostOnly = finalPath.resolve(".hostonly");
-//                if(Files.exists(hostOnly)){
-//                    loadScripts(hostOnly, exturaOnly);
-//
-//                }
+//                loadScripts(finalPath, nbt);
+
                 loadScripts(finalPath, nbt);
                 loadGlobalScripts(nbt);
 
@@ -155,15 +151,32 @@ public class LocalAvatarLoader {
                 nbt.put("metadata", AvatarMetadataParser.parse(metadata, IOUtils.getFileNameOrEmpty(finalPath)));
                 AvatarMetadataParser.injectToModels(metadata, models);
                 AvatarMetadataParser.injectToTextures(metadata, textures);
-                if(!exturaOnly.isEmpty())
-                    nbt.put("exturaOnly",exturaOnly);
-                // return :3
-                if (!models.isEmpty())
-                    nbt.put("models", models);
-                if (!textures.isEmpty())
-                    nbt.put("textures", textures);
-                if (!animations.isEmpty())
-                    nbt.put("animations", animations);
+
+                /* Extura stuff*/
+                CompoundTag exturaOnly = new CompoundTag();
+                CompoundTag localOnly = new CompoundTag();
+                CompoundTag exturaHostOnly = new CompoundTag();
+
+                Path hostOnly = finalPath.resolve(".hostonly");
+                if(Files.exists(hostOnly)){
+                    loadScripts(hostOnly, exturaOnly);
+                }
+                Path exturaOnlyPath = finalPath.resolve(".extura");
+                if(Files.exists(exturaOnlyPath)){
+                    loadScripts(exturaOnlyPath, exturaOnly);
+                }
+                Path localOnlyPath = finalPath.resolve(".local");
+                if(Files.exists(localOnlyPath)){
+                    loadScripts(localOnlyPath, exturaOnly);
+                }
+
+                if(!exturaHostOnly.isEmpty()) nbt.put("exturaHostOnly",exturaHostOnly);
+                if(!exturaOnly.isEmpty()) nbt.put("exturaOnly",exturaOnly);
+                if(!localOnly.isEmpty()) nbt.put("localOnly",localOnly);
+
+                if (!models.isEmpty()) nbt.put("models", models);
+                if (!textures.isEmpty()) nbt.put("textures", textures);
+                if (!animations.isEmpty()) nbt.put("animations", animations);
 
                 // load
                 target.loadAvatar(nbt);
