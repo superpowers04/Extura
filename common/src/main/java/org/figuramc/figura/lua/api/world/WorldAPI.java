@@ -90,12 +90,9 @@ public class WorldAPI {
             value = "world.get_block_state"
     )
     public static BlockStateAPI getBlockState(Object x, Double y, Double z) {
-        FiguraVec3 pos = LuaUtils.parseVec3("getBlockState", x, y, z);
-        BlockPos blockPos = pos.asBlockPos();
+        BlockPos blockPos = LuaUtils.parseVec3("getBlockState", x, y, z).asBlockPos();
         Level world = getCurrentWorld();
-        if (!world.hasChunkAt(blockPos))
-            return new BlockStateAPI(Blocks.AIR.defaultBlockState(), blockPos);
-        return new BlockStateAPI(world.getBlockState(blockPos), blockPos);
+        return new BlockStateAPI((world.hasChunkAt(blockPos) ? world.getBlockState(blockPos) : Blocks.AIR.defaultBlockState()), blockPos);
     }
 
     @SuppressWarnings("deprecation")
@@ -145,7 +142,24 @@ public class WorldAPI {
         });
         return list;
     }
-
+    @SuppressWarnings("deprecation")
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = FiguraVec3.class,
+                            argumentNames = "pos"
+                    ),
+                    @LuaMethodOverload(
+                            argumentTypes = {Double.class, Double.class, Double.class},
+                            argumentNames = {"x", "y", "z"}
+                    )
+            },
+            value = "world.isChunkLoaded"
+    )
+    public static Boolean isChunkLoaded(Object x, Double y, Double z) {
+        return getCurrentWorld().hasChunkAt(LuaUtils.parseVec3("isChunkAtBlockLoaded", x, y, z).asBlockPos());
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
@@ -161,11 +175,9 @@ public class WorldAPI {
             value = "world.get_redstone_power"
     )
     public static int getRedstonePower(Object x, Double y, Double z) {
-        FiguraVec3 pos = LuaUtils.parseVec3("getRedstonePower", x, y, z);
-        BlockPos blockPos = pos.asBlockPos();
-        if (getCurrentWorld().getChunkAt(blockPos) == null)
-            return 0;
-        return getCurrentWorld().getBestNeighborSignal(blockPos);
+        BlockPos blockPos = LuaUtils.parseVec3("getRedstonePower", x, y, z).asBlockPos();
+        Level World = getCurrentWorld();
+        return (World.getChunkAt(blockPos) == null) ? 0 : World.getBestNeighborSignal(blockPos);
     }
 
     @LuaWhitelist
@@ -183,11 +195,9 @@ public class WorldAPI {
             value = "world.get_strong_redstone_power"
     )
     public static int getStrongRedstonePower(Object x, Double y, Double z) {
-        FiguraVec3 pos = LuaUtils.parseVec3("getStrongRedstonePower", x, y, z);
-        BlockPos blockPos = pos.asBlockPos();
-        if (getCurrentWorld().getChunkAt(blockPos) == null)
-            return 0;
-        return getCurrentWorld().getDirectSignalTo(blockPos);
+        BlockPos blockPos = LuaUtils.parseVec3("getStrongRedstonePower", x, y, z).asBlockPos();
+        Level World = getCurrentWorld();
+        return (World.getChunkAt(blockPos) == null) ? 0 : World.getDirectSignalTo(blockPos);
     }
 
     @LuaWhitelist
@@ -241,8 +251,7 @@ public class WorldAPI {
             value = "world.get_rain_gradient"
     )
     public static double getRainGradient(Float delta) {
-        if (delta == null) delta = 1f;
-        return getCurrentWorld().getRainLevel(delta);
+        return getCurrentWorld().getRainLevel((delta == null) ? delta : 1f );
     }
 
     @LuaWhitelist
@@ -266,11 +275,9 @@ public class WorldAPI {
             value = "world.get_light_level"
     )
     public static Integer getLightLevel(Object x, Double y, Double z) {
-        FiguraVec3 pos = LuaUtils.parseVec3("getLightLevel", x, y, z);
-        BlockPos blockPos = pos.asBlockPos();
+        BlockPos blockPos = LuaUtils.parseVec3("getLightLevel", x, y, z).asBlockPos();
         Level world = getCurrentWorld();
-        if (world.getChunkAt(blockPos) == null)
-            return null;
+        if (world.getChunkAt(blockPos) == null) return null;
         world.updateSkyBrightness();
         return world.getLightEngine().getRawBrightness(blockPos, world.getSkyDarken());
     }
@@ -290,12 +297,9 @@ public class WorldAPI {
             value = "world.get_sky_light_level"
     )
     public static Integer getSkyLightLevel(Object x, Double y, Double z) {
-        FiguraVec3 pos = LuaUtils.parseVec3("getSkyLightLevel", x, y, z);
-        BlockPos blockPos = pos.asBlockPos();
+        BlockPos blockPos = LuaUtils.parseVec3("getSkyLightLevel", x, y, z).asBlockPos();
         Level world = getCurrentWorld();
-        if (world.getChunkAt(blockPos) == null)
-            return null;
-        return world.getBrightness(LightLayer.SKY, blockPos);
+        return ((world.getChunkAt(blockPos) == null) ? null : world.getBrightness(LightLayer.SKY, blockPos));
     }
 
     @LuaWhitelist
@@ -313,12 +317,9 @@ public class WorldAPI {
             value = "world.get_block_light_level"
     )
     public static Integer getBlockLightLevel(Object x, Double y, Double z) {
-        FiguraVec3 pos = LuaUtils.parseVec3("getBlockLightLevel", x, y, z);
-        BlockPos blockPos = pos.asBlockPos();
+        BlockPos blockPos = LuaUtils.parseVec3("getBlockLightLevel", x, y, z).asBlockPos();
         Level world = getCurrentWorld();
-        if (world.getChunkAt(blockPos) == null)
-            return null;
-        return world.getBrightness(LightLayer.BLOCK, blockPos);
+        return (world.getChunkAt(blockPos) == null ? null : world.getBrightness(LightLayer.BLOCK, blockPos));
     }
 
     @LuaWhitelist
@@ -336,19 +337,16 @@ public class WorldAPI {
             value = "world.is_open_sky"
     )
     public static Boolean isOpenSky(Object x, Double y, Double z) {
-        FiguraVec3 pos = LuaUtils.parseVec3("isOpenSky", x, y, z);
-        BlockPos blockPos = pos.asBlockPos();
+        BlockPos blockPos = LuaUtils.parseVec3("isOpenSky", x, y, z).asBlockPos();
         Level world = getCurrentWorld();
-        if (world.getChunkAt(blockPos) == null)
-            return null;
-        return world.canSeeSky(blockPos);
+
+        return (world.getChunkAt(blockPos) == null ? null : world.canSeeSky(blockPos));
     }
 
     @LuaWhitelist
     @LuaMethodDoc("world.get_dimension")
     public static String getDimension() {
-        Level world = getCurrentWorld();
-        return world.dimension().location().toString();
+        return getCurrentWorld().dimension().location().toString();
     }
 
     @LuaWhitelist

@@ -1802,21 +1802,21 @@
   "figura.docs.world.new_item": "Parses and create a new ItemStack from the given string\nA count and damage can be given, to be applied on this itemstack",
   "figura.docs.world.exists": "Checks whether or not a world currently exists\nThis will almost always be true, but might be false on some occasions such as while travelling between dimensions",
   "figura.docs.world.get_build_height": "Returns the minimum and maximum build height of the world, as varargs",
-  "figura.docs.world.get_spawn_point": "Returns a vector with the coordinates of the world spawn",
-  "SEPERATOR":"Extura exclusive",
+
+  "EXTURA_SEPERATOR":"Extura exclusive",
   "figura.config.use_secure_cloud": "(Extura) Secure Cloud",
   "figura.config.use_secure_cloud.tooltip": "Whether to use a Secure Connection for the cloud",
   "figura.config.block_cloud": "(Extura) Disable cloud",
   "figura.config.block_cloud.tooltip": "Disable Figura's multiplayer features",
-  "figura.docs.host.set_natural_forces": "Sets if the player is effected by gravity and drag",
-  "figura.docs.world.get_spawn_point": "Returns a vector with the coordinates of the world spawn",
-  "figura.docs.world.get_nearby_entities": "Returns any nearby entities",
-  "figura.docs.world.raycast_entity": "Raycasts an Entity in the world, returns a map containing the entity and it's position.",
-  "figura.docs.world.raycast_block": "Raycasts a Block in the world, returns a map containing the block and it's position.",
+  "figura.docs.world.get_spawn_point": "(Extura) Returns a vector with the coordinates of the world spawn",
+  "figura.docs.world.isChunkLoaded": "(Extura) Gets whether a chunk is loaded at the given block position",
+  "figura.docs.world.get_nearby_entities": "(Extura) Returns entities near the given block position",
+  "figura.docs.world.raycast_entity": "(Extura > linetraceEntity) Returns the entity and pos of a linetrace.",
+  "figura.docs.world.raycast_block": "(Extura > linetraceBlock) Returns the block, side, and pos of a linetrace",
 
 
-  "figura.docs.world.linetraceBlock": "Returns the block, side, and pos of a linetrace",
-  "figura.docs.world.linetraceEntity": "Returns the entity and pos of a linetrace",
+  "figura.docs.world.linetraceBlock": "(Extura) Returns the block, side, and pos of a linetrace",
+  "figura.docs.world.linetraceEntity": "(Extura) Returns the entity and pos of a linetrace",
 
 
   "figura.config.extura": "Extura - Advanced",
@@ -1832,13 +1832,23 @@
   "figura.config.get_blocks_limit": "Unlimited world.getBlocks",
   "figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
 
+  "figura.config.get_target_limit": "Unlimited entity:getTarget",
+  "figura.config.get_target_limit.tooltip": "Toggles if scripts can bypass the 20 block limit of entity.getTargetedBlock and entity.getTargetedEntity",
+
   "figura.config.use_global_scripts": "Global Scripts",
   "figura.config.use_global_scripts.tooltip": "Toggles if scripts are loaded from the `global_scripts` directory in your Figura folder. Note that they can override normal scripts if they have the same path/name",
 
   "figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
   "figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used",
-  "figura.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
+  "figura.docs.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
 
+  "figura.docs.host.set_player_movement": "(Extura) Set if the player can move normally",
+  "figura.docs.host.get_player_movement": "(Extura) Get if the player can move normally",
+  "figura.docs.host.set_velocity": "(Extura - Requires host.allowExturaCheats() to be true) Sets the player's velocity",
+  "figura.docs.host.set_position": "(Extura - Requires host.allowExturaCheats() to be true) Sets the player's position",
+  "figura.docs.host.set_natural_forces": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity and drag",
+  "figura.docs.host.set_gravity": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity",
 
-  "figura.extura.httpGet": "Makes an http request to a url"
+  "figura.docs.extura.async_lua_function": "Runs specified lua function in a thread. NOTE: VERY UNSTABLE!",
+  "figura.docs.extura.httpGet": "Makes an http request to a url"
 }

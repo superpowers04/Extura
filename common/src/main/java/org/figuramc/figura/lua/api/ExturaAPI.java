@@ -26,7 +26,7 @@ import org.luaj.vm2.LuaFunction;
 public class ExturaAPI {
     private final Avatar owner;
     private final boolean isHost;
-    private final static Integer VERSION = 4;
+    private final static Integer VERSION = 5;
 
     public ExturaAPI(Avatar owner) {
         this.isHost = (this.owner = owner).isHost;
