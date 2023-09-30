@@ -70,8 +70,6 @@ public class FiguraAPIManager {
         add(FiguraMat3.class);
         add(FiguraMat4.class);
 
-        add(FiguraMathAPI.class);
-
         add(NullEntity.class);
         add(EntityAPI.class);
         add(LivingEntityAPI.class);
@@ -164,7 +162,6 @@ public class FiguraAPIManager {
         put("pings", r -> r.ping = new PingAPI(r.owner));
         put("textures", r -> r.texture = new TextureAPI(r.owner));
         put("config", r -> new ConfigAPI(r.owner));
-        put("figura_math", r -> new FiguraMathAPI());
         if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
 
     }};
