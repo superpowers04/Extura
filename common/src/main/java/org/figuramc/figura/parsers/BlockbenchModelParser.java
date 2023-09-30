@@ -135,13 +135,13 @@ public class BlockbenchModelParser {
                 if (p.getFileSystem() == FileSystems.getDefault()) {
                     File f = p.toFile().getCanonicalFile();
                     p = f.toPath();
-                    if (!f.exists()) throw new IllegalStateException("File do not exists!");
+                    if (!f.exists()) throw new IllegalStateException("File does not exist!");
                 } else {
                     p = p.normalize();
                     if (p.getFileSystem() != avatar.getFileSystem())
                         throw new IllegalStateException("File from outside the avatar folder!");
                 }
-                if (avatar.getNameCount() > 1) if (!p.startsWith(avatar)) throw new IllegalStateException("File from outside the avatar folder!");
+                if (avatar.getNameCount() > 1) if (!p.startsWith(avatar)) throw new IllegalStateException("File is outside of the avatar folder!");
                 FiguraMod.debug("path is {}", p.toString());
                 //load texture
                 source = IOUtils.readFileBytes(p);
@@ -160,7 +160,9 @@ public class BlockbenchModelParser {
                     FiguraMod.LOGGER.error("", e);
 
                 //otherwise, load from the source stored in the model
-                source = Base64.getDecoder().decode(texture.source.replaceFirst("data:image/png;base64,",""));
+                String sourceTex = texture.source;
+                if(sourceTex.startsWith("data:image/png;base64,"))sourceTex = sourceTex.substring(22);
+                source = Base64.getDecoder().decode(sourceTex);
                 path = folders + modelName + "." + name;
                 FiguraMod.debug("Loaded {} Texture \"{}\" from {}", textureType.toUpperCase(), name, path);
             }

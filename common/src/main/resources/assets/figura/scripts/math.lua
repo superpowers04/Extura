@@ -1,33 +1,16 @@
 -- math utils --
 
-function math.clamp(val, min, max)
-  return math.min(math.max(val, min), max)
-end
+math.clamp = figura_math.clamp
+math.lerp = figura_math.lerp
+math.shortAngle = figura_math.shortAngle
+math.map = figura_math.map
+math.lerpAngle = figura_math.lerpAngle
+math.sign = figura_math.sign
+math.round = figura_math.round
 
-function math.lerp(a, b, t)
-  return a + (b - a) * t
-end
 
-function math.round(arg)
-  return math.floor(arg + 0.5)
-end
 
-function math.map(value, min1, max1, min2, max2)
-  return (value - min1) / (max1 - min1) * (max2 - min2) + min2
-end
 
-function math.shortAngle(a, b)
-    local x = (a - b) % 360
-    return x - ((2 * x) % 360)
-end
-
-function math.lerpAngle(a, b, t)
-  return (a + math.shortAngle(a, b) * t) % 360
-end
-
-function math.sign(x)
-  return x == 0 and 0 or x > 0 and 1 or -1
-end
 
 vec = vectors.vec
 math.playerScale = 0.9375

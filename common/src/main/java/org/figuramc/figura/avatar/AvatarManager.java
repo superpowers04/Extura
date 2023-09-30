@@ -194,8 +194,7 @@ public class AvatarManager {
     }
 
     public static void clearCEMAvatars() {
-        for (Avatar avatar : LOADED_CEM.values())
-            avatar.clean();
+        for (Avatar avatar : LOADED_CEM.values()) avatar.clean();
         LOADED_CEM.clear();
     }
 

@@ -45,6 +45,7 @@ public class LocalAvatarLoader {
     private static WatchService watcher;
 
     public static final HashMap<ResourceLocation, CompoundTag> CEM_AVATARS = new HashMap<>();
+
     public static final FiguraResourceListener AVATAR_LISTENER = FiguraResourceListener.createResourceListener("cem", manager -> {
         CEM_AVATARS.clear();
         AvatarManager.clearCEMAvatars();
@@ -114,25 +115,9 @@ public class LocalAvatarLoader {
         async(() -> {
             try {
                 // load as folder
-                 if (finalPath.toString().endsWith(".moon")) {
-                    //NbtIo already closes the file stream
-                    CompoundTag ava = NbtIo.readCompressed(Files.newInputStream(finalPath));
-                    loadState = LoadState.SCRIPTS;
-                    ava.putBoolean("isMoon",true);
-                    loadGlobalScripts(ava);
-                    target.loadAvatar(ava);
-                    return;
-                }
                 CompoundTag nbt = new CompoundTag();
-                CompoundTag exturaOnly = new CompoundTag();
                 // scripts
                 loadState = LoadState.SCRIPTS;
-                loadScripts(finalPath, nbt);
-                Path hostOnly = finalPath.resolve(".hostonly");
-//                if(Files.exists(hostOnly)){
-//                    loadScripts(hostOnly, exturaOnly);
-//
-//                }
                 loadScripts(finalPath, nbt);
                 loadGlobalScripts(nbt);
 
@@ -151,19 +136,18 @@ public class LocalAvatarLoader {
 
                 // metadata
                 loadState = LoadState.METADATA;
-                String metadata = IOUtils.readFile(finalPath.resolve("avatar.json"));
-                nbt.put("metadata", AvatarMetadataParser.parse(metadata, IOUtils.getFileNameOrEmpty(finalPath)));
+                var metadata = AvatarMetadataParser.read(IOUtils.readFile(finalPath.resolve("avatar.json")));
+
+                CompoundTag metaNBT = AvatarMetadataParser.parse(metadata, IOUtils.getFileNameOrEmpty(finalPath));
+                nbt.put("metadata", metaNBT);
+                metaNBT.putString("uuid",target.id.toString());
+
                 AvatarMetadataParser.injectToModels(metadata, models);
                 AvatarMetadataParser.injectToTextures(metadata, textures);
-                if(!exturaOnly.isEmpty())
-                    nbt.put("exturaOnly",exturaOnly);
-                // return :3
-                if (!models.isEmpty())
-                    nbt.put("models", models);
-                if (!textures.isEmpty())
-                    nbt.put("textures", textures);
-                if (!animations.isEmpty())
-                    nbt.put("animations", animations);
+
+                if (!models.isEmpty()) nbt.put("models", models);
+                if (!textures.isEmpty()) nbt.put("textures", textures);
+                if (!animations.isEmpty()) nbt.put("animations", animations);
 
                 // load
                 target.loadAvatar(nbt);
@@ -179,12 +163,11 @@ public class LocalAvatarLoader {
         List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
         if (scripts.size() == 0) return;
         CompoundTag scriptsNbt = new CompoundTag();
-        String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
+        String _Path = path.toString();
+        Pattern patt = Pattern.compile("[/\\\\]");
         for (Path script : scripts) {
-            String name = script.toString()
-                    .replaceFirst(pathRegex, "")
-                    .replaceAll("[/\\\\]", ".");
-            name = name.substring(0, name.length() - 4);
+            String name = script.toString();
+            name = patt.matcher(name).replaceAll(".").substring(_Path.length() + 1, name.length() - 4);
             scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
         }
         nbt.put("scripts", scriptsNbt);
@@ -197,12 +180,11 @@ public class LocalAvatarLoader {
         if (scripts.size() == 0) return;
         CompoundTag scriptsNbt = new CompoundTag();
         if(nbt.contains("scripts")) scriptsNbt = nbt.getCompound("scripts");
-        String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
+        String _Path = path.toString();
+        Pattern patt = Pattern.compile("[/\\\\]");
         for (Path script : scripts) {
-            String name = script.toString()
-                    .replaceFirst(pathRegex, "")
-                    .replaceAll("[/\\\\]", ".");
-            name = name.substring(0, name.length() - 4);
+            String name = script.toString();
+            name = patt.matcher(name).replaceAll(".").substring(_Path.length() + 1, name.length() - 4);
             scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
         }
         nbt.put("scripts", scriptsNbt);
@@ -210,18 +192,18 @@ public class LocalAvatarLoader {
     }
     private static void loadSounds(Path path, CompoundTag nbt) throws IOException {
         List<Path> sounds = IOUtils.getFilesByExtension(path, ".ogg");
-        if (sounds.size() > 0) {
-            CompoundTag soundsNbt = new CompoundTag();
-            String pathRegex = Pattern.quote(path.toString().isEmpty() ? path.toString() : path + path.getFileSystem().getSeparator());
-            for (Path sound : sounds) {
-                String name = sound.toString()
-                        .replaceFirst(pathRegex, "")
-                        .replaceAll("[/\\\\]", ".");
-                name = name.substring(0, name.length() - 4);
-                soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
-            }
-            nbt.put("sounds", soundsNbt);
+        if (sounds.size() == 0) return;
+        CompoundTag soundsNbt = new CompoundTag();
+        String _Path = path.toString();
+        Pattern patt = Pattern.compile("[/\\\\]");
+        for (Path sound : sounds) {
+            String name = sound.toString();
+            name = patt.matcher(name).replaceAll(".").substring(_Path.length() + 1, name.length() - 4);
+
+            soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
         }
+        nbt.put("sounds", soundsNbt);
+
     }
 
     private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchModelParser parser, CompoundTag textures, ListTag animations, String folders) throws Exception {
@@ -285,11 +267,12 @@ public class LocalAvatarLoader {
                 event = watchEvent;
                 Path path = entry.getKey().resolve((Path) event.context());
                 String name = IOUtils.getFileNameOrEmpty(path);
-
-                if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || name.matches("(.*(\\.lua|\\.bbmodel|\\.ogg|\\.png)$|avatar\\.json)")))
+                if (IOUtils.isHidden(path) || !(Files.isDirectory(path) ||
+                    name.endsWith(".lua") || name.endsWith(".bbmodel") || name.endsWith(".ogg") || name.endsWith(".png") || name == "avatar.json"))
                     continue;
 
-                if (kind == StandardWatchEventKinds.ENTRY_CREATE && !IS_WINDOWS)
+
+                if (!IS_WINDOWS && kind == StandardWatchEventKinds.ENTRY_CREATE)
                     addWatchKey(path, KEYS::put);
 
                 reload = true;
