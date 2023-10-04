@@ -347,8 +347,8 @@ public class FiguraLuaPrinter {
             case LuaValue.TTABLE -> ColorUtils.Colors.PURPLE.style;
             case LuaValue.TNIL -> ColorUtils.Colors.LUA_ERROR.style;
             case LuaValue.TBOOLEAN -> ColorUtils.Colors.LUA_PING.style;
-            case LuaValue.TLIGHTUSERDATA -> ColorUtils.Colors.BLUE.style;
-            case LuaValue.TNUMBER -> Style.EMPTY.withColor(ChatFormatting.GREEN);
+            case LuaValue.TNUMBER -> ColorUtils.Colors.BLUE.style;
+            case LuaValue.TSTRING -> Style.EMPTY.withColor(ChatFormatting.GREEN);
             case LuaValue.TUSERDATA -> Style.EMPTY.withColor(ChatFormatting.YELLOW);
             case LuaValue.TTHREAD -> Style.EMPTY.withColor(ChatFormatting.GOLD);
         	default -> Style.EMPTY.withColor(ChatFormatting.WHITE);
