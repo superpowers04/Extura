@@ -28,10 +28,8 @@ public class AvatarMetadataParser {
     }
 
     public static CompoundTag parse(String json, String filename) {
-        return parse(read(json),filename);
-    }
-    public static CompoundTag parse(Metadata metadata, String filename) {
         // parse json -> object
+        Metadata metadata = read(json);
 
         // nbt
         CompoundTag nbt = new CompoundTag();
@@ -92,7 +90,6 @@ public class AvatarMetadataParser {
 
         return nbt;
     }
-
     public static void injectToModels(Metadata metadata, CompoundTag models) throws IOException {
         PARTS_TO_MOVE.clear();
 

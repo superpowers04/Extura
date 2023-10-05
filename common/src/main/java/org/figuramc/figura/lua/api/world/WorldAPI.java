@@ -158,7 +158,7 @@ public class WorldAPI {
             value = "world.isChunkLoaded"
     )
     public static Boolean isChunkLoaded(Object x, Double y, Double z) {
-        return getCurrentWorld().hasChunkAt(LuaUtils.parseVec3("isChunkAtBlockLoaded", x, y, z).asBlockPos());
+        return getCurrentWorld().hasChunkAt(LuaUtils.parseVec3("isChunkLoaded", x, y, z).asBlockPos());
     }
     @LuaWhitelist
     @LuaMethodDoc(
@@ -251,7 +251,7 @@ public class WorldAPI {
             value = "world.get_rain_gradient"
     )
     public static double getRainGradient(Float delta) {
-        return getCurrentWorld().getRainLevel((delta == null) ? delta : 1f );
+        return getCurrentWorld().getRainLevel((delta == null) ? 1f : delta );
     }
 
     @LuaWhitelist

@@ -136,9 +136,10 @@ public class LocalAvatarLoader {
 
                 // metadata
                 loadState = LoadState.METADATA;
-                var metadata = AvatarMetadataParser.read(IOUtils.readFile(finalPath.resolve("avatar.json")));
+                String _meta = IOUtils.readFile(finalPath.resolve("avatar.json"));
+                var metadata = AvatarMetadataParser.read(_meta);
 
-                CompoundTag metaNBT = AvatarMetadataParser.parse(metadata, IOUtils.getFileNameOrEmpty(finalPath));
+                CompoundTag metaNBT = AvatarMetadataParser.parse(_meta, IOUtils.getFileNameOrEmpty(finalPath));
                 nbt.put("metadata", metaNBT);
                 metaNBT.putString("uuid",target.id.toString());
 
@@ -268,7 +269,7 @@ public class LocalAvatarLoader {
                 Path path = entry.getKey().resolve((Path) event.context());
                 String name = IOUtils.getFileNameOrEmpty(path);
                 if (IOUtils.isHidden(path) || !(Files.isDirectory(path) ||
-                    name.endsWith(".lua") || name.endsWith(".bbmodel") || name.endsWith(".ogg") || name.endsWith(".png") || name == "avatar.json"))
+                    name.endsWith(".lua") || name.endsWith(".bbmodel") || name.endsWith(".ogg") || name.endsWith(".png") || name.equals("avatar.json")))
                     continue;
 
 
