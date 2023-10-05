@@ -42,10 +42,10 @@ public class LuaUtils {
             if (w == null) w = defaultW;
             return FiguraVec4.of(((Number) x).doubleValue(), y.doubleValue(), z.doubleValue(), w.doubleValue());
         }
-        throw new LuaError("Illegal argument 'X' to " + methodName + "(): " + x.getClass().getSimpleName());
+        throw new LuaError("Illegal argument to " + methodName + "(): " + x.getClass().getSimpleName());
     }
 
-    public static Pair<FiguraVec3, FiguraVec3> parse2Vec3(String methodName, Object x, Object y, Number z, Object w, Number t, Number h) {
+    public static Pair<FiguraVec3, FiguraVec3> parse2Vec3(String methodName, Object x, Object y, Number z, Object w, Number t, Number h, int xIndex) {
         FiguraVec3 a, b;
 
         if (x instanceof FiguraVec3 vec1) {
@@ -56,10 +56,10 @@ public class LuaUtils {
                 if (w == null || w instanceof Number) {
                     b = parseVec3(methodName, y, z, (Number) w);
                 } else {
-                    throw new LuaError("Illegal argument to 'W' " + methodName + "(): " + w);
+                    throw new LuaError("Illegal argument at position" + xIndex+3 + "to " + methodName + "(): " + w);
                 }
             } else {
-                throw new LuaError("Illegal argument 'Y' to " + methodName + "(): " + y);
+                throw new LuaError("Illegal argument at position "+ xIndex+1 + " to " + methodName + "(): " + y);
             }
         } else if (x instanceof Number && y == null || y instanceof Number) {
             a = parseVec3(methodName, x, (Number) y, z);
@@ -68,10 +68,10 @@ public class LuaUtils {
             } else if (w == null || w instanceof Number) {
                 b = parseVec3(methodName, w, t, h);
             } else {
-                throw new LuaError("Illegal argument 'W' to " + methodName + "(): " + w);
+                throw new LuaError("Illegal argument at position "+ xIndex+3 + " to " + methodName + "(): " + w);
             }
         } else {
-            throw new LuaError("Illegal argument 'X' to " + methodName + "(): " + x);
+            throw new LuaError("Illegal argument at position "+ xIndex + " to " + methodName + "(): " + x);
         }
 
         return Pair.of(a, b);
