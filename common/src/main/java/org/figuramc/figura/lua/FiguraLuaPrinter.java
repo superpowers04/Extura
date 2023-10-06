@@ -343,17 +343,16 @@ public class FiguraLuaPrinter {
     }
 
     private static Style getTypeColor(LuaValue value) {
-
-        switch(value.type()){
-            case 5: return ColorUtils.Colors.PURPLE.style; // Table
-            case 0: return ColorUtils.Colors.LUA_ERROR.style; // Nil
-            case 1: return ColorUtils.Colors.LUA_PING.style; // Bool
-            case 2: return ColorUtils.Colors.BLUE.style; // Number
-            case 3: return Style.EMPTY.withColor(ChatFormatting.GREEN); // String
-            case 7: return Style.EMPTY.withColor(ChatFormatting.YELLOW); // Userdate
-            case 8: return Style.EMPTY.withColor(ChatFormatting.GOLD); // Thread
-        	default: return Style.EMPTY.withColor(ChatFormatting.WHITE); // Your mother
-        }
+        return switch (value.type()) {
+            case LuaValue.TTABLE -> ColorUtils.Colors.PURPLE.style;
+            case LuaValue.TNIL -> ColorUtils.Colors.LUA_ERROR.style;
+            case LuaValue.TBOOLEAN -> ColorUtils.Colors.LUA_PING.style;
+            case LuaValue.TNUMBER -> ColorUtils.Colors.BLUE.style;
+            case LuaValue.TSTRING -> Style.EMPTY.withColor(ChatFormatting.GREEN);
+            case LuaValue.TUSERDATA -> Style.EMPTY.withColor(ChatFormatting.YELLOW);
+            case LuaValue.TTHREAD -> Style.EMPTY.withColor(ChatFormatting.GOLD);
+        	default -> Style.EMPTY.withColor(ChatFormatting.WHITE);
+        };
     }
 
     // -- SLOW PRINTING OF LOG --// 
