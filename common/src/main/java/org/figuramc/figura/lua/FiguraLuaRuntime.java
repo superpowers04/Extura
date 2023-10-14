@@ -15,6 +15,7 @@ import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.entity.NullEntity;
 import org.figuramc.figura.lua.api.event.EventsAPI;
 import org.figuramc.figura.lua.api.event.LuaEvent;
+import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.nameplate.NameplateAPI;
 import org.figuramc.figura.lua.api.ping.PingAPI;
@@ -48,6 +49,7 @@ public class FiguraLuaRuntime {
     public VanillaModelAPI vanilla_model;
     public KeybindAPI keybinds;
     public HostAPI host;
+    public JavaAPI java;
     public NameplateAPI nameplate;
     public RendererAPI renderer;
     public ActionWheelAPI action_wheel;

@@ -17,6 +17,10 @@ import org.figuramc.figura.lua.api.action_wheel.ActionWheelAPI;
 import org.figuramc.figura.lua.api.action_wheel.Page;
 import org.figuramc.figura.lua.api.event.EventsAPI;
 import org.figuramc.figura.lua.api.event.LuaEvent;
+import org.figuramc.figura.lua.api.java.ClassAPI;
+import org.figuramc.figura.lua.api.java.FieldAPI;
+import org.figuramc.figura.lua.api.java.InstanceAPI;
+import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.keybind.FiguraKeybind;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.math.MatricesAPI;
@@ -84,6 +88,11 @@ public class FiguraAPIManager {
 
         add(EventsAPI.class);
         add(LuaEvent.class);
+
+        add(JavaAPI.class);
+        add(ClassAPI.class);
+        add(InstanceAPI.class);
+        add(FieldAPI.class);
 
         add(Vertex.class);
         add(FiguraModelPart.class);
@@ -185,6 +194,7 @@ public class FiguraAPIManager {
         put("vanilla_model", r -> r.vanilla_model = new VanillaModelAPI(r.owner));
         put("keybinds", r -> r.keybinds = new KeybindAPI(r.owner));
         put("host", r -> r.host = new HostAPI(r.owner));
+        put("java", r -> r.java = new JavaAPI());
         put("nameplate", r -> r.nameplate = new NameplateAPI());
         put("renderer", r -> r.renderer = new RendererAPI(r.owner));
         put("action_wheel", r -> r.action_wheel = new ActionWheelAPI(r.owner));
