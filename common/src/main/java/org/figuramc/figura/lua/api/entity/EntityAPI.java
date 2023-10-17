@@ -20,6 +20,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.NbtToLua;
 import org.figuramc.figura.lua.ReadOnlyLuaTable;
@@ -420,7 +421,7 @@ public class EntityAPI<T extends Entity> {
     public Object[] getTargetedBlock(boolean ignoreLiquids, Double distance) {
         checkEntity();
         if (distance == null) distance = 20d;
-        distance = Math.max(Math.min(distance, 20), -20);
+        if (!Configs.GET_TARGET_LIMIT.value) distance = Math.max(Math.min(distance, 20), -20);
         HitResult result = entity.pick(distance, 1f, !ignoreLiquids);
         return LuaUtils.parseBlockHitResult(result);
     }
@@ -439,7 +440,7 @@ public class EntityAPI<T extends Entity> {
     public Object[] getTargetedEntity(Double distance) {
         checkEntity();
         if (distance == null) distance = 20d;
-        distance = Math.max(Math.min(distance, 20), 0);
+        if (!Configs.GET_TARGET_LIMIT.value) distance = Math.max(Math.min(distance, 20), 0);
 
         Vec3 vec3 = entity.getEyePosition(1f);
         HitResult result = entity.pick(distance, 1f, false);
@@ -452,10 +453,8 @@ public class EntityAPI<T extends Entity> {
         AABB aABB = entity.getBoundingBox().expandTowards(vec32.scale(distance)).inflate(1d);
         EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, e -> e != entity, distance);
 
-        if (entityHit != null)
-            return new Object[]{EntityAPI.wrap(entityHit.getEntity()), FiguraVec3.fromVec3(entityHit.getLocation())};
 
-        return null;
+        return ((entityHit == null) ? null : new Object[]{EntityAPI.wrap(entityHit.getEntity()), FiguraVec3.fromVec3(entityHit.getLocation())});
     }
 
     @LuaWhitelist
@@ -472,8 +471,7 @@ public class EntityAPI<T extends Entity> {
     public LuaValue getVariable(String key) {
         checkEntity();
         Avatar a = AvatarManager.getAvatar(entity);
-        LuaTable table = a == null || a.luaRuntime == null ? new LuaTable() : a.luaRuntime.avatar_meta.storedStuff;
-        table = new ReadOnlyLuaTable(table);
+        LuaTable table = new ReadOnlyLuaTable((a == null || a.luaRuntime == null) ? new LuaTable() : a.luaRuntime.avatar_meta.storedStuff);
         return key == null ? table : table.get(key);
     }
 

@@ -336,6 +336,11 @@ public class Configs {
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
                 this.tooltip = FiguraText.of("config.get_blocks_limit.tooltip");
             }};
+
+    public static final ConfigType.BoolConfig GET_TARGET_LIMIT = new ConfigType.BoolConfig("get_target_limit", EXTURA, false) {{
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = FiguraText.of("config.get_target_limit.tooltip");
+            }}; // Did not know getTargetedEntity and getTargetedBlock were limited to 20 blocks
     public static final ConfigType.BoolConfig EXPOSE_SENSITIVE_LIBRARIES = new ConfigType.BoolConfig("expose_sensitive_libraries", EXTURA, false) {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
                 this.tooltip = FiguraText.of("config.expose_sensitive_libraries.tooltip");

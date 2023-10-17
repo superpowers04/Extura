@@ -168,8 +168,6 @@ public class LocalAvatarFetcher {
     public static boolean isAvatar(Path path) {
         if (!Files.exists(path))
             return false;
-        if (path.toString().toLowerCase().endsWith(".moon") || path.toString().toLowerCase().endsWith(".nbt"))
-            return true;
 
         Path metadata = path.resolve("avatar.json");
         return Files.exists(metadata) && !Files.isDirectory(metadata);
@@ -199,7 +197,6 @@ public class LocalAvatarFetcher {
      */
     public static class AvatarPath {
 
-        //im going insane... or better saying, crazy, speaking of which, I was crazy once
         protected final Path path, folder, theActualPathForThis; // murder, why does everything needs to be protected/private :sob:
         protected final String name, description;
         protected final CardBackground background;
@@ -239,17 +236,7 @@ public class LocalAvatarFetcher {
             CardBackground bg = CardBackground.DEFAULT;
             Path iconPath = null;
 
-            if((path.toString().toLowerCase().endsWith(".moon") || path.toString().toLowerCase().endsWith(".nbt")) && !Configs.WARDROBE_FILE_NAMES.value){
-                try{
-                    if(cachedNames.containsKey(path.toString().toLowerCase())){name = cachedNames.get(path.toString().toLowerCase());}
-                    else{
-                        CompoundTag nbt = NbtIo.readCompressed(Files.newInputStream(path));
-                        CompoundTag metadata = nbt.getCompound("metadata");
-                        if(metadata.contains("name")) name = metadata.getString("name") + " (" + Files.getLastModifiedTime(path) + ")";
-                        cachedNames.put(path.toString().toLowerCase(),name);
-                    }
-                }catch(Exception ignored){}
-            }else if (!(this instanceof FolderPath)) {
+            if (!(this instanceof FolderPath)) {
                 //metadata
                 try {
                     String str = IOUtils.readFile(path.resolve("avatar.json"));
@@ -276,7 +263,7 @@ public class LocalAvatarFetcher {
 
         public boolean search(String query) {
             String q = query.toLowerCase();
-            return this.getName().toLowerCase().contains(q) || IOUtils.getFileNameOrEmpty(path).contains(q);
+            return this.getName().toLowerCase().contains(q) || IOUtils.getFileNameOrEmpty(path).toLowerCase().contains(q);
         }
 
         public Path getPath() {
@@ -424,6 +411,7 @@ public class LocalAvatarFetcher {
         @Override
         public boolean search(String query) {
             boolean result = super.search(query);
+            if(result) return result;
 
             for (AvatarPath child : children) {
                 if (result) break;
