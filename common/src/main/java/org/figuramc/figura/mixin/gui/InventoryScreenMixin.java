@@ -7,6 +7,7 @@ import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.model.rendering.EntityRenderMode;
 import org.figuramc.figura.utils.ui.UIHelper;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,7 +21,7 @@ public class InventoryScreenMixin {
         if (!Configs.FIGURA_INVENTORY.value || AvatarManager.panic)
             return;
 
-        UIHelper.drawEntity(x, y, size, mouseX, mouseY, entity, guiGraphics, EntityRenderMode.MINECRAFT_GUI);
+        UIHelper.drawEntity(x, y, size, mouseX, mouseY, entity, guiGraphics, new Vector3f(), EntityRenderMode.MINECRAFT_GUI);
         ci.cancel();
     }
 }
