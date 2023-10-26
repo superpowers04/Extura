@@ -1842,7 +1842,7 @@
   "figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
   "figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used",
 
-
+  "figura.docs.client.generate_uuid": "(Extura) Generates a random UUID",
   "figura.docs.host.set_pose": "(Extura) Set the player's pose",
   "figura.docs.host.set_player_movement": "(Extura) Set if the player can move normally",
   "figura.docs.host.get_player_movement": "(Extura) Get if the player can move normally",
