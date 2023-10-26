@@ -17,6 +17,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -634,7 +635,17 @@ public class HostAPI {
         this.minecraft.player.setDeltaMovement(LuaUtils.parseVec3("player_setVelocity", x, y, z).asVec3());
 
     }
-
+    @LuaWhitelist
+    @LuaMethodDoc("host.set_pose")
+    public void setPose(String pose) {
+        if(!allowExturaCheats()) return;
+        try{
+            Pose _pose = Pose.valueOf(pose);
+            this.minecraft.player.setPose(_pose);
+        }catch(IllegalArgumentException ignored){
+            throw new LuaError("Invalid pose " + pose);
+        }
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
