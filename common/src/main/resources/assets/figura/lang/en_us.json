@@ -42,7 +42,7 @@
 
 
   "figura.permissions.category.blocked": "Blocked",
-  "figura.permissions.category.blocked.info": "No permissions\nAll Figura features are disabled\nAs if the Avatar did not existed",
+  "figura.permissions.category.blocked.info": "No permissions\nAll Figura features are disabled\nAs if no Avatar is present",
   "figura.permissions.category.low": "Low",
   "figura.permissions.category.low.info": "Low permissions\nMost features are disabled\nIdeal for very simple Avatars",
   "figura.permissions.category.default": "Default",
@@ -192,12 +192,12 @@
   "figura.gui.expand": "Expand",
   "figura.gui.minimise": "Minimise",
   "figura.gui.reset_all": "Reset All",
-  "figura.gui.panic": "Panic mode active! Figura features are disabled!\ntoggle panic mode with the [%s] key",
+  "figura.gui.panic": "Panic mode active! Figura features are disabled!\nToggle panic mode with the [%s] key",
   "figura.gui.avatar_settings.tooltip": "Avatar Settings",
   "figura.gui.duplicate_keybind": "This key is also used for:\n%s",
   "figura.gui.favorited": "Favorited",
-  "figura.gui.new_version.tooltip": "A new version of Figura is available! %s\nClick to download it in your browser!",
-  "figura.gui.old_version.tooltip": "Are you a time traveler? The latest version is %s",
+  "figura.gui.new_version.tooltip": "A new version of Figura is available! %s\nClick to download it in your browser!\n Note this will download Figura, not Extura",
+  "figura.gui.old_version.tooltip": "The latest Figura version is %s",
   "figura.gui.clear": "Clear",
   "figura.gui.not_available_yet": "Not available yet",
 
@@ -401,7 +401,7 @@
   "figura.config.format_script.4":"AST",
   "figura.config.format_script.1.tooltip":"No compacting",
   "figura.config.format_script.2.tooltip":"Minimal compacting, removes only comments and unnecessary whitespaces",
-  "figura.config.format_script.3.tooltip":"Same as Light and also compacts everything into a single line",
+  "figura.config.format_script.3.tooltip":"Normal compacting, removes comments and compacts everything into a single line",
   "figura.config.format_script.4.tooltip":"Parses code into Abstract Syntax Tree and reconstructs code into theoretically optimal representation",
 
 
@@ -448,8 +448,8 @@
   "figura.config.action_wheel_mode.3": "Hold (run on release)",
   "figura.config.action_wheel_mode.4": "Toggle (run on release)",
   "figura.config.action_wheel_mode.1.tooltip": "The Action Wheel will render as long as its button is pressed",
-  "figura.config.action_wheel_mode.2.tooltip": "Pressing the Action Wheel button will change the Action Wheel visibility",
-  "figura.config.action_wheel_mode.3.tooltip": "Same as Hold, but the selected Action will be run once the Action Wheel is closed",
+  "figura.config.action_wheel_mode.2.tooltip": "Pressing the Action Wheel button will toggle the Action Wheel visibility",
+  "figura.config.action_wheel_mode.3.tooltip": "Same as Hold, but the selected Action will be run once the button is let go",
   "figura.config.action_wheel_mode.4.tooltip": "Same as Toggle, but the selected Action will be run once the Action Wheel is closed",
 
   "figura.config.action_wheel_scale": "Action Wheel Size",
@@ -530,28 +530,20 @@
 
   "figura.config.paperdoll": "Paperdoll",
   "figura.config.paperdoll.tooltip": "Paperdoll settings",
-
   "figura.config.has_paperdoll": "Enable paperdoll",
   "figura.config.has_paperdoll.tooltip": "Toggle the paperdoll rendering",
-
   "figura.config.paperdoll_always_on": "Always on",
   "figura.config.paperdoll_always_on.tooltip": "Toggle if the paperdoll should render always or only during poses",
-
   "figura.config.first_person_paperdoll": "First Person only",
   "figura.config.first_person_paperdoll.tooltip": "Toggles if the paperdoll should render only when in first person",
-
   "figura.config.paperdoll_invisible": "Remove Invisibility",
   "figura.config.paperdoll_invisible.tooltip": "Toggles if the paperdoll should remove the invisibility effect while rendering",
-
   "figura.config.paperdoll_scale": "Paperdoll Scale",
   "figura.config.paperdoll_scale.tooltip": "Changes the paperdoll scale",
-
   "figura.config.paperdoll_x": "Paperdoll X",
   "figura.config.paperdoll_x.tooltip": "Changes the paperdoll X position",
-
   "figura.config.paperdoll_y": "Paperdoll Y",
   "figura.config.paperdoll_y.tooltip": "Changes the paperdoll Y position",
-
   "figura.config.paperdoll_pitch": "Paperdoll Pitch",
   "figura.config.paperdoll_pitch.tooltip": "Changes the paperdoll PITCH rotation",
 
