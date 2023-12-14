@@ -36,14 +36,14 @@ public class Configs {
         // test for unused configs
         if (FiguraMod.debugModeEnabled()) {
             ConfigType.Category debug = new ConfigType.Category("debug");
-            new ConfigType.ColorConfig("color_test", debug, 0xFF72AD);
+            new ConfigType.ColorConfig("color_test", debug, ColorUtils.Colors.AWESOME_BLUE.hex);
             new ConfigType.StringConfig("string_test", debug, "text");
             new ConfigType.IntConfig("int_test", debug, 2147483647);
         }
     }
 
 
-    // -- categories -- //
+    // -- categories -- // 
 
 
     public static final ConfigType.Category
@@ -57,12 +57,13 @@ public class Configs {
             DEV = new ConfigType.Category("dev") {{
                 this.name = this.name.copy().withStyle(ChatFormatting.RED);
             }},
-            EXTURA = new ConfigType.Category("extura") {{
-                this.name = this.name.copy().withStyle(ChatFormatting.LIGHT_PURPLE);
+            NETWORKING = new ConfigType.Category("networking") {{
+                this.name = this.name.copy().withStyle(ChatFormatting.RED);
+                this.tooltip = this.tooltip.copy().withStyle(ChatFormatting.RED);
             }};
 
 
-    // -- nameplate -- //
+    // -- nameplate -- // 
 
 
     public static final ConfigType.BoolConfig
@@ -96,7 +97,7 @@ public class Configs {
             }};
 
 
-    // -- script -- //
+    // -- script -- // 
 
 
     public static final ConfigType.EnumConfig
@@ -125,7 +126,7 @@ public class Configs {
     };
 
 
-    // -- RENDERING -- //
+    // -- RENDERING -- // 
 
 
     public static final ConfigType.EnumConfig
@@ -141,7 +142,7 @@ public class Configs {
             FIRST_PERSON_MATRICES = new ConfigType.BoolConfig("first_person_matrices", RENDERING, true);
 
 
-    // -- ACTION WHEEL -- //
+    // -- ACTION WHEEL -- // 
 
 
     public static final ConfigType.KeybindConfig
@@ -157,7 +158,7 @@ public class Configs {
             ACTION_WHEEL_DECORATIONS = new ConfigType.BoolConfig("action_wheel_decorations", ACTION_WHEEL, true);
 
 
-    // -- UI -- //
+    // -- UI -- // 
 
 
     public static final ConfigType.BoolConfig
@@ -180,7 +181,7 @@ public class Configs {
             REDUCED_MOTION = new ConfigType.BoolConfig("reduced_motion", UI, false);
 
 
-    // -- PAPERDOLL -- //
+    // -- PAPERDOLL -- // 
 
 
     public static final ConfigType.BoolConfig
@@ -196,7 +197,7 @@ public class Configs {
             PAPERDOLL_YAW = new ConfigType.FloatConfig("paperdoll_yaw", PAPERDOLL, 20);
 
 
-    // -- MISC -- //
+    // -- MISC -- // 
 
 
     public static final ConfigType.KeybindConfig
@@ -272,45 +273,12 @@ public class Configs {
     };
     public static final ConfigType.IPConfig
             SERVER_IP = new ConfigType.IPConfig("server_ip", DEV, "figura.moonlight-devs.org") {
-                @Override
-                public void onChange() {
-                    super.onChange();
-                    NetworkStuff.reAuth();
-                }
-            };
-    public static final ConfigType.BoolConfig USE_SECURE_CLOUD = new ConfigType.BoolConfig("use_secure_cloud", DEV, true) {
-            @Override
-            public void onChange() {
-                super.onChange();
-                NetworkStuff.reAuth();
-            }
-            {
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.use_secure_cloud.tooltip");
-            }
-        };
-        public static final ConfigType.BoolConfig BLOCK_CLOUD = new ConfigType.BoolConfig("block_cloud", DEV, false) {
-            @Override
-            public void onChange() {
-                super.onChange();
-                NetworkStuff.reAuth();
-            }
-            {
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.block_cloud.tooltip");
-            }
-        };
-        public static final ConfigType.BoolConfig USE_MC_HOST_RESOLVER = new ConfigType.BoolConfig("use_mc_host_resolver", DEV, true) {
-            @Override
-            public void onChange() {
-                super.onChange();
-                NetworkStuff.reAuth();
-            }
-            {
-                this.name = this.name.copy();
-                this.tooltip = FiguraText.of("config.use_mc_host_resolver.tooltip");
-            }
-        };
+        @Override
+        public void onChange() {
+            super.onChange();
+            NetworkStuff.reAuth();
+        }
+    };
     @SuppressWarnings("unused")
     public static final ConfigType.ButtonConfig
             CLEAR_CACHE = new ConfigType.ButtonConfig("clear_cache", DEV, () -> {
@@ -331,34 +299,13 @@ public class Configs {
     public static final ConfigType.BoolConfig
             FORCE_SMOOTH_AVATAR = new ConfigType.BoolConfig("force_smooth_avatar", DEV, false),
             GUI_FPS = new ConfigType.BoolConfig("gui_fps", DEV, false);
-// Extura
-    public static final ConfigType.BoolConfig GETBLOCKS_LIMIT = new ConfigType.BoolConfig("get_blocks_limit", EXTURA, false) {{
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.get_blocks_limit.tooltip");
-            }};
 
-    public static final ConfigType.BoolConfig GET_TARGET_LIMIT = new ConfigType.BoolConfig("get_target_limit", EXTURA, false) {{
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.get_target_limit.tooltip");
-            }}; // Did not know getTargetedEntity and getTargetedBlock were limited to 20 blocks
-    public static final ConfigType.BoolConfig EXPOSE_SENSITIVE_LIBRARIES = new ConfigType.BoolConfig("expose_sensitive_libraries", EXTURA, false) {{
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("config.expose_sensitive_libraries.tooltip");
-            }};
-        public static final ConfigType.BoolConfig EXPOSE_EXTURA_API = new ConfigType.BoolConfig("expose_extura_api", EXTURA, true) {{
-                this.name = this.name.copy().withStyle(ChatFormatting.RED);
-                this.tooltip = FiguraText.of("expose_extura_api.tooltip");
-            }};
-    public static final ConfigType.BoolConfig USE_GLOBAL_SCRIPTS = new ConfigType.BoolConfig("use_global_scripts", EXTURA, false) {{
-                this.name = this.name.copy();
-                this.tooltip = FiguraText.of("config.use_global_scripts.tooltip");
-            }};
-    public static final ConfigType.BoolConfig EXPOSE_HTTP = new ConfigType.BoolConfig("expose_http", EXTURA, false) {{
-                this.name = this.name.copy();
-                this.tooltip = FiguraText.of("config.expose_http.tooltip");
-            }};
-    public static final ConfigType.BoolConfig ANNUAL_CACHE_DELETION = new ConfigType.BoolConfig("annual_cache_deletion", EXTURA, true) {{
-                this.name = this.name.copy();
-                this.tooltip = FiguraText.of("config.annual_cache_deletion.tooltip");
-            }};
+    // -- NETWORKING -- //
+    public static final ConfigType.BoolConfig ALLOW_NETWORKING =
+            new ConfigType.BoolConfig("allow_networking", NETWORKING, false);
+    public static final ConfigType.EnumConfig NETWORKING_RESTRICTION = new ConfigType.EnumConfig("networking_restriction", NETWORKING, 0, 3);
+
+    public static final ConfigType.NetworkFilterConfig NETWORK_FILTER = new ConfigType.NetworkFilterConfig("network_filter", NETWORKING);
+
+    public static final ConfigType.EnumConfig LOG_NETWORKING = new ConfigType.EnumConfig("networking_logging", NETWORKING, 0, 4);
 }

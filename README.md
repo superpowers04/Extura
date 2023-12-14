@@ -31,7 +31,7 @@ An addon to Figura that allows you to do some out of Figura-scope things
 
 Meet us on the [FiguraMC Discord Server](https://discord.gg/figuramc) for more info and help!\
 
-Help translate Figura to your native language on [Weblate](https://translate.figuramc.org/widget/figuramc)!\
+Help translate Figura to your native language on [Weblate](https://translate.figuramc.org/projects/figuramc/figura/)!\
 ![translate]
 
 [translate]: https://translate.figuramc.org/widget/figuramc/figura/horizontal-auto.svg
