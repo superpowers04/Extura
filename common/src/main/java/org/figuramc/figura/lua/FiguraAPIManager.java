@@ -194,7 +194,7 @@ public class FiguraAPIManager {
         put("vanilla_model", r -> r.vanilla_model = new VanillaModelAPI(r.owner));
         put("keybinds", r -> r.keybinds = new KeybindAPI(r.owner));
         put("host", r -> r.host = new HostAPI(r.owner));
-        put("java", r -> r.java = new JavaAPI());
+        
         put("nameplate", r -> r.nameplate = new NameplateAPI());
         put("renderer", r -> r.renderer = new RendererAPI(r.owner));
         put("action_wheel", r -> r.action_wheel = new ActionWheelAPI(r.owner));
@@ -209,6 +209,7 @@ public class FiguraAPIManager {
         put("textures", r -> r.texture = new TextureAPI(r.owner));
         put("config", r -> new ConfigAPI(r.owner));
         if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
+        if(Configs.EXPOSE_JAVA_API.value) put("java", r -> r.java = new JavaAPI(r.owner));
 
         put("data", r -> new DataAPI(r.owner));
         put("file", r -> new FileAPI(r.owner));

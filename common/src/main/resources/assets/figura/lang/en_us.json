@@ -1,6 +1,5 @@
 {
 
-	"EXTURA_SEPERATOR":"Extura exclusive",
 	"figura.config.use_secure_cloud": "(Extura) Secure Cloud",
 	"figura.config.use_secure_cloud.tooltip": "Whether to use a Secure Connection for the cloud",
 	"figura.config.block_cloud": "(Extura) Disable cloud",
@@ -19,6 +18,8 @@
 	"figura.config.extura": "Extura - Advanced",
 	"figura.config.expose_extura_api": "Expose Extura API",
 	"figura.config.expose_extura_api.tooltip": "Expose the Extura API to *ALL* Figura avatars",
+	"figura.config.expose_java_api": "Expose Java API",
+	"figura.config.expose_extura_api.tooltip": "Expose the Java API to *YOUR* Figura avatar.",
 	"figura.config.annual_cache_deletion": "Delete cache weekly",
 	"figura.config.annual_cache_deletion.tooltip": "Delete cached avatars after 7 days",
 	"figura.config.expose_http": "Expose HTTP",
@@ -51,7 +52,12 @@
 	"figura.docs.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
 	"figura.docs.extura.async_lua_function": "Runs specified lua function in a thread. NOTE: VERY UNSTABLE!",
 	"figura.docs.extura.httpGet": "Makes an http request to a url",
+	"figura.docs.events.processs_script": "The PROCESS_SCRIPT event is run whenever a script is required and a preprocessor is loaded. The script's name and contents are passed as arguments, the script's contents will be replaced with the return value",
+
 	"figura": "Figura - Extura",
+	"EXTURA_SEPERATOR":"Extura exclusive",
+
+
 	"figura.tab": "  ",
 	"figura.ellipsis": "…",
 	"figura.backend.connected": "Cloud connected!",
