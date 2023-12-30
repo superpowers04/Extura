@@ -374,6 +374,7 @@ public class NetworkStuff {
             baos.close();
         } catch (Exception e) {
             FiguraMod.LOGGER.error("", e);
+            FiguraToast.sendToast(FiguraText.of("backend.upload_error"), FiguraToast.ToastType.ERROR);
         }
     }
 
