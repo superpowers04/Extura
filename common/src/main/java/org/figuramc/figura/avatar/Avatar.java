@@ -1002,7 +1002,7 @@ public class Avatar {
 		Map<String, String> preprocessors = loadScript(nbt.getCompound("preprocessors"), "");
 
 		CompoundTag metadata = nbt.getCompound("metadata");
-		nbt.put("preprocessors",null);
+		nbt.put("preprocessors",new CompoundTag());
 
 		ListTag autoScripts;
 		if (metadata.contains("autoScripts"))
