@@ -5,6 +5,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.lua.api.AvatarAPI;
 import org.figuramc.figura.lua.api.HostAPI;
 import org.figuramc.figura.lua.api.RendererAPI;
@@ -14,6 +15,7 @@ import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.entity.NullEntity;
 import org.figuramc.figura.lua.api.event.EventsAPI;
 import org.figuramc.figura.lua.api.event.LuaEvent;
+import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.nameplate.NameplateAPI;
 import org.figuramc.figura.lua.api.ping.PingAPI;
@@ -23,9 +25,7 @@ import org.figuramc.figura.utils.PathUtils;
 import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
-import org.luaj.vm2.lib.jse.JseBaseLib;
-import org.luaj.vm2.lib.jse.JseMathLib;
-import org.luaj.vm2.lib.jse.JseStringLib;
+import org.luaj.vm2.lib.jse.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -46,12 +46,13 @@ public class FiguraLuaRuntime {
     //---------------------------------
     public EntityAPI<?> entityAPI;
     public EventsAPI events;
-    public VanillaModelAPI vanilla_model;
-    public KeybindAPI keybinds;
-    public HostAPI host;
-    public NameplateAPI nameplate;
-    public RendererAPI renderer;
-    public ActionWheelAPI action_wheel;
+	public VanillaModelAPI vanilla_model;
+	public KeybindAPI keybinds;
+	public HostAPI host;
+	public JavaAPI java;
+	public NameplateAPI nameplate;
+	public RendererAPI renderer;
+	public ActionWheelAPI action_wheel;
     public AvatarAPI avatar_meta;
     public PingAPI ping;
     public TextureAPI texture;
@@ -77,6 +78,17 @@ public class FiguraLuaRuntime {
         userGlobals.load(new TableLib());
         userGlobals.load(new JseStringLib());
         userGlobals.load(new JseMathLib());
+		if(avatar.isHost){
+			userGlobals.set("isHost", LuaValue.TRUE);
+			if(Configs.EXPOSE_SENSITIVE_LIBRARIES.value){
+				userGlobals.load(new JseIoLib());
+				userGlobals.load(new JseOsLib());
+				userGlobals.load(new CoroutineLib());
+				userGlobals.set("expose_sensitive_libraries", LuaValue.TRUE);
+			}
+		}else{
+			userGlobals.set("isHost", LuaValue.FALSE);
+		}
 
         LuaC.install(userGlobals);
 
@@ -110,15 +122,15 @@ public class FiguraLuaRuntime {
         if (user == null) {
             entityAPI = null;
             val = NullEntity.INSTANCE;
-        } else {
-            val = entityAPI = EntityAPI.wrap(user);
-        }
+		} else {
+			val = entityAPI = EntityAPI.wrap(user);
+		}
+		LuaValue _user = typeManager.javaToLua(val).arg1();
+		userGlobals.set("user", _user);
+		userGlobals.set("player", _user);
+	}
 
-        userGlobals.set("user", typeManager.javaToLua(val).arg1());
-        userGlobals.set("player", userGlobals.get("user"));
-    }
-
-    public Entity getUser() {
+	public Entity getUser() {
         return entityAPI != null && entityAPI.isLoaded() ? entityAPI.getEntity() : null;
     }
 

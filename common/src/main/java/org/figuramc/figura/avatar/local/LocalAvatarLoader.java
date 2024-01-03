@@ -115,7 +115,6 @@ public class LocalAvatarLoader {
                 // scripts
                 loadState = LoadState.SCRIPTS;
                 loadScripts(finalPath, nbt);
-
                 // custom sounds
                 loadState = LoadState.SOUNDS;
                 loadSounds(finalPath, nbt);
@@ -142,12 +141,9 @@ public class LocalAvatarLoader {
                 AvatarMetadataParser.injectToTextures(metadata, textures);
 
                 // return :3
-                if (!models.isEmpty())
-                    nbt.put("models", models);
-                if (!textures.isEmpty())
-                    nbt.put("textures", textures);
-                if (!animations.isEmpty())
-                    nbt.put("animations", animations);
+                if (!models.isEmpty()) nbt.put("models", models);
+                if (!textures.isEmpty()) nbt.put("textures", textures);
+                if (!animations.isEmpty()) nbt.put("animations", animations);
                 CompoundTag metadataTag = nbt.getCompound("metadata");
                 if (metadataTag.contains("resources_paths")) {
                     loadResources(nbt, metadataTag.getList("resources_paths", Tag.TAG_STRING), finalPath);
