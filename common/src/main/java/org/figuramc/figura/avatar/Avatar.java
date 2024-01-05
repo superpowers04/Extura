@@ -997,11 +997,10 @@ public class Avatar {
         if (!nbt.contains("scripts"))
             return;
 
-        Map<String, String> scripts = new HashMap<>();
-        CompoundTag scriptsNbt = nbt.getCompound("scripts");
-        for (String s : scriptsNbt.getAllKeys())
-            scripts.put(PathUtils.computeSafeString(s), new String(scriptsNbt.getByteArray(s), StandardCharsets.UTF_8));
 
+        CompoundTag scriptsNbt = nbt.getCompound("scripts");
+        // Allow loading of pre-3 scripts, Extura doesn't use this format but pre-3 does
+        Map<String, String> scripts = loadScript(scriptsNbt, "");
         CompoundTag metadata = nbt.getCompound("metadata");
 
         ListTag autoScripts;
@@ -1021,6 +1020,17 @@ public class Avatar {
             if (runtime.init(autoScripts))
                 init.use(runtime.getInstructions());
         });
+    }
+    
+    public Map<String, String> loadScript(CompoundTag tag, String path) {
+        Map<String, String> result = new HashMap<>();
+        for (String key : tag.getAllKeys()){
+            switch(tag.get(key).getId()){
+                case Tag.TAG_COMPOUND -> result.putAll(loadScript(tag.getCompound(key), path + key + "."));
+                case Tag.TAG_BYTE_ARRAY -> result.put(PathUtils.computeSafeString(path + key), new String(tag.getByteArray(key), StandardCharsets.UTF_8));
+            }
+        }
+        return result;
     }
 
     private void loadAnimations() {
