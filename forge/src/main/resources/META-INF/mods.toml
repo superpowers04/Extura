@@ -7,10 +7,10 @@ displayURL = "https://github.com/FiguraMC/Figura"
 [[mods]]
 modId = "figura"
 version = "${version}"
-displayName = "Figura"
+displayName = "Figura - Extura"
 logoFile="assets/figura/icon.png"
-authors = "skyrina, lumelia, UnlikePaladin, omoflop"
-credits = "TooManyLimits, Lexize, KitCat962, Manuel-3, superpowers04, auriafoxgirl, applejuiceyy"
+authors = "skyrina, lumelia, UnlikePaladin, omoflop, ConstantDust - Extura, Superpowers04 - Extura, PoollOverNathan - ExtExtura"
+credits = "TooManyLimits, Lexize, KitCat962, Manuel-3, superpowers04, auriafoxgirl, applejuiceyy, 4P5"
 description = '''
 Extensive customization of the Player model
 '''
