@@ -7,13 +7,10 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.Pack;
@@ -27,6 +24,7 @@ import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.entity.ViewerAPI;
+import org.figuramc.figura.lua.docs.FiguraListDocs;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
@@ -496,9 +494,12 @@ public class ClientAPI {
 
         ServerData mServer = Minecraft.getInstance().getCurrentServer();
         if (mServer != null) {
-            map.put("name", mServer.name);
-            map.put("ip", mServer.ip);
-            map.put("motd", mServer.motd.getString());
+            if (mServer.name != null)
+                map.put("name", mServer.name);
+            if (mServer.ip != null)
+                map.put("ip", mServer.ip);
+            if (mServer.motd != null)
+                map.put("motd", mServer.motd.getString());
         }
 
         return map;
@@ -713,6 +714,20 @@ public class ClientAPI {
                     .collect(Collectors.toList());
         } else {
             throw new LuaError("Registry " + registryName + " does not exist");
+        }
+    }
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = String.class, argumentNames = "enumName"),
+            },
+            value = "client.getEnum"
+    )
+    public static List<String> getEnum(@LuaNotNil String enumName) {
+        try {
+            return FiguraListDocs.getEnumValues(enumName);
+        } catch (Exception e) {
+            throw new LuaError("Enum " + enumName + " does not exist");
         }
     }
 
