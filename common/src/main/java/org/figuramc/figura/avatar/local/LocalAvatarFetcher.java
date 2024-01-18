@@ -65,6 +65,7 @@ public class LocalAvatarFetcher {
 
     public static void tick() {
         boolean reload = false;
+        try{
 
         for (Map.Entry<Path, WatchKey> entry : WATCHED_KEYS.entrySet()) {
             WatchKey key = entry.getValue();
@@ -90,6 +91,7 @@ public class LocalAvatarFetcher {
 
         if (reload)
             requireReload = true;
+        }catch(Exception ignored){ }
     }
 
     public static void init() {

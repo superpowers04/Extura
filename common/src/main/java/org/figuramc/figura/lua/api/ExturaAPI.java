@@ -56,10 +56,11 @@ public class ExturaAPI {
 			// https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
 			URLConnection connec = new URI(arg).toURL().openConnection();
 			BufferedReader in = new BufferedReader(new InputStreamReader(connec.getInputStream()));
-			String ret = "";
+			StringBuilder ret = new StringBuilder();
 			String inLine;
-			while ((inLine = in.readLine()) != null) ret += inLine;
-			return ret;
+			while ((inLine = in.readLine()) != null) ret.append(inLine);
+			in.close();
+			return ret.toString();
 		}catch (URISyntaxException | MalformedURLException err) {
 			throw new LuaError("Unable to parse URL: " + err);
 		}catch(IOException err){
