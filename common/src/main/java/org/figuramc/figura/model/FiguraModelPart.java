@@ -1382,7 +1382,12 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             throw new LuaError("Illegal argument to removeTask(): " + x.getClass().getSimpleName());
         return this;
     }
-
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.remove")
+    public FiguraModelPart remove() {
+        this.parent.removeChild(this);
+        return this;
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = @LuaMethodOverload(

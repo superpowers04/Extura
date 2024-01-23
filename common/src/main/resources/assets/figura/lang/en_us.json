@@ -8,6 +8,7 @@
 	"figura.docs.world.get_nearby_entities": "(Extura) Returns entities near the given block position",
 	"figura.docs.world.raycast_entity": "(Extura > linetraceEntity) Returns the entity and pos of a linetrace.",
 	"figura.docs.world.raycast_block": "(Extura > linetraceBlock) Returns the block, side, and pos of a linetrace",
+	"figura.docs.model_part.remove": "Removes this modelpart from it's parent",
 
 
 	"figura.docs.world.linetraceBlock": "(Extura) Returns the block, side, and pos of a linetrace",

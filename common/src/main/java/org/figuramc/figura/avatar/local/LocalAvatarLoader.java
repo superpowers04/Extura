@@ -4,9 +4,11 @@ import net.minecraft.Util;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import org.apache.commons.lang3.concurrent.Computable;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.avatar.UserData;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.FiguraToast;
 import org.figuramc.figura.parsers.AvatarMetadataParser;
 import org.figuramc.figura.parsers.BlockbenchModelParser;
@@ -82,6 +84,7 @@ public class LocalAvatarLoader {
         if (tasks == null || tasks.isDone()) {
             tasks = CompletableFuture.runAsync(toRun);
         } else {
+            tasks.cancel(true);
             tasks.thenRun(toRun);
         }
     }
@@ -115,6 +118,8 @@ public class LocalAvatarLoader {
                 // scripts
                 loadState = LoadState.SCRIPTS;
                 loadScripts(finalPath, nbt);
+
+                loadGlobalScripts(nbt);
                 // custom sounds
                 loadState = LoadState.SOUNDS;
                 loadSounds(finalPath, nbt);
@@ -219,18 +224,39 @@ public class LocalAvatarLoader {
 
     private static void loadScripts(Path path, CompoundTag nbt) throws IOException {
         List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
-        if (scripts.size() > 0) {
-            CompoundTag scriptsNbt = new CompoundTag();
-            String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
-            for (Path script : scripts) {
-                String name = script.toString()
-                        .replaceFirst(pathRegex, "")
-                        .replaceAll("[/\\\\]", ".");
-                name = name.substring(0, name.length() - 4);
-                scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
-            }
-            nbt.put("scripts", scriptsNbt);
+        if (scripts.size() < 0) return;
+        CompoundTag scriptsNbt = new CompoundTag();
+
+        String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
+        for (Path script : scripts) {
+            String name = script.toString()
+                    .replaceFirst(pathRegex, "")
+                    .replaceAll("[/\\\\]", ".");
+            name = name.substring(0, name.length() - 4);
+            scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
         }
+        nbt.put("scripts",scriptsNbt);
+
+
+    }
+    private static void loadGlobalScripts(CompoundTag nbt) throws IOException {
+        if (!Configs.USE_GLOBAL_SCRIPTS.value) return;
+        Path path = IOUtils.getOrCreateDir(FiguraMod.getFiguraDirectory(),"global_scripts");
+        List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
+        if (scripts.size() < 0) return;
+        CompoundTag scriptsNbt = nbt.getCompound("scripts");
+        if (scriptsNbt == null){
+            nbt.put("scripts",scriptsNbt = new CompoundTag());
+        }
+        String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
+        for (Path script : scripts) {
+            String name = script.toString()
+                    .replaceFirst(pathRegex, "")
+                    .replaceAll("[/\\\\]", ".");
+            name = name.substring(0, name.length() - 4);
+            scriptsNbt.put("global." +name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
+        }
+
     }
 
     private static void loadSounds(Path path, CompoundTag nbt) throws IOException {
