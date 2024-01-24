@@ -18,10 +18,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.luaj.vm2.LuaError;
@@ -45,6 +47,7 @@ import org.figuramc.figura.overrides.NoInput;
 import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.LuaUtils;
 import org.figuramc.figura.utils.TextUtils;
+import org.luaj.vm2.LuaError;
 
 import java.util.*;
 
@@ -348,7 +351,10 @@ public class HostAPI {
     public ItemStackAPI getSlot(@LuaNotNil Object slot) {
         if (!this.isHost) return null;
         Entity e = this.owner.luaRuntime.getUser();
-        return ItemStackAPI.verify(e.getSlot(LuaUtils.parseSlot(slot, null)).get());
+        if (e == null || !e.isAlive())
+            return ItemStackAPI.verify(ItemStack.EMPTY);
+        SlotAccess slotAccess = e.getSlot(LuaUtils.parseSlot(slot, null));
+        return ItemStackAPI.verify(slotAccess.get());
     }
 
     @LuaWhitelist
