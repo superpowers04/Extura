@@ -4,20 +4,16 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.NbtIo;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.cards.CardBackground;
+import org.figuramc.figura.parsers.AvatarMetadataParser;
 import org.figuramc.figura.utils.FileTexture;
 import org.figuramc.figura.utils.IOUtils;
-import org.figuramc.figura.parsers.AvatarMetadataParser;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -65,7 +61,6 @@ public class LocalAvatarFetcher {
 
     public static void tick() {
         boolean reload = false;
-        try{
 
         for (Map.Entry<Path, WatchKey> entry : WATCHED_KEYS.entrySet()) {
             WatchKey key = entry.getValue();
@@ -91,7 +86,6 @@ public class LocalAvatarFetcher {
 
         if (reload)
             requireReload = true;
-        }catch(Exception ignored){ }
     }
 
     public static void init() {
@@ -202,9 +196,8 @@ public class LocalAvatarFetcher {
         protected final Path path, folder, theActualPathForThis; // murder, why does everything needs to be protected/private :sob:
         protected final String name, description;
         protected final CardBackground background;
-        protected final HashMap<String,String> cachedNames = new HashMap<>();
         protected Properties properties;
-        //icon
+        // icon
         protected final Path iconPath;
         protected boolean iconLoaded;
         protected FileTexture iconTexture;
@@ -239,7 +232,7 @@ public class LocalAvatarFetcher {
             Path iconPath = null;
 
             if (!(this instanceof FolderPath)) {
-                //metadata
+                // metadata
                 try {
                     String str = IOUtils.readFile(path.resolve("avatar.json"));
                     AvatarMetadataParser.Metadata metadata = AvatarMetadataParser.read(str);
@@ -264,8 +257,8 @@ public class LocalAvatarFetcher {
         }
 
         public boolean search(String query) {
-            String q = query.toLowerCase();
-            return this.getName().toLowerCase().contains(q) || IOUtils.getFileNameOrEmpty(path).toLowerCase().contains(q);
+            String q = query.toLowerCase(Locale.US);
+            return this.getName().toLowerCase(Locale.US).contains(q) || IOUtils.getFileNameOrEmpty(path).contains(q);
         }
 
         public Path getPath() {
@@ -413,7 +406,6 @@ public class LocalAvatarFetcher {
         @Override
         public boolean search(String query) {
             boolean result = super.search(query);
-            if(result) return result;
 
             for (AvatarPath child : children) {
                 if (result) break;
