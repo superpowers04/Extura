@@ -392,15 +392,11 @@ public class Avatar {
     }
 
     public boolean arrowRenderEvent(float delta, EntityAPI<?> arrow) {
-        Varargs result = null;
-        if (loaded) result = run("ARROW_RENDER", render, delta, arrow);
-        return isCancelled(result);
+        return isCancelled(loaded ? run("ARROW_RENDER", render, delta, arrow) : null);
     }
 
     public boolean tridentRenderEvent(float delta, EntityAPI<?> trident) {
-        Varargs result = null;
-        if (loaded) result = run("TRIDENT_RENDER", render, delta, trident);
-        return isCancelled(result);
+        return isCancelled(loaded ? run("TRIDENT_RENDER", render, delta, trident) : null);
     }
 
     public boolean itemRenderEvent(ItemStackAPI item, String mode, FiguraVec3 pos, FiguraVec3 rot, FiguraVec3 scale, boolean leftHanded, PoseStack stack, MultiBufferSource bufferSource, int light, int overlay) {
@@ -417,9 +413,7 @@ public class Avatar {
     }
 
     public boolean playSoundEvent(String id, FiguraVec3 pos, float vol, float pitch, boolean loop, String category, String file) {
-        Varargs result = null;
-        if (loaded) result = run("ON_PLAY_SOUND", tick, id, pos, vol, pitch, loop, category, file);
-        return isCancelled(result);
+        return isCancelled(loaded ? run("ON_PLAY_SOUND", tick, id, pos, vol, pitch, loop, category, file) : null);
     }
 
     public void resourceReloadEvent() {
@@ -450,33 +444,24 @@ public class Avatar {
     }
 
     public boolean mouseScrollEvent(double delta) {
-        Varargs result = loaded ? run("MOUSE_SCROLL", tick, delta) : null;
-        return isCancelled(result);
+        return isCancelled(loaded ? run("MOUSE_SCROLL", tick, delta) : null);
     }
 
     public boolean mouseMoveEvent(double x, double y) {
-        Varargs result = loaded ? run("MOUSE_MOVE", tick, x, y) : null;
-        return isCancelled(result);
+        return isCancelled(loaded ? run("MOUSE_MOVE", tick, x, y) : null);
     }
 
     public boolean mousePressEvent(int button, int action, int modifiers) {
-        Varargs result = loaded ? run("MOUSE_PRESS", tick, button, action, modifiers) : null;
-        return isCancelled(result);
+        return isCancelled(loaded ? run("MOUSE_PRESS", tick, button, action, modifiers) : null);
     }
 
     public boolean keyPressEvent(int key, int action, int modifiers) {
-		Varargs result = loaded ? run("KEY_PRESS", tick, key, action, modifiers) : null;
-		return isCancelled(result);
+		return isCancelled(loaded ? run("KEY_PRESS", tick, key, action, modifiers) : null);
 	}
 	public void charTypedEvent(String chars, int modifiers, int codePoint) {
 		if (loaded) run("CHAR_TYPED", tick, chars, modifiers, codePoint);
 	}
-	public String preprocessScriptEvent(String name,String src) { // piped event
 
-		Varargs val = (luaRuntime != null) ? run("PROCESS_SCRIPT", tick, name, src) : null;
-
-		return val == null || val.isnil(1) ? "unchanged" : val.arg(1).tojstring();
-	}
 
 	// -- rendering events -- // 
 
