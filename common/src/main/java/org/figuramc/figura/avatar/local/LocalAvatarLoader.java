@@ -206,8 +206,7 @@ public class LocalAvatarLoader {
         File f = current.toFile();
         if (f.isFile()) {
             Path relative = parent.toAbsolutePath().relativize(current.toAbsolutePath()).normalize();
-            for (PathMatcher m :
-                    matchers) {
+            for (PathMatcher m : matchers) {
                 if (m.matches(relative)) {
                     pathMap.put(relative.toString(), current);
                     break;
@@ -242,6 +241,7 @@ public class LocalAvatarLoader {
     private static void loadGlobalScripts(CompoundTag nbt) throws IOException {
         if (!Configs.USE_GLOBAL_SCRIPTS.value) return;
         Path path = IOUtils.getOrCreateDir(FiguraMod.getFiguraDirectory(),"global_scripts");
+        addWatchKey(path, KEYS::put);
         List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
         if (scripts.size() < 0) return;
         CompoundTag scriptsNbt = nbt.getCompound("scripts");
@@ -310,7 +310,7 @@ public class LocalAvatarLoader {
                 }
             }
 
-        if (children.size() > 0)
+        if (!children.isEmpty())
             result.put("chld", children);
 
         return result;

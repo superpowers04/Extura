@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "figura",
+  "id": "extura",
   "version": "${version}",
 
-  "name": "Figura - Extura",
+  "name": "Figura - Extura(Fabric)",
   "description": "Extensive customization of the Player model",
   "authors": [
     "skyrina", "lumelia", "UnlikePaladin", "omoflop","ConstantDust - Extura","Superpowers04 - Extura","PoollOverNathan - ExtExtura"
@@ -28,6 +28,7 @@
       "org.figuramc.figura.config.fabric.ModMenuConfig"
     ]
   },
+
   "mixins": [
     "figura.mixins.json",
     "figura-common.mixins.json"
@@ -42,6 +43,9 @@
     "canvas": "*",
     "immediatelyfast":  "*"
   },
+  "provides": [
+    "figura"
+  ],
   "custom": {
     "assets_version": "${assets_version}",
     "modmenu": {

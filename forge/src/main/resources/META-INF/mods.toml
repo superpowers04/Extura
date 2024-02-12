@@ -9,11 +9,12 @@ modId = "figura"
 version = "${version}"
 displayName = "Figura - Extura"
 logoFile="assets/figura/icon.png"
-authors = "skyrina, lumelia, UnlikePaladin, omoflop, ConstantDust - Extura, Superpowers04 - Extura, PoollOverNathan - ExtExtura"
-credits = "TooManyLimits, Lexize, KitCat962, Manuel-3, superpowers04, auriafoxgirl, applejuiceyy, 4P5"
+authors = "ConstantDust, Superpowers04, PoollOverNathan - ExtExtura"
+credits = "superpowers04, ConstantDust, PoollOverNathan"
 description = '''
-Extensive customization of the Player model
+An addon to Figura that adds random features
 '''
+
 
 [modproperties.figura]
 assets_version="${assets_version}"

@@ -15,6 +15,8 @@
 	"figura.docs.world.linetraceEntity": "(Extura) Returns the entity and pos of a linetrace",
 
 
+	"figura.config.vanilla_cloud": "Use Vanilla Figura Backend",
+	"figura.config.vanilla_cloud.tooltip": "Forces the backend to use %s",
 	"figura.config.extura": "Extura - Advanced",
 	"figura.config.expose_extura_api": "Expose Extura API",
 	"figura.config.expose_extura_api.tooltip": "Expose the Extura API to *ALL* Figura avatars",

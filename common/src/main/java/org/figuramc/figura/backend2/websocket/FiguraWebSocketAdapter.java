@@ -55,10 +55,15 @@ public class FiguraWebSocketAdapter extends WebSocketAdapter {
     }
 
     public static String getBackendAddress() {
-        ServerAddress backendIP = ServerAddress.parseString(Configs.SERVER_IP.value);
-        return "wss://" + backendIP.getHost() + "/ws";
-    }
 
+        if(Configs.BLOCK_CLOUD.value) return "ws://invalidHost.thisisdumb/ws";
+        if(Configs.VANILLA_CLOUD.value){
+            return "wss://" + ServerAddress.parseString(Configs.SERVER_IP.defaultValue).getHost() + "/ws";
+        }
+        String backendIP = Configs.USE_MC_HOST_RESOLVER.value ? ServerAddress.parseString(Configs.SERVER_IP.value).getHost() : Configs.SERVER_IP.value;
+        if(Configs.USE_SECURE_CLOUD.value) return "wss://" + backendIP + "/ws";
+        return "ws://" + backendIP + "/ws";
+    }
     @Override
     public void onBinaryMessage(WebSocket websocket, byte[] binary) throws Exception {
         super.onBinaryMessage(websocket, binary);

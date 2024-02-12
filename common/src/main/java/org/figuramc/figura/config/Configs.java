@@ -309,10 +309,20 @@ public class Configs {
 		}
 		{
 			this.name = this.name.copy().withStyle(ChatFormatting.RED);
-			this.tooltip = FiguraText.of("config.block_cloud.tooltip");
+			this.tooltip = FiguraText.of("config.block_cloud.tooltip",SERVER_IP.defaultValue);
 		}
 	};
-
+	public static final ConfigType.BoolConfig VANILLA_CLOUD = new ConfigType.BoolConfig("vanilla_cloud", DEV, false) {
+		@Override
+		public void onChange() {
+			super.onChange();
+			NetworkStuff.reAuth();
+		}
+		{
+			this.name = this.name.copy().withStyle(ChatFormatting.RED);
+			this.tooltip = FiguraText.of("config.vanilla_cloud.tooltip");
+		}
+	};
 	public static final ConfigType.BoolConfig USE_MC_HOST_RESOLVER = new ConfigType.BoolConfig("use_mc_host_resolver", DEV, true) {
 		@Override
 		public void onChange() {
