@@ -29,9 +29,9 @@ public class HttpAPI {
     }
 
     protected static String getBackendAddress() {
-        if(Configs.BLOCK_CLOUD.value) return "https://invalidHost.thisisdumb/api";
+        if(Configs.BLOCK_CLOUD.value) return "http://invalidHost.thisisdumb/api";
         if(Configs.VANILLA_CLOUD.value){
-            return "http://" + ServerAddress.parseString(Configs.SERVER_IP.defaultValue).getHost() + "/api";
+            return "https://" + ServerAddress.parseString(Configs.SERVER_IP.defaultValue).getHost() + "/api";
         }
         String backendIP = Configs.USE_MC_HOST_RESOLVER.value ? ServerAddress.parseString(Configs.SERVER_IP.value).getHost() : Configs.SERVER_IP.value;
         if(Configs.USE_SECURE_CLOUD.value) return "https://" + backendIP + "/api";

@@ -88,7 +88,7 @@ public class NetworkStuff {
 
         //auth check
         authCheck--;
-        if (authCheck <= 0) {
+        if (authCheck <= 0 && !Configs.BLOCK_CLOUD.value) {
             authCheck = RECONNECT;
 
             if (!isConnected())
@@ -172,12 +172,14 @@ public class NetworkStuff {
 
     public static void auth() {
         authCheck = RECONNECT;
+        if(Configs.BLOCK_CLOUD.value) return;
         AuthHandler.auth(false);
         fetchMOTD();
     }
 
     public static void reAuth() {
         authCheck = RECONNECT;
+        if(Configs.BLOCK_CLOUD.value) return;
         AuthHandler.auth(true);
         fetchMOTD();
     }
@@ -202,6 +204,7 @@ public class NetworkStuff {
             disconnect(null);
 
         backendStatus = 2;
+        if(Configs.BLOCK_CLOUD.value) return;
         connectAPI(token);
         connectWS(token);
     }
