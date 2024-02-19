@@ -94,11 +94,16 @@ public class WebsocketThingy extends WebSocketClient {
         super.send(bytes);
     }
 
-    private static String getBackendAddress() {
-        ServerAddress backendIP = ServerAddress.parseString(Configs.SERVER_IP.value);
-        return "wss://" + backendIP.getHost() + "/ws";
-    }
+    public static String getBackendAddress() {
 
+        if(Configs.BLOCK_CLOUD.value) return "ws://invalidHost.thisisdumb/ws";
+        if(Configs.VANILLA_CLOUD.value){
+            return "wss://" + ServerAddress.parseString(Configs.SERVER_IP.defaultValue).getHost() + "/ws";
+        }
+        String backendIP = Configs.USE_MC_HOST_RESOLVER.value ? ServerAddress.parseString(Configs.SERVER_IP.value).getHost() : Configs.SERVER_IP.value;
+        if(Configs.USE_SECURE_CLOUD.value) return "wss://" + backendIP + "/ws";
+        return "ws://" + backendIP + "/ws";
+    }
     private void handleClose(int code, String reason) {
         if (Configs.CONNECTION_TOASTS.value)
             FiguraToast.sendToast(FiguraText.of("backend.disconnected"), FiguraToast.ToastType.ERROR);
