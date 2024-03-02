@@ -47,7 +47,6 @@ public class ExturaAPI {
 			return null;
 		}
 	}
-
 	@LuaWhitelist
 	@LuaMethodDoc("extura.http_get")
 	public Object httpGet(String arg) {

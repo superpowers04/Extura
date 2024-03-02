@@ -19,6 +19,7 @@ import org.figuramc.figura.lua.api.ping.PingAPI;
 import org.figuramc.figura.lua.api.sound.SoundAPI;
 import org.figuramc.figura.lua.api.vanilla_model.VanillaModelAPI;
 import org.figuramc.figura.lua.api.world.WorldAPI;
+import org.figuramc.figura.lua.api.ExturaAPI;
 import org.figuramc.figura.model.FiguraModelPart;
 import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaTable;
@@ -100,6 +101,8 @@ public abstract class FiguraGlobalsDocs {
     @LuaFieldDoc("globals.type")
     public LuaFunction type;
 
+    @LuaFieldDoc("globals.extura")
+    public ExturaAPI extura;
     @LuaMethodDoc(
             overloads = {
                     @LuaMethodOverload(
@@ -114,6 +117,24 @@ public abstract class FiguraGlobalsDocs {
             value = "globals.require"
     )
     public static Object require() {return null;}
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = String.class,
+                            argumentNames = "scriptName"
+                    ),
+                    @LuaMethodOverload(
+                            argumentTypes = {String.class, String.class},
+                            argumentNames = {"scriptName", "scriptContents"}
+                    )
+            },
+            value = "globals.addScript"
+    )
+    public static Object addScript() {return null;}
+    @LuaMethodDoc(
+            value = "globals.getScripts"
+    )
+    public static Object getScripts() {return null;}
 
     @LuaMethodDoc(
             overloads = {

@@ -21,6 +21,7 @@ import java.util.*;
         name = "EventsAPI",
         value = "events"
 )
+
 public class EventsAPI {
 
     // docs only :woozy:
@@ -87,6 +88,9 @@ public class EventsAPI {
     @LuaWhitelist
     @LuaFieldDoc("events.resource_reload")
     public final LuaEvent RESOURCE_RELOAD = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.damage")
+    public final LuaEvent DAMAGE = new LuaEvent();
 
     private final Map<String, LuaEvent> events = new HashMap<>();
     
@@ -112,6 +116,8 @@ public class EventsAPI {
         events.put("ITEM_RENDER", ITEM_RENDER);
         events.put("ON_PLAY_SOUND", ON_PLAY_SOUND);
         events.put("RESOURCE_RELOAD", RESOURCE_RELOAD);
+        
+        events.put("DAMAGE", DAMAGE);
 
         for (FiguraEvent entrypoint : ENTRYPOINTS) {
             String ID = entrypoint.getID().toUpperCase(Locale.US);

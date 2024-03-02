@@ -78,13 +78,14 @@ public class NetworkStuff {
     private static int maxAvatarSize = Integer.MAX_VALUE;
 
     public static void tick() {
+    	if(Configs.BLOCK_CLOUD.value) return;
         //limits
         uploadRate.tick();
         downloadRate.tick();
 
         //auth check
         authCheck--;
-        if (authCheck <= 0 && !Configs.BLOCK_CLOUD.value) {
+        if (authCheck <= 0) {
             authCheck = RECONNECT;
 
             if (!isConnected())

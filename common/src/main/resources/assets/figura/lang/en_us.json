@@ -1,4 +1,7 @@
 {
+	"figura.docs.globals.extura": "The Extura object that contains some random stuff. Only visible if it's enabled in the settings.",
+	"figura.docs.globals.edit_script": "Allows you to add, edit or remove scripts from your avatar.\nAccepts 2 strings, if the second string is nil, the script is unloaded. Note this will NOT remove events",
+
 	"figura.config.use_secure_cloud": "(Extura) Secure Cloud",
 	"figura.config.use_secure_cloud.tooltip": "Whether to use a Secure Connection for the cloud",
 	"figura.config.block_cloud": "(Extura) Disable cloud",
@@ -21,7 +24,7 @@
 	"figura.config.expose_extura_api": "Expose Extura API",
 	"figura.config.expose_extura_api.tooltip": "Expose the Extura API to *ALL* Figura avatars",
 	"figura.config.expose_java_api": "Expose Java API",
-	"figura.config.expose_extura_api.tooltip": "Expose the Java API to *YOUR* Figura avatar.",
+	"figura.config.expose_java_api.tooltip": "Expose the Java API to *YOUR* Figura avatar.",
 	"figura.config.annual_cache_deletion": "Delete cache weekly",
 	"figura.config.annual_cache_deletion.tooltip": "Delete cached avatars after 7 days",
 	"figura.config.expose_http": "Expose HTTP",
@@ -1735,9 +1738,6 @@
     "figura.docs.world.new_item": "Parses and creates a new ItemStack from the given string\nA count and damage can be given, to be applied on this itemstack",
     "figura.docs.world.exists": "Checks whether or not a world currently exists\nThis will almost always be true, but might be false on some occasions such as while traveling between dimensions",
     "figura.docs.world.get_build_height": "Returns the minimum and maximum build height of the world, as multiple results",
-    "figura.docs.world.get_spawn_point": "Returns a vector with the coordinates of the world spawn",
-    "figura.docs.world.raycast_entity": "Raycasts an Entity in the world, returns a map containing the entity and it's position.",
-    "figura.docs.world.raycast_block": "Raycasts a Block in the world, returns a map containing the block and it's position.",
     "figura.docs.data": "A global API that provides functions to work with data related features",
     "figura.docs.data.create_buffer": "Creates an empty buffer",
     "figura.docs.buffer": "A byte buffer object",
