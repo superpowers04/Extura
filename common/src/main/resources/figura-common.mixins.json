@@ -20,7 +20,6 @@
     "MinecraftMixin",
     "ReloadableResourceManagerMixin",
     "SkullBlockEntityAccessor",
-    "SNIHelperMixin",
     "TextDisplayMixin",
     "compat.GeckolibGeoArmorRendererMixin",
     "compat.GeckolibGeoRendererMixin",
