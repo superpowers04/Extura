@@ -153,7 +153,7 @@ public class FiguraLuaRuntime {
 	private void loadExtraLibraries() {
 		// require
 		this.setGlobal("require", require);
-		this.setGlobal("addScript", newScript);
+		this.setGlobal("addScript", addScript);
 		this.setGlobal("getScripts", getScripts);
 
 		// listFiles
@@ -241,7 +241,7 @@ public class FiguraLuaRuntime {
 		});
 	}
 
-	private final VarArgFunction newScript = new VarArgFunction() {
+	private final VarArgFunction addScript = new VarArgFunction() {
 		@Override
 		public Varargs invoke(Varargs arg) {
 			Path path = PathUtils.getPath(arg.checkstring(1));
@@ -250,7 +250,6 @@ public class FiguraLuaRuntime {
 				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
 			);
 			if(arg.isnil(2)){
-				
 				owner.nbt.getCompound("scripts").remove(scriptName);
 				scripts.remove(scriptName);
 				loadedScripts.remove(scriptName);
@@ -291,31 +290,13 @@ public class FiguraLuaRuntime {
 		}
 	};
 
-	private final TwoArgFunction getScripts = new TwoArgFunction() {
+	private final VarArgFunction getScripts = new VarArgFunction() {
 		@Override
-		public LuaValue call(LuaValue folderPath, LuaValue includeSubfolders) {
-			Path path = PathUtils.getPath(folderPath);
-			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
-
-			Path targetPath = (PathUtils.isAbsolute(path) ? path : dir.resolve(path)).normalize();
-
-			boolean subFolders = !includeSubfolders.isnil() && includeSubfolders.checkboolean();
-
+		public LuaValue call() {
 			// iterate over all script names and add them if their name starts with the path query
 			LuaTable table = new LuaTable();
-			for (String s  : scripts.keySet()) {
-				Path scriptPath = PathUtils.getPath(s);
-
-				// Add to table only if the beginning of the path matches
-				if (!(scriptPath.startsWith(targetPath)))
-					continue;
-				// remove the common parent
-				Path result = targetPath.relativize(scriptPath);
-				// Paths always have at least one name.
-				// If we do not allow subfolders, only allow paths that directly point to a file
-				if (!subFolders && result.getNameCount()!=1)
-					continue;
-				table.set(LuaValue.valueOf(s.replace('/', '.')),LuaValue.valueOf(scripts.get(s)));
+			for (String s : scripts.keySet()) {
+				table.set(LuaValue.valueOf(s),LuaValue.valueOf(scripts.get(s)));
 			}
 
 			return table;

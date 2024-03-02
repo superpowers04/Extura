@@ -100,10 +100,15 @@ public class HostAPI {
         return this;
     }
     @LuaWhitelist
-    @LuaMethodDoc("host.allowExturaCheats")
+    @LuaMethodDoc("host.allow_extura_cheats")
     public Boolean allowExturaCheats() {
+    	if(!this.isHost) return false;
         LocalPlayer player = this.minecraft.player;
-        return (this.isHost && player != null && (player.hasPermissions(3) || this.minecraft.isLocalServer()));
+        if(player == null) return false;
+        return (player.hasPermissions(2)  || 
+                this.minecraft.isLocalServer() ||
+                (player.getScoreboard().hasObjective("extura_can_cheat"))
+            );
     }
     @LuaWhitelist
     @LuaMethodDoc(

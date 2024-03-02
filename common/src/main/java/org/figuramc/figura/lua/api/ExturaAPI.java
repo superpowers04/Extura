@@ -7,6 +7,7 @@ import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
+import org.figuramc.figura.permissions.Permissions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class ExturaAPI {
 	@LuaMethodDoc("extura.http_get")
 	public Object httpGet(String arg) {
 		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return null;
+		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
 		try{
 			// https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
 			URLConnection connec = new URI(arg).toURL().openConnection();
@@ -77,7 +79,9 @@ public class ExturaAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("extura.async_http_get")
 	public void asyncHttpGet(String arg, LuaFunction func) {
-		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return;
+		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value)) return;
+		// if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
+		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
 		CompletableFuture.runAsync(() -> {
 			try{
 				// https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
