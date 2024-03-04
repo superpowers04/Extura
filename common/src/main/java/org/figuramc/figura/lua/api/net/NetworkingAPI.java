@@ -38,14 +38,10 @@ public class NetworkingAPI {
     @LuaWhitelist
     @LuaFieldDoc("net.http")
     public final HttpRequestsAPI http;
-    @LuaWhitelist
-    @LuaFieldDoc("net.socket")
-    public final SocketAPI socket;
 
     public NetworkingAPI(Avatar owner) {
         this.owner = owner;
         http = new HttpRequestsAPI(this);
-        socket = new SocketAPI(this);
     }
 
     public void securityCheck(String link) throws RuntimeException {
@@ -84,11 +80,20 @@ public class NetworkingAPI {
         RestrictionLevel level = RestrictionLevel.getById(Configs.NETWORKING_RESTRICTION.value);
         if (level == null) return false;
         ArrayList<Filter> filters = Configs.NETWORK_FILTER.getFilters();
-        return switch (level) {
-            case WHITELIST -> filters.stream().anyMatch(f -> ( f.startsWith(link) || f.matches(link)  ));
-            case BLACKLIST -> filters.stream().noneMatch(f -> ( f.startsWith(link) || f.matches(link) ));
-            case NONE -> true;
-        };
+        try {
+            URL url = new URL(link);
+            if (url.getPort() != -1 && url.getPort() != 80 && url.getPort() != 443)
+                throw new LuaError("Port %s not allowed, only 80 (HTTP) and 443 (HTTPS) are permitted.".formatted(url.getPort()));
+
+            return switch (level) {
+                case WHITELIST -> filters.stream().anyMatch(f -> f.matches(url.getHost()));
+                case BLACKLIST -> filters.stream().noneMatch(f -> f.matches(url.getHost()));
+                case NONE -> true;
+            };
+        }
+        catch (MalformedURLException e) {
+            throw new LinkNotAllowedException(NETWORKING_DISALLOWED_FOR_LINK_ERROR.formatted(link));
+        }
     }
 
     void log(LogSource source, Component text) {
@@ -160,11 +165,9 @@ public class NetworkingAPI {
     public static class Filter {
 
         private String filterSource;
-        private FilterMode filterMode;
 
-        public Filter(String source, FilterMode mode) {
+        public Filter(String source) {
             setSource(source.trim());
-            setMode(mode);
         }
 
         public String getSource() {
@@ -175,46 +178,8 @@ public class NetworkingAPI {
             this.filterSource = filterSource;
         }
 
-        public FilterMode getMode() {
-            return filterMode;
-        }
-
-        public void setMode(FilterMode filterMode) {
-            this.filterMode = filterMode;
-        }
-
         public boolean matches(String s) {
-            return switch (filterMode) {
-                case EQUALS -> s.trim().equals(filterSource);
-                case CONTAINS -> s.trim().contains(filterSource);
-                case STARTS_WITH -> s.trim().startsWith(filterSource);
-                case ENDS_WITH -> s.trim().endsWith(filterSource);
-                case REGEX -> s.trim().matches(filterSource);
-            };
-        }
-
-        public enum FilterMode {
-            EQUALS(0),
-            CONTAINS(1),
-            STARTS_WITH(2),
-            ENDS_WITH(3),
-            REGEX(4);
-            private final int id;
-            FilterMode(int id) {
-                this.id = id;
-            }
-
-            public int getId() {
-                return id;
-            }
-
-            public static FilterMode getById(int id) {
-                for (FilterMode t :
-                        FilterMode.values()) {
-                    if (t.id == id) return t;
-                }
-                return null;
-            }
+            return s.trim().equalsIgnoreCase(filterSource);
         }
     }
 
@@ -247,11 +212,10 @@ public class NetworkingAPI {
     @LuaWhitelist
     public Object __index(LuaValue key) {
         if (!key.isstring()) return null;
-        return switch (key.tojstring()) {
-            case "http" -> http;
-            case "socket" -> socket;
-            default -> null;
-        };
+        if (key.tojstring().equals("http")) {
+            return http;
+        }
+        return null;
     }
 
     static class LinkNotAllowedException extends RuntimeException {
