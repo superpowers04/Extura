@@ -85,8 +85,8 @@ public class NetworkingAPI {
         if (level == null) return false;
         ArrayList<Filter> filters = Configs.NETWORK_FILTER.getFilters();
         return switch (level) {
-            case WHITELIST -> filters.stream().anyMatch(f -> f.matches(link));
-            case BLACKLIST -> filters.stream().noneMatch(f -> f.matches(link));
+            case WHITELIST -> filters.stream().anyMatch(f -> ( f.startsWith(link) || f.matches(link)  ));
+            case BLACKLIST -> filters.stream().noneMatch(f -> ( f.startsWith(link) || f.matches(link) ));
             case NONE -> true;
         };
     }
