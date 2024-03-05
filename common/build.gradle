@@ -19,7 +19,7 @@ dependencies {
     }
 
     // Libraries
-    implementation("org.java-websocket:Java-WebSocket:$websocket")
+    implementation("com.neovisionaries:nv-websocket-client:$nv_websocket")
     implementation("com.github.FiguraMC.luaj:luaj-core:$luaj-figura")
     implementation("com.github.FiguraMC.luaj:luaj-jse:$luaj-figura")
 

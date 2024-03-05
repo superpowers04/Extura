@@ -26,7 +26,7 @@ dependencies {
     }
 
     // Libraries
-    include(implementation("org.java-websocket:Java-WebSocket:$websocket"))
+    include(implementation("com.neovisionaries:nv-websocket-client:$nv_websocket"))
     include(implementation("com.github.FiguraMC.luaj:luaj-core:$luaj-figura"))
     include(implementation("com.github.FiguraMC.luaj:luaj-jse:$luaj-figura"))
 
