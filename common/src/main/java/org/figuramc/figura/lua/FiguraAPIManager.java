@@ -181,7 +181,6 @@ public class FiguraAPIManager {
 		add(NetworkingAPI.class);
 		add(SocketAPI.class);
 		add(FileAPI.class);
-		add(FiguraSocket.class);
 
 		add(HttpRequestsAPI.class);
 		add(HttpRequestsAPI.HttpRequestBuilder.class);
