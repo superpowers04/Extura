@@ -36,7 +36,7 @@ import java.util.UUID;
 public class FiguraMod {
 
     public static final String MOD_ID = "figura";
-    public static final String MOD_NAME = "Figura - Extura";
+    public static final String MOD_NAME = "Figura";
     public static final FiguraModMetadata METADATA = FiguraModMetadata.getMetadataForMod(MOD_ID);
     public static final Version VERSION = new Version(PlatformUtils.getFiguraModVersionString());
     public static final Calendar CALENDAR = Calendar.getInstance();
