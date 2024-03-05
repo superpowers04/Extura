@@ -177,8 +177,8 @@ public class FiguraAPIManager {
 
 		add(RaycastAPI.class);
 		add(NetworkingAPI.class);
-		add(SocketAPI.class);
 		add(FileAPI.class);
+		add(DisabledAPI.class);
 
 		add(HttpRequestsAPI.class);
 		add(HttpRequestsAPI.HttpRequestBuilder.class);

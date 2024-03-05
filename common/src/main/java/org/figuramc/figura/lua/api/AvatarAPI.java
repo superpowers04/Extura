@@ -332,17 +332,17 @@ public class AvatarAPI {
 		return avatar.permissions.get(Permissions.BUFFERS_COUNT);
 	}
 
-	@LuaWhitelist
-	@LuaMethodDoc("avatar.get_sockets_count")
-	public int getSocketsCount() {
-		return avatar.openSockets.size();
-	}
+	// @LuaWhitelist
+	// @LuaMethodDoc("avatar.get_sockets_count")
+	// public int getSocketsCount() {
+	// 	return avatar.openSockets.size();
+	// }
 
-	@LuaWhitelist
-	@LuaMethodDoc("avatar.get_max_sockets_count")
-	public int getMaxSocketsCount() {
-		return avatar.permissions.get(Permissions.MAX_SOCKETS);
-	}
+	// @LuaWhitelist
+	// @LuaMethodDoc("avatar.get_max_sockets_count")
+	// public int getMaxSocketsCount() {
+	// 	return avatar.permissions.get(Permissions.MAX_SOCKETS);
+	// }
 
 	@LuaWhitelist
 	@LuaMethodDoc("avatar.get_max_texture_size")

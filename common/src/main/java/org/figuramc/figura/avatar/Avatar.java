@@ -379,7 +379,7 @@ public class Avatar {
 
     public boolean skullRenderEvent(float delta, BlockStateAPI block, ItemStackAPI item, EntityAPI<?> entity, String mode) {
         Varargs result = null;
-        if (loaded && renderer != null && renderer.allowSkullRendering)
+        if (loaded && renderer != null && renderer.interceptRendersIntoFigura)
             result = run("SKULL_RENDER", render, delta, block, item, entity, mode);
         return isCancelled(result);
     }
@@ -650,7 +650,7 @@ public class Avatar {
     }
 
     public boolean skullRender(PoseStack stack, MultiBufferSource bufferSource, int light, Direction direction, float yaw) {
-        if (renderer == null || !loaded || !renderer.allowSkullRendering)
+        if (renderer == null || !loaded || !renderer.interceptRendersIntoFigura)
             return false;
 
         stack.pushPose();
@@ -918,7 +918,6 @@ public class Avatar {
 
         clearSounds();
         clearParticles();
-        closeSockets();
         closeBuffers();
 
         events.clear();
@@ -930,17 +929,6 @@ public class Avatar {
             value.releaseAlBuffer();
     }
 
-    public void closeSockets() {
-        for (FiguraSocket socket :
-                openSockets) {
-            if (!socket.isClosed()) {
-                try {
-                    socket.baseClose();
-                } catch (Exception ignored) {}
-            }
-        }
-        openSockets.clear();
-    }
 
     public void closeBuffers() {
         for (FiguraBuffer buffer :
