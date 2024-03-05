@@ -7,12 +7,12 @@ displayURL = "https://github.com/FiguraMC/Figura"
 [[mods]]
 modId = "figura"
 version = "${version}"
-displayName = "Figura - Extura"
+displayName = "Figura - Extura(Forge)"
 logoFile="assets/figura/icon.png"
-authors = "ConstantDust, Superpowers04, PoollOverNathan - ExtExtura"
-credits = "superpowers04, ConstantDust, PoollOverNathan"
+authors = "ConstantDust, Superpowers04, PoolloverNathan - ExtExtura"
+credits = "superpowers04, ConstantDust, PoolloverNathan"
 description = '''
-An addon to Figura that adds random features
+Extensive customization of the Player model. Extura fork
 '''
 
 

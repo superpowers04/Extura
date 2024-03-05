@@ -38,9 +38,9 @@ public class SocketAPI {
             parent.error(NetworkingAPI.LogSource.SOCKET, Component.literal("Tried to establish connection to not allowed host %s".formatted(host)));
             throw e.luaError;
         }
-        int maxSockets = parent.owner.permissions.get(Permissions.MAX_SOCKETS);
-        if (parent.owner.openSockets.size() > maxSockets)
-            throw new LuaError("You can't open more than %s sockets".formatted(maxSockets));
+        // int maxSockets = parent.owner.permissions.get(Permissions.MAX_SOCKETS);
+        // if (parent.owner.openSockets.size() > maxSockets)
+        //     throw new LuaError("You can't open more than %s sockets".formatted(maxSockets));
         FiguraFuture<FiguraSocket> future = new FiguraFuture<>();
         CompletableFuture.supplyAsync(() -> {
             try {
