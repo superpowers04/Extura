@@ -33,7 +33,6 @@ import java.util.Locale;
 )
 public class NetworkingAPI {
     private static FileOutputStream logFileOutputStream;
-    private static final String NETWORKING_IS_HOST_ONLY = "NetworkingAPI is only allowed in a host environment!";
     private static final String NETWORKING_DISABLED_ERROR_TEXT = "Networking is disabled in config";
     private static final String NO_PERMISSION_ERROR_TEXT = "This avatar doesn't have networking permissions";
     private static final String NETWORKING_DISALLOWED_FOR_LINK_ERROR = "Networking whitelist/blacklist does not allow access to link: %s";
@@ -48,8 +47,6 @@ public class NetworkingAPI {
     }
 
     public void securityCheck(String link) throws RuntimeException {
-        if (!owner.isHost)
-            throw new LuaError(NETWORKING_IS_HOST_ONLY);
         if (!Configs.ALLOW_NETWORKING.value)
             throw new LuaError(NETWORKING_DISABLED_ERROR_TEXT);
         if (owner.permissions.get(Permissions.NETWORKING) < 1) {
@@ -69,7 +66,7 @@ public class NetworkingAPI {
             )
     )
     public boolean isNetworkingAllowed() {
-        return owner.isHost && Configs.ALLOW_NETWORKING.value && owner.permissions.get(Permissions.NETWORKING) >= 1;
+        return Configs.ALLOW_NETWORKING.value && owner.permissions.get(Permissions.NETWORKING) >= 1;
     }
 
     @LuaWhitelist
@@ -82,9 +79,6 @@ public class NetworkingAPI {
             )
     )
     public boolean isLinkAllowed(String link) {
-        if (!owner.isHost)
-            throw new LuaError(NETWORKING_IS_HOST_ONLY);
-
         RestrictionLevel level = RestrictionLevel.getById(Configs.NETWORKING_RESTRICTION.value);
         if (level == null) return false;
         ArrayList<Filter> filters = Configs.NETWORK_FILTER.getFilters();
