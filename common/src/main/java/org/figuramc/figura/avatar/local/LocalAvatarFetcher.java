@@ -181,7 +181,7 @@ public class LocalAvatarFetcher {
     }
 
     public static boolean isLoaded() {
-        return loaded && !isReloadRequired();
+        return loaded && !requireReload;
     }
 
     public static boolean isReloadRequired() {
