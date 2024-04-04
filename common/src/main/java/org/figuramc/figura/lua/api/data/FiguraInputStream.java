@@ -1,5 +1,6 @@
 package org.figuramc.figura.lua.api.data;
 
+import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
@@ -18,13 +19,16 @@ import java.util.concurrent.CompletableFuture;
 public class FiguraInputStream extends InputStream {
     private final InputStream sourceStream;
     private final boolean asyncOnly;
-    public FiguraInputStream(InputStream sourceStream) {
-        this(sourceStream, false);
+    private final Avatar avatar;
+
+    public FiguraInputStream(InputStream sourceStream, Avatar avatar) {
+        this(sourceStream, false, avatar);
     }
 
-    public FiguraInputStream(InputStream sourceStream, boolean asyncOnly) {
+    public FiguraInputStream(InputStream sourceStream, boolean asyncOnly, Avatar avatar) {
         this.sourceStream = sourceStream;
         this.asyncOnly = asyncOnly;
+        this.avatar = avatar;
     }
 
     @Override
@@ -44,7 +48,7 @@ public class FiguraInputStream extends InputStream {
     public FiguraFuture<LuaString> readAsync(Integer limit) {
         final int finalLimit = limit != null ? limit : available();
         // Future handle that will be returned
-        FiguraFuture<LuaString> future = new FiguraFuture<>();
+        FiguraFuture<LuaString> future = new FiguraFuture<>(avatar);
         // Calling an async read that will be put in a future results
         CompletableFuture.supplyAsync(() -> {
             try {

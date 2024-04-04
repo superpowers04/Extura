@@ -134,7 +134,7 @@ public class FileAPI {
             Path p = securityCheck(path);
             File f = p.toFile();
             FileInputStream fis = new FileInputStream(f);
-            return new FiguraInputStream(fis);
+            return new FiguraInputStream(fis, parent);
         } catch (FileNotFoundException e) {
             throw new LuaError(e);
         }
