@@ -742,7 +742,7 @@ public class ClientAPI {
             overloads = {
                     @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
             }, 
-            value = "client.regexMatch"
+            value = "client.regex_match"
     )
     public static Boolean regexMatch(@LuaNotNil String str, @LuaNotNil String expression) {
         Pattern pattern = Pattern.compile(expression);
