@@ -45,6 +45,8 @@ import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @LuaWhitelist
@@ -732,6 +734,23 @@ public class ClientAPI {
             return FiguraListDocs.getEnumValues(enumName);
         } catch (Exception e) {
             throw new LuaError("Enum " + enumName + " does not exist");
+        }
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "client.regexMatch"
+    )
+    public static Boolean regexMatch(@LuaNotNil String str, @LuaNotNil String expression) {
+        Pattern pattern = Pattern.compile(expression);
+        Matcher matcher = pattern.matcher(str);
+        if (matcher.find()) {
+            return true;
+        } else {
+            return false;
         }
     }
 
