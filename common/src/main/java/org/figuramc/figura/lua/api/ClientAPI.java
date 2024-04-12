@@ -737,23 +737,6 @@ public class ClientAPI {
         }
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = {
-                    @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
-            }, 
-            value = "client.regex_match"
-    )
-    public static Boolean regexMatch(@LuaNotNil String str, @LuaNotNil String expression) {
-        Pattern pattern = Pattern.compile(expression);
-        Matcher matcher = pattern.matcher(str);
-        if (matcher.find()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @Override
     public String toString() {
         return "ClientAPI";

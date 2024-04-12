@@ -43,6 +43,8 @@ import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.LuaError;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -584,6 +586,19 @@ public class HostAPI {
         return false;
     }
 
+    public Boolean regexMatch(@LuaNotNil String str, @LuaNotNil String expression) {
+        if (!isHost()) return false;
+
+        Pattern pattern = Pattern.compile(expression);
+        Matcher matcher = pattern.matcher(str);
+        if (matcher.find()) {
+            return true;
+        } else {
+            return false;
+        }
+        
+    }
+
     @LuaWhitelist
     @LuaMethodDoc("host.get_reach_distance")
     public double getReachDistance() {
@@ -632,6 +647,14 @@ public class HostAPI {
             unlockCursor = (Boolean) value;
         else throw new LuaError("Cannot assign value on key \"" + key + "\"");
     }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "host.regex_match"
+    )
 
     @Override
     public String toString() {
