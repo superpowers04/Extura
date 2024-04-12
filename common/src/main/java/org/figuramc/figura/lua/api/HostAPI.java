@@ -598,12 +598,29 @@ public class HostAPI {
 
         Pattern pattern = Pattern.compile(expression);
         Matcher matcher = pattern.matcher(str);
+
         if (matcher.find()) {
             return true;
         } else {
             return false;
         }
         
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "host.regex_replace"
+    )
+    public String regexReplace(@LuaNotNil String str, @LuaNotNil String replaceWith, @LuaNotNil String expression) {
+        if (!isHost()) return str;
+
+        Pattern pattern = Pattern.compile(expression);
+        Matcher matcher = pattern.matcher(str);
+        
+        return matcher.replaceAll(replaceWith);
     }
 
     @LuaWhitelist
