@@ -586,6 +586,13 @@ public class HostAPI {
         return false;
     }
 
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "host.regex_match"
+    )
     public Boolean regexMatch(@LuaNotNil String str, @LuaNotNil String expression) {
         if (!isHost()) return false;
 
@@ -647,14 +654,6 @@ public class HostAPI {
             unlockCursor = (Boolean) value;
         else throw new LuaError("Cannot assign value on key \"" + key + "\"");
     }
-
-    @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = {
-                    @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
-            }, 
-            value = "host.regex_match"
-    )
 
     @Override
     public String toString() {
