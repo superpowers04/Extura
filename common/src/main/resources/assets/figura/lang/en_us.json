@@ -54,6 +54,11 @@
 	"figura.docs.host.set_natural_forces": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity and drag",
 	"figura.docs.host.set_gravity": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity",
 
+    
+    "figura.docs.client.regex_find": "(Extura) Checks a string against a (java flavor) Regular Expression and returns true if any matches are found",
+    "figura.docs.client.regex_match": "(Extura) Matches a string against a (java flavor) Regular Expression and returns all matches",
+    "figura.docs.client.regex_replace": "(Extura) Matches a string against a (java flavor) Regular Expression and replaces all matches with a specified string",
+ 
 	"figura.docs.extura": "The Extura API",
 	"figura.docs.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
 	"figura.docs.extura.async_lua_function": "Runs specified lua function in a thread. NOTE: VERY UNSTABLE!",
@@ -1127,9 +1132,7 @@
     "figura.docs.event.remove": "Removes either a function from this event or when given a string, remove all functions registered under that name\nReturns the number of functions that were removed",
     "figura.docs.event.get_registered_count": "Returns the number of functions that are registered with the given name",
     "figura.docs.host": "A global API dedicated to specifically the host of the avatar\nFor other viewers, these do nothing",
-    "figura.docs.host.regex_match": "Checks a string against a (java flavor) Regular Expression",
-    "figura.docs.host.regex_replace": "Checks a string against a (java flavor) Regular Expression and replaces all matches with a specified string",
-    "figura.docs.host.unlock_cursor": "Setting this value to true will unlock your cursor, letting you move it freely on the screen instead of it controlling your player's rotation",
+   "figura.docs.host.unlock_cursor": "Setting this value to true will unlock your cursor, letting you move it freely on the screen instead of it controlling your player's rotation",
     "figura.docs.host.is_host": "Returns true if this instance of the script is running on host",
     "figura.docs.host.is_cursor_unlocked": "Checks if the cursor is currently unlocked\nOnly responds to your own changes in your script, not anything done by Minecraft itself",
     "figura.docs.host.set_unlock_cursor": "Toggles locking of your cursor, letting you move it freely on the screen instead of it controlling your player's rotation",

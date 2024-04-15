@@ -32,8 +32,7 @@ public class AvatarMetadataParser {
 
     public static CompoundTag parse(String json, String filename) {
         // parse json -> object
-        Metadata metadata = read(json);
-        parse(metadata,json,filename);
+        return parse(read(json),json,filename);
     }
     public static CompoundTag parse(Metadata metadata, String json, String filename) {
 

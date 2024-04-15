@@ -736,6 +736,58 @@ public class ClientAPI {
         }
     }
 
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "client.regex_match"
+    )
+    public Object[] regexMatch(@LuaNotNil String str, @LuaNotNil String expression) {
+
+
+        Pattern pattern = Pattern.compile(expression);
+        Matcher matcher = pattern.matcher(str);
+
+        List<String> matched = new ArrayList<>();
+
+        while (matcher.find()){
+        	matched.add(matcher.group());
+        }
+        // if (matcher.find()) {
+        //     return true;
+        // } else {
+        //     return false;
+        // }
+        return matched.toArray();
+    }
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "client.regex_find"
+    )
+    public Boolean regexFind(@LuaNotNil String str, @LuaNotNil String expression) {
+        return Pattern.compile(expression).matcher(str).find();
+        
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "client.regex_replace"
+    )
+    public String regexReplace(@LuaNotNil String str, @LuaNotNil String replaceWith, @LuaNotNil String expression) {
+
+        Pattern pattern = Pattern.compile(expression);
+        Matcher matcher = pattern.matcher(str);
+        
+        return matcher.replaceAll(replaceWith);
+    }
+
     @Override
     public String toString() {
         return "ClientAPI";
