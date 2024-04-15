@@ -53,7 +53,8 @@
 	"figura.docs.host.set_position": "(Extura - Requires host.allowExturaCheats() to be true) Sets the player's position",
 	"figura.docs.host.set_natural_forces": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity and drag",
 	"figura.docs.host.set_gravity": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity",
-
+    
+    "figura.docs.client.is_integrated_server": "(Extura) Returns true if the client is on it's integrated server",
     
     "figura.docs.client.regex_find": "(Extura) Checks a string against a (java flavor) Regular Expression and returns true if any matches are found",
     "figura.docs.client.regex_match": "(Extura) Matches a string against a (java flavor) Regular Expression and returns all matches",

@@ -485,6 +485,11 @@ public class ClientAPI {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc("client.is_integrated_server")
+    public static Boolean isIntegratedServer() {
+    	return Minecraft.getInstance().getSingleplayerServer() != null;
+    }
+    @LuaWhitelist
     @LuaMethodDoc("client.get_server_data")
     public static Map<String, String> getServerData() {
         Map<String, String> map = new HashMap<>();
