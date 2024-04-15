@@ -50,6 +50,8 @@ import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.LuaError;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -602,6 +604,43 @@ public class HostAPI {
         if (this.isHost && player != null)
             return player.getAbilities().flying;
         return false;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "host.regex_match"
+    )
+    public Boolean regexMatch(@LuaNotNil String str, @LuaNotNil String expression) {
+        if (!isHost()) return false;
+
+        Pattern pattern = Pattern.compile(expression);
+        Matcher matcher = pattern.matcher(str);
+
+        if (matcher.find()) {
+            return true;
+        } else {
+            return false;
+        }
+        
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = {String.class, String.class, String.class}, argumentNames = {"string", "expression"})
+            }, 
+            value = "host.regex_replace"
+    )
+    public String regexReplace(@LuaNotNil String str, @LuaNotNil String replaceWith, @LuaNotNil String expression) {
+        if (!isHost()) return str;
+
+        Pattern pattern = Pattern.compile(expression);
+        Matcher matcher = pattern.matcher(str);
+        
+        return matcher.replaceAll(replaceWith);
     }
 
     @LuaWhitelist
