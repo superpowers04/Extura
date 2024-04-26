@@ -50,6 +50,7 @@ public class AvatarAPI {
 		return (LuaTable) NbtToLua.convert(avatar.nbt);
 	}
 
+
 	@LuaWhitelist
 	@LuaMethodDoc(
 			overloads = @LuaMethodOverload(

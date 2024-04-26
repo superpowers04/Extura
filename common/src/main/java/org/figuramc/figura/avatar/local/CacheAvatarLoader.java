@@ -44,7 +44,7 @@ public class CacheAvatarLoader {
 
     public static boolean checkAndLoad(String hash, UserData target) {
         Path p = getAvatarCacheDirectory();
-        p = p.resolve(hash + ".moon");
+        p = p.resolve(hash + ".nbt");
 
         if (Files.exists(p)) {
             load(hash, target);
@@ -56,7 +56,7 @@ public class CacheAvatarLoader {
 
     public static void load(String hash, UserData target) {
         LocalAvatarLoader.async(() -> {
-            Path path = getAvatarCacheDirectory().resolve(hash + ".moon");
+            Path path = getAvatarCacheDirectory().resolve(hash + ".nbt");
             try {
                 target.loadAvatar(NbtIo.readCompressed(Files.newInputStream(path)));
                 FiguraMod.debug("Loaded avatar \"{}\" from cache to \"{}\"", hash, target.id);
@@ -68,7 +68,7 @@ public class CacheAvatarLoader {
 
     public static void save(String hash, CompoundTag nbt) {
         LocalAvatarLoader.async(() -> {
-            Path file = getAvatarCacheDirectory().resolve(hash + ".moon");
+            Path file = getAvatarCacheDirectory().resolve(hash + ".nbt");
             try {
                 NbtIo.writeCompressed(nbt, Files.newOutputStream(file));
                 FiguraMod.debug("Saved avatar \"{}\" on cache", hash);

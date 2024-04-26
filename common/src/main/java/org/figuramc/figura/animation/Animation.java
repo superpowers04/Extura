@@ -49,6 +49,7 @@ public class Animation {
     protected float speed = 1f;
     protected float startDelay, loopDelay;
     protected int override;
+    private float overrideMultiplier = 1;
     protected int priority = 0;
     protected LoopMode loop;
 

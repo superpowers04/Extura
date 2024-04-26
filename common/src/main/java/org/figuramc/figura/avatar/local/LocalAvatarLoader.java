@@ -46,7 +46,7 @@ public class LocalAvatarLoader {
 		CEM_AVATARS.clear();
 		AvatarManager.clearCEMAvatars();
 
-		for (Map.Entry<ResourceLocation, Resource> cem : manager.listResources("cem", location -> location.getNamespace().equals(FiguraMod.MOD_ID) && location.getPath().endsWith(".moon")).entrySet()) {
+		for (Map.Entry<ResourceLocation, Resource> cem : manager.listResources("cem", location -> location.getNamespace().equals(FiguraMod.MOD_ID) && location.getPath().endsWith(".nbt")).entrySet()) {
 			// id
 			ResourceLocation key = cem.getKey();
 			String[] split = key.getPath().split("/");

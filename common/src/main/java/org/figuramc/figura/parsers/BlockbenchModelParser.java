@@ -274,11 +274,17 @@ public class BlockbenchModelParser {
                 continue;
 
             //convert face json to java object
-            BlockbenchModel.CubeFace face = GSON.fromJson(faces.getAsJsonObject(cubeFace), BlockbenchModel.CubeFace.class);
-
+            JsonObject faceObj = faces.getAsJsonObject(cubeFace);
             //dont add null faces
-            if (face.texture == null)
+            if (!faceObj.has("texture"))
                 continue;
+            try{
+            	faceObj.get("texture").getAsNumber();
+            }catch(Exception e){
+            	continue;
+            }
+            BlockbenchModel.CubeFace face = GSON.fromJson(faceObj, BlockbenchModel.CubeFace.class);
+
 
             //parse texture
             TextureData texture = textureMap.get(textureIdMap.get(face.texture));

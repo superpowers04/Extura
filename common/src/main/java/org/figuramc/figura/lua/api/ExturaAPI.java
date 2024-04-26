@@ -57,7 +57,7 @@ public class ExturaAPI {
 	// }
 	@LuaWhitelist
 	@LuaMethodDoc("extura.http_get")
-	public Object httpGet(String arg,Map<String, List<String>> headers) {
+	public String httpGet(String arg) {
 		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return null;
 		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
 		try{
@@ -74,6 +74,7 @@ public class ExturaAPI {
 		}catch(IOException err){
 			throw new LuaError("Unable to send request: " + err);
 		}
+		// return null;
 	}
 	@LuaWhitelist
 	@LuaMethodDoc("extura.async_lua_function")

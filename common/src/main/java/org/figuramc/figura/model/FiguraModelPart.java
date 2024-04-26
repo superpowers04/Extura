@@ -286,7 +286,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     @LuaMethodDoc("model_part.get_children")
     public Map<Integer, FiguraModelPart> getChildren() {
         Map<Integer, FiguraModelPart> map = new HashMap<>();
-        Int size = this.children.size();
+        Integer size = this.children.size();
         for (int i = 0; i < size; i++)
             map.put(i + 1, this.children.get(i));
         return map;
@@ -1315,7 +1315,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_item")
     public ItemTask newItem(@LuaNotNil String name) {
-        this.renderTasks.put(name, new ItemTask(name, owner, this));
+    	ItemTask task = new ItemTask(name, owner, this);
+        this.renderTasks.put(name, task);
         return task;
     }
 
@@ -1327,7 +1328,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_block")
     public BlockTask newBlock(@LuaNotNil String name) {
-        this.renderTasks.put(name, new BlockTask(name, owner, this));
+    	BlockTask task = new BlockTask(name, owner, this);
+        this.renderTasks.put(name, task);
         return task;
     }
 
@@ -1348,7 +1350,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_sprite")
     public SpriteTask newSprite(@LuaNotNil String name) {
-        this.renderTasks.put(name, new SpriteTask(name, owner, this));
+    	SpriteTask task = new SpriteTask(name, owner, this);
+        this.renderTasks.put(name, task);
         return task;
     }
 
@@ -1360,7 +1363,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_entity")
     public EntityTask newEntity(@LuaNotNil String name) {
-        this.renderTasks.put(name, new EntityTask(name, owner, this));
+    	EntityTask task = new EntityTask(name, owner, this);
+        this.renderTasks.put(name, task);
         return task;
     }
 

@@ -438,15 +438,16 @@ public class WorldAPI {
             value = "world.get_nearby_entities"
     )
     public static Map<String, EntityAPI<?>> getNearbyEntities(Integer range, Object x, Double y, Double z) {
-        FiguraVec3 pos = LuaUtils.parseVec3("getNearbyEntities", x, y, z);
+        var pos = LuaUtils.parseVec3("getNearbyEntities", x, y, z).asVec3();
         HashMap<String, EntityAPI<?>> entityList = new HashMap<>();
 
-        AABB area = new AABB(pos.asVec3().subtract(range, range, range), pos.asVec3().add(range, range, range));
+        AABB area = new AABB(pos.subtract(range, range, range), pos.add(range, range, range));
         for (Entity entity : getCurrentWorld().getEntitiesOfClass(Entity.class, area)) {
             entityList.put(entity.getUUID().toString(), EntityAPI.wrap(entity));
         }
         return entityList;
     }
+
 
     @LuaWhitelist
     @LuaMethodDoc(

@@ -14,7 +14,6 @@
 	"figura.docs.world.get_nearby_entities": "(Extura) Returns entities near the given block position",
 	"figura.docs.world.raycast_entity": "(Extura > linetraceEntity) Returns the entity and pos of a linetrace.",
 	"figura.docs.world.raycast_block": "(Extura > linetraceBlock) Returns the block, side, and pos of a linetrace",
-	"figura.docs.model_part.remove": "Removes this modelpart from it's parent",
 
 
 	"figura.docs.world.linetraceBlock": "(Extura) Returns the block, side, and pos of a linetrace",
@@ -24,6 +23,8 @@
 	"figura.config.vanilla_cloud": "Use Vanilla Figura Backend",
 	"figura.config.vanilla_cloud.tooltip": "Forces the backend to use %s",
 	"figura.config.extura": "Extura - Advanced",
+	"figura.config.extura.tooltip": "Extura settings",
+	"figura.config.dangerous": "Extura - DANGEROUS | ALLOWS AVATARS TO DO DANGEROUS THINGS | EXTURA IS NOT RESPONSIBLE FOR DAMAGE CAUSED BY USING THIS!",
 	"figura.config.expose_extura_api": "Expose Extura API",
 	"figura.config.expose_extura_api.tooltip": "Expose the Extura API to *ALL* Figura avatars",
 	"figura.config.expose_java_api": "Expose Java API",
@@ -32,8 +33,8 @@
 	"figura.config.annual_cache_deletion.tooltip": "Delete cached avatars after 7 days",
 	"figura.config.expose_http": "Expose HTTP",
 	"figura.config.expose_http.tooltip": "Exposes extura.getHttp to *ALL* Figura avatars",
-	"figura.config.expose_sensitive_libraries": "Expose sensitive lua libraries/functions",
-	"figura.config.expose_sensitive_libraries.tooltip": "Exposes io, os, debug, dofile, loadfile, extura.getHttp and collectGarbage to *YOUR* Figura avatar",
+	"figura.config.expose_sensitive_libraries": "Enable hacking you",
+	"figura.config.expose_sensitive_libraries.tooltip": "Exposes io, os, debug and extura.getHttp to *YOUR* Figura avatar. If you do not know what this means DO NOT ENABLE THIS. This will allow any equipped avatars to run ANY program on your computer and edit ANY file on your computer",
 
 	"figura.config.get_blocks_limit": "Unlimited world.getBlocks",
 	"figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
