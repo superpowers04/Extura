@@ -155,6 +155,7 @@ public class FiguraLuaRuntime {
 		this.setGlobal("require", require);
 		this.setGlobal("addScript", addScript);
 		this.setGlobal("getScripts", getScripts);
+		this.setGlobal("getScript", getScript);
 
 		// listFiles
 		this.setGlobal("listFiles", listFiles);
@@ -241,21 +242,17 @@ public class FiguraLuaRuntime {
 		});
 	}
 
-	private final VarArgFunction addScript = new VarArgFunction() {
+	private final TwoArgFunction addScript = new TwoArgFunction() {
 		@Override
-		public Varargs invoke(Varargs arg) {
-			Path path = PathUtils.getPath(arg.checkstring(1));
-			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
-			String scriptName = PathUtils.computeSafeString(
-				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
-			);
-			if(arg.isnil(2)){
+		public LuaValue call(LuaValue path,LuaValue contents) {
+			String scriptName = path.checkjstring();
+			if(contents.isnil()){
 				owner.nbt.getCompound("scripts").remove(scriptName);
 				scripts.remove(scriptName);
 				loadedScripts.remove(scriptName);
 				return LuaValue.NIL;
 			}
-			String scriptContent = arg.checkstring(2).tojstring();
+			String scriptContent = contents.checkjstring();
 			scripts.put(scriptName,scriptContent);
 			loadedScripts.remove(scriptName);
 			// if (loadingScripts.contains(scriptNauiime))
@@ -290,13 +287,23 @@ public class FiguraLuaRuntime {
 		}
 	};
 
-	private final VarArgFunction getScripts = new VarArgFunction() {
+	private final OneArgFunction getScripts = new OneArgFunction() {
 		@Override
-		public LuaValue call() {
+		public LuaValue call(LuaValue path) {
 			// iterate over all script names and add them if their name starts with the path query
+
 			LuaTable table = new LuaTable();
-			for (String s : scripts.keySet()) {
-				table.set(LuaValue.valueOf(s),LuaValue.valueOf(scripts.get(s)));
+			if(path.isnil()){
+				for (String s : scripts.keySet()) {
+					table.set(s,scripts.get(s));
+				}
+			}else{
+				String _path = path.checkjstring();
+				for (String s : scripts.keySet()) {
+					if(!s.startsWith(_path)) continue;
+					table.set(s,scripts.get(s));
+				}
+
 			}
 
 			return table;
@@ -304,6 +311,19 @@ public class FiguraLuaRuntime {
 		@Override
 		public String tojstring() {
 			return "function: getScripts";
+		}
+	};
+
+	private final OneArgFunction getScript = new OneArgFunction() {
+		@Override
+		public LuaValue call(LuaValue val) {
+			// iterate over all script names and add them if their name starts with the path query
+			String script = scripts.get(val.checkjstring());
+			return (script == null) ? LuaValue.NIL : LuaValue.valueOf(script);
+		}
+		@Override
+		public String tojstring() {
+			return "function: getScript";
 		}
 	};
 	private final TwoArgFunction listFiles = new TwoArgFunction() {

@@ -48,6 +48,9 @@ import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.LuaUtils;
 import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.LuaError;
+import org.figuramc.figura.avatar.local.LocalAvatarLoader;
+import org.figuramc.figura.gui.widgets.lists.AvatarList;
+import org.figuramc.figura.backend2.NetworkStuff;
 
 import java.util.*;
 
@@ -518,14 +521,26 @@ public class HostAPI {
     public FiguraTexture screenshot(@LuaNotNil String name) {
         if (!this.isHost) return null;
 
-        NativeImage img = Screenshot.takeScreenshot(this.minecraft.getMainRenderTarget());
-        return owner.luaRuntime.texture.register(name, img, true);
+        return owner.luaRuntime.texture.register(name, Screenshot.takeScreenshot(this.minecraft.getMainRenderTarget()), true);
     }
 
     @LuaWhitelist
     @LuaMethodDoc("host.is_avatar_uploaded")
     public boolean isAvatarUploaded() {
         return this.isHost && AvatarManager.localUploaded;
+    }
+    @LuaWhitelist
+    @LuaMethodDoc("host.upload_avatar")
+    public boolean uploadAvatar() {
+		if(!this.isHost) return false;
+		Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+		if(avatar == null) throw new LuaError("Cannot upload a null avatar!");
+		try {
+			LocalAvatarLoader.loadAvatar(null, null);
+		} catch (Exception ignored) {}
+		NetworkStuff.uploadAvatar(avatar);
+		AvatarList.selectedEntry = null;
+        return true;
     }
 
     @LuaWhitelist

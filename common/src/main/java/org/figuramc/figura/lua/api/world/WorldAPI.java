@@ -628,6 +628,34 @@ public class WorldAPI {
             return false;
         }
     }
+    // @LuaWhitelist
+    // @LuaMethodDoc(
+    //         overloads = {
+    //                 @LuaMethodOverload(
+    //                         argumentTypes = {BlockStateAPI.class, FiguraVec3.class},
+    //                         argumentNames = {"block", "pos"}
+    //                 ),
+    //                 @LuaMethodOverload(
+    //                         argumentTypes = {BlockStateAPI.class, Double.class, Double.class, Double.class},
+    //                         argumentNames = {"block", "x", "y", "z"}
+    //                 )
+    //         },
+    //         value = "world.send_block"
+    // )
+    // public static Boolean sendBlock(@LuaNotNil String string, Object x, Double y, Double z) {
+    //     BlockPos pos = LuaUtils.parseVec3("setBlock", x, y, z).asBlockPos();
+    //     try {
+    //         Level level = getCurrentWorld();
+    //         if(!level.hasChunkAt(pos)) return false;
+    //         BlockState block = BlockStateArgument.block(CommandBuildContext.simple(level.registryAccess(), level.enabledFeatures())).parse(new StringReader(string)).getState();
+	// 		BlockState oldBlock = level.getBlockState(pos);
+    //         level.setBlockAndUpdate(pos,block);
+    //         level.syncBlockState(pos,block,pos);
+    //         return true;
+    //     } catch (Exception e) {
+    //         return false;
+    //     }
+    // }
 
     @LuaWhitelist
     @LuaMethodDoc(

@@ -194,18 +194,19 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             FiguraVec3 pos = customization.getAnimPos();
             pos.add(-vec.x, vec.y, vec.z);
             customization.setAnimPos(pos.x, pos.y, pos.z);
-        } else {
-            customization.setAnimPos(-vec.x, vec.y, vec.z);
+            return;
         }
+        customization.setAnimPos(-vec.x, vec.y, vec.z);
     }
     public void animRotation(FiguraVec3 vec, boolean merge) {
         if (merge) {
             FiguraVec3 rot = customization.getAnimRot();
             rot.add(-vec.x, -vec.y, vec.z);
             customization.setAnimRot(rot.x, rot.y, rot.z);
-        } else {
-            customization.setAnimRot(-vec.x, -vec.y, vec.z);
+            return;
         }
+        customization.setAnimRot(-vec.x, -vec.y, vec.z);
+        
     }
     public void globalAnimRot(FiguraVec3 vec, boolean merge) {
         /*FiguraModelPart part = parent;
@@ -221,9 +222,10 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             FiguraVec3 scale = customization.getAnimScale();
             scale.multiply(vec);
             customization.setAnimScale(scale.x, scale.y, scale.z);
-        } else {
-            customization.setAnimScale(vec.x, vec.y, vec.z);
+            return;
         }
+        customization.setAnimScale(vec.x, vec.y, vec.z);
+        
     }
 
     // -- LUA BUSINESS --//
@@ -284,7 +286,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     @LuaMethodDoc("model_part.get_children")
     public Map<Integer, FiguraModelPart> getChildren() {
         Map<Integer, FiguraModelPart> map = new HashMap<>();
-        for (int i = 0; i < this.children.size(); i++)
+        Int size = this.children.size();
+        for (int i = 0; i < size; i++)
             map.put(i + 1, this.children.get(i));
         return map;
     }
@@ -330,8 +333,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_pos"
     )
     public FiguraModelPart setPos(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setPos", x, y, z);
-        this.customization.setPos(vec);
+        this.customization.setPos(LuaUtils.parseVec3("setPos", x, y, z));
         return this;
     }
 
@@ -374,8 +376,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_rot"
     )
     public FiguraModelPart setRot(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setRot", x, y, z);
-        this.customization.setRot(vec);
+        this.customization.setRot(LuaUtils.parseVec3("setRot", x, y, z));
         return this;
     }
 
@@ -435,8 +436,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_offset_rot"
     )
     public FiguraModelPart setOffsetRot(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setOffsetRot", x, y, z);
-        this.customization.offsetRot(vec);
+        this.customization.offsetRot(LuaUtils.parseVec3("setOffsetRot", x, y, z));
         return this;
     }
 
@@ -479,8 +479,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_scale"
     )
     public FiguraModelPart setScale(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseOneArgVec("setScale", x, y, z, 1d);
-        this.customization.setScale(vec);
+        this.customization.setScale(LuaUtils.parseOneArgVec("setScale", x, y, z, 1d));
         return this;
     }
 
@@ -511,8 +510,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_offset_scale"
     )
     public FiguraModelPart setOffsetScale(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseOneArgVec("setOffsetScale", x, y, z, 1d);
-        this.customization.offsetScale(vec);
+        this.customization.offsetScale(LuaUtils.parseOneArgVec("setOffsetScale", x, y, z, 1d));
         return this;
     }
 
@@ -555,8 +553,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_pivot"
     )
     public FiguraModelPart setPivot(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setPivot", x, y, z);
-        this.customization.setPivot(vec);
+        this.customization.setPivot(LuaUtils.parseVec3("setPivot", x, y, z));
         return this;
     }
 
@@ -587,8 +584,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_offset_pivot"
     )
     public FiguraModelPart setOffsetPivot(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setOffsetPivot", x, y, z);
-        this.customization.offsetPivot(vec);
+        this.customization.offsetPivot(LuaUtils.parseVec3("setOffsetPivot", x, y, z));
         return this;
     }
 
@@ -946,9 +942,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             aliases = "uv",
             value = "model_part.set_uv")
     public FiguraModelPart setUV(Object x, Double y) {
-        this.customization.uvMatrix.reset();
         FiguraVec2 uv = LuaUtils.parseVec2("setUV", x, y);
-        this.customization.uvMatrix.translate(uv.x % 1, uv.y % 1);
+        this.customization.uvMatrix.reset().translate(uv.x % 1, uv.y % 1);
         return this;
     }
 
@@ -1006,8 +1001,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         if (this.textureWidth == -1 || this.textureHeight == -1) {
             if (this.customization.partType == PartCustomization.PartType.GROUP)
                 throw new LuaError("Cannot call getUVPixels on groups!");
-            else
-                throw new LuaError("Cannot call getUVPixels on parts with multiple texture sizes!");
+            else throw new LuaError("Cannot call getUVPixels on parts with multiple texture sizes!");
         }
 
         return getUV().multiply(this.textureWidth, this.textureHeight);
@@ -1036,7 +1030,25 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public FiguraMat3 getUVMatrix() {
         return this.customization.uvMatrix;
     }
-
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = FiguraVec3.class,
+                            argumentNames = "color"
+                    ),
+                    @LuaMethodOverload(
+                            argumentTypes = {Double.class, Double.class, Double.class},
+                            argumentNames = {"r", "g", "b"}
+                    )
+            },
+            value = "model_part.set_color")
+    public FiguraModelPart setColorUnlimited(Object r, Double g, Double b) {
+        FiguraVec3 vec = LuaUtils.parseVec3("setColor", r, g, b);
+        this.customization.color.set(vec);
+        this.customization.color2.set(vec);
+        return this;
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
@@ -1303,8 +1315,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_item")
     public ItemTask newItem(@LuaNotNil String name) {
-        ItemTask task = new ItemTask(name, owner, this);
-        this.renderTasks.put(name, task);
+        this.renderTasks.put(name, new ItemTask(name, owner, this));
         return task;
     }
 
@@ -1316,8 +1327,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_block")
     public BlockTask newBlock(@LuaNotNil String name) {
-        BlockTask task = new BlockTask(name, owner, this);
-        this.renderTasks.put(name, task);
+        this.renderTasks.put(name, new BlockTask(name, owner, this));
         return task;
     }
 
@@ -1338,8 +1348,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_sprite")
     public SpriteTask newSprite(@LuaNotNil String name) {
-        SpriteTask task = new SpriteTask(name, owner, this);
-        this.renderTasks.put(name, task);
+        this.renderTasks.put(name, new SpriteTask(name, owner, this));
         return task;
     }
 
@@ -1351,8 +1360,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_entity")
     public EntityTask newEntity(@LuaNotNil String name) {
-        EntityTask task = new EntityTask(name, owner, this);
-        this.renderTasks.put(name, task);
+        this.renderTasks.put(name, new EntityTask(name, owner, this));
         return task;
     }
 
@@ -1377,8 +1385,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public Object getTask(String name) {
         if (name != null)
             return this.renderTasks.get(name);
-        else
-            return this.renderTasks;
+        return this.renderTasks;
     }
 
     @LuaWhitelist
@@ -1580,12 +1587,9 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
 
     @Override
     public int compareTo(FiguraModelPart o) {
-        if (this.isChildOf(o))
-            return 1;
-        else if (o.isChildOf(this))
-            return -1;
-        else
-            return 0;
+        if (this.isChildOf(o)) return 1;
+        else if (o.isChildOf(this)) return -1;
+        return 0;
     }
 
     @Override

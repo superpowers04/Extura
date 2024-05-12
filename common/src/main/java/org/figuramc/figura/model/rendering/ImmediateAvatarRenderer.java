@@ -175,13 +175,13 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         return prev - Math.max(remainingComplexity[0], 0);
     }
 
+    double s = 1.0 / 16;
     protected PartCustomization setupRootCustomization(double vertOffset) {
         PartCustomization customization = new PartCustomization();
 
         customization.setPrimaryRenderType(RenderTypes.TRANSLUCENT);
         customization.setSecondaryRenderType(RenderTypes.EMISSIVE);
 
-        double s = 1.0 / 16;
         customization.positionMatrix.scale(s, s, s);
         customization.positionMatrix.rotateZ(180);
         customization.positionMatrix.translate(0, vertOffset, 0);

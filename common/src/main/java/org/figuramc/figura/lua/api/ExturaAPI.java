@@ -8,6 +8,7 @@ import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.permissions.Permissions;
+// import org.figuramc.figura.lua.api.java.ExturaClassAPI;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import org.luaj.vm2.LuaFunction;
 public class ExturaAPI {
 	private final Avatar owner;
 	private final boolean isHost;
-	private final static Integer VERSION = 5;
+	private final static Integer VERSION = 6;
 
 	public ExturaAPI(Avatar owner) {
 		this.isHost = (this.owner = owner).isHost;
@@ -38,7 +39,7 @@ public class ExturaAPI {
 		if (arg == null || !this.isHost) return null;
 		Field obj;
 		try {
-			 obj = Configs.class.getDeclaredField(arg);
+				obj = Configs.class.getDeclaredField(arg);
 		}catch(java.lang.NoSuchFieldException ignored){
 			return null;
 		}
@@ -48,9 +49,15 @@ public class ExturaAPI {
 			return null;
 		}
 	}
+	// @LuaWhitelist
+	// @LuaMethodDoc("extura.get_class")
+	// public ExturaClassAPI getClass(String arg) {
+	// 	if (arg == null || !this.isHost) return null;
+	// 	return ExturaClassAPI.fromString(arg);
+	// }
 	@LuaWhitelist
 	@LuaMethodDoc("extura.http_get")
-	public Object httpGet(String arg) {
+	public Object httpGet(String arg,Map<String, List<String>> headers) {
 		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return null;
 		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
 		try{
@@ -83,20 +90,7 @@ public class ExturaAPI {
 		// if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
 		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
 		CompletableFuture.runAsync(() -> {
-			try{
-				// https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
-				URLConnection connec = new URI(arg).toURL().openConnection();
-				BufferedReader in = new BufferedReader(new InputStreamReader(connec.getInputStream()));
-				String ret = "";
-				String inLine;
-				while ((inLine = in.readLine()) != null) ret += inLine;
-				func.call(ret);
-				return;
-			}catch (URISyntaxException | MalformedURLException err) {
-				throw new LuaError("Unable to parse URL: " + err);
-			}catch(IOException err){
-				throw new LuaError("Unable to send request: " + err);
-			}
+			func.call(httpGet(arg));
 		});
 		return;
 	}

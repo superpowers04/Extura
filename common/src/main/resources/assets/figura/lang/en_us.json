@@ -1,7 +1,8 @@
 {
 	"figura.docs.globals.extura": "The Extura object that contains some random stuff. Only visible if it's enabled in the settings.",
-	"figura.docs.globals.edit_script": "(Extura) Allows you to add, edit or remove scripts from your avatar.\nAccepts 2 strings, if the second string is nil, the script is unloaded. Note this will NOT remove events",
-	"figura.docs.globals.get_scripts": "(Extura) Returns a table containing script names and their contents.",
+	"figura.docs.globals.add_script": "(Extura) Allows you to add, edit or remove scripts from your avatar.\nAccepts 2 strings, if the second string is nil, the script is unloaded. Note this will NOT remove events",
+	"figura.docs.globals.get_scripts": "(Extura) Returns a table of script names.",
+	"figura.docs.globals.get_script": "(Extura) Returns the contents of a script or nil if the script doesn't exist.",
 
 	"figura.config.use_secure_cloud": "(Extura) Secure Cloud",
 	"figura.config.use_secure_cloud.tooltip": "Whether to use a Secure Connection for the cloud",
@@ -46,6 +47,7 @@
 	"figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
 	"figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used",
 
+	"figura.docs.host.upload_avatar": "(Extura) Uploads your current avatar to the backend and then reloads it",
 	"figura.docs.host.set_pose": "(Extura) Set the player's pose",
 	"figura.docs.host.set_player_movement": "(Extura) Set if the player can move normally",
 	"figura.docs.host.get_player_movement": "(Extura) Get if the player can move normally",

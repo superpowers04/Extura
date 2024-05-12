@@ -174,10 +174,7 @@ public abstract class AvatarRenderer {
      */
     public static FiguraMat4 entityToWorldMatrix(Entity e, float delta) {
         double yaw = e instanceof LivingEntity le ? Mth.lerp(delta, le.yBodyRotO, le.yBodyRot) : e.getViewYRot(Minecraft.getInstance().getFrameTime());
-        FiguraMat4 result = FiguraMat4.of();
-        result.rotateX(180 - yaw);
-        result.translate(e.getPosition(delta));
-        return result;
+        return FiguraMat4.of().rotateX(180 - yaw).translate(e.getPosition(delta));
     }
 
     public static double getYawOffsetRot(Entity e, float delta) {
@@ -190,19 +187,14 @@ public abstract class AvatarRenderer {
      * player's camera position and orientation.
      * @return That matrix.
      */
-    public static FiguraMat4 worldToViewMatrix() {
-        Minecraft client = Minecraft.getInstance();
-        Camera camera = client.gameRenderer.getMainCamera();
-        Matrix3f cameraMat3f = new Matrix3f().rotation(camera.rotation());
-        cameraMat3f.invert();
-        FiguraMat4 result = FiguraMat4.of();
-        Vec3 cameraPos = camera.getPosition().scale(-1);
-        result.translate(cameraPos.x, cameraPos.y, cameraPos.z);
-        FiguraMat3 cameraMat = FiguraMat3.of().set(cameraMat3f);
-        result.multiply(cameraMat.augmented());
-        result.scale(-1, 1, -1);
-        return result;
-    }
+	public static FiguraMat4 worldToViewMatrix() {
+		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+		Vec3 cameraPos = camera.getPosition().scale(-1);
+		return FiguraMat4.of()
+				.translate(cameraPos.x, cameraPos.y, cameraPos.z)
+				.multiply(FiguraMat3.of().set(new Matrix3f().rotation(camera.rotation()).invert()).augmented())
+				.scale(-1, 1, -1);
+	}
 
     public void setupRenderer(PartFilterScheme currentFilterScheme, MultiBufferSource bufferSource, PoseStack matrices, float tickDelta, int light, float alpha, int overlay, boolean translucent, boolean glowing) {
         this.setupRenderer(currentFilterScheme, bufferSource, tickDelta, light, alpha, overlay, translucent, glowing);
@@ -235,14 +227,9 @@ public abstract class AvatarRenderer {
         PoseStack.Pose pose = matrices.last();
 
         // pos
-        Matrix4d posMat = new Matrix4d(pose.pose());
-        posMat.translate(-camX, -camY, -camZ);
-        posMat.scale(-1, -1, 1);
-        this.posMat.set(posMat);
+        this.posMat.set(new Matrix4d(pose.pose()).translate(-camX, -camY, -camZ).scale(-1, -1, 1));
 
         // normal
-        Matrix3f normalMat = new Matrix3f(pose.normal());
-        normalMat.scale(-1, -1, 1);
-        this.normalMat.set(normalMat);
+        this.normalMat.set(new Matrix3f(pose.normal()).scale(-1, -1, 1));
     }
 }
