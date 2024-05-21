@@ -35,6 +35,8 @@ import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.NoiseGenerator;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaTable;
 import org.figuramc.figura.math.vector.FiguraVec2;
@@ -45,6 +47,7 @@ import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaTable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -76,6 +79,45 @@ public class WorldAPI {
     public static BiomeAPI getBiome(Object x, Double y, Double z) {
         FiguraVec3 pos = LuaUtils.parseVec3("getBiome", x, y, z);
         return new BiomeAPI(getCurrentWorld().getBiome(pos.asBlockPos()).value(), pos.asBlockPos());
+    }
+    
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = String.class,
+                            argumentNames = "id"
+                    ),
+            },
+            value = "world.get_map_data"
+    )
+    public static HashMap<String, Object> getMapData(String id) {
+        MapItemSavedData data = getCurrentWorld().getMapData(id);
+
+        if (data == null)
+            return null;
+
+        HashMap<String, Object> map = new HashMap<>();
+
+        map.put("center_x", data.centerX);
+        map.put("center_z", data.centerZ);
+        map.put("locked", data.locked);
+        map.put("scale", data.scale);
+
+        ArrayList<HashMap<String, Object>> decorations = new ArrayList<>();
+        for (MapDecoration decoration : data.getDecorations()) {
+                HashMap<String, Object> decorationMap = new HashMap<>();
+                decorationMap.put("type", decoration.getType().toString());
+                decorationMap.put("name", decoration.getName() == null ? "" : decoration.getName().getString());
+                decorationMap.put("x", decoration.getX());
+                decorationMap.put("y", decoration.getY());
+                decorationMap.put("rot", decoration.getRot());
+                decorationMap.put("image", decoration.getImage());
+                decorations.add(decorationMap);
+        }
+        map.put("decorations", decorations);
+
+        return map;
     }
 
     @SuppressWarnings("deprecation")
@@ -447,7 +489,31 @@ public class WorldAPI {
         }
         return entityList;
     }
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = {FiguraVec3.class, FiguraVec3.class},
+                            argumentNames = {"pos1", "pos2"}
+                    ),
+                    @LuaMethodOverload(
+                            argumentTypes = {Double.class, Double.class, Double.class, Double.class, Double.class, Double.class},
+                            argumentNames = {"x1", "y1", "z1", "x2", "y2", "z2"}
+                    )
+            },
+            value = "world.get_entities"
+    )
+    public static List<EntityAPI<?>> getEntities(Object x1, Object y1, Double z1, Double x2, Double y2, Double z2) {
+        Pair<FiguraVec3, FiguraVec3> pair = LuaUtils.parse2Vec3("getEntities", x1, y1, z1, x2, y2, z2, 1);
+        FiguraVec3 pos1 = pair.getFirst();
+        FiguraVec3 pos2 = pair.getSecond();
 
+        AABB aabb = new AABB(pos1.asVec3(), pos2.asVec3());
+        return getCurrentWorld().getEntitiesOfClass(Entity.class, aabb)
+                .stream()
+                .map(EntityAPI::wrap)
+                .collect(Collectors.toList());
+    }
 
     @LuaWhitelist
     @LuaMethodDoc(

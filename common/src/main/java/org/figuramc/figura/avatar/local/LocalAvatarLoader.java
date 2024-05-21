@@ -337,7 +337,7 @@ public class LocalAvatarLoader {
 				Path path = entry.getKey().resolve((Path) event.context());
 				String name = IOUtils.getFileNameOrEmpty(path);
 
-				if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || name.matches("(.*(\\.lua|\\.bbmodel|\\.ogg|\\.png)$|avatar\\.json)")))
+				if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || name == "avatar.json" || name.matches("(\\.lua|\\.bbmodel|\\.ogg|\\.png)$")))
 					continue;
 
 				if (kind == StandardWatchEventKinds.ENTRY_CREATE && !IS_WINDOWS)
