@@ -380,4 +380,8 @@ public class Configs {
 				this.name = this.name.copy();
 				this.tooltip = FiguraText.of("config.annual_cache_deletion.tooltip");
 			}};
+	public static final ConfigType.BoolConfig HELPER_ERRORS = new ConfigType.BoolConfig("helper_errors", EXTURA, true) {{
+				this.name = this.name.copy();
+				this.tooltip = FiguraText.of("config.helper_errors.tooltip");
+			}};
 }

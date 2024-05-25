@@ -25,6 +25,8 @@
 	"figura.config.extura": "Extura - Advanced",
 	"figura.config.extura.tooltip": "Extura settings",
 	"figura.config.dangerous": "Extura - DANGEROUS | ALLOWS AVATARS TO DO DANGEROUS THINGS | EXTURA IS NOT RESPONSIBLE FOR DAMAGE CAUSED BY USING THIS!",
+	"figura.config.helper_errors": "Enable helper errors",
+	"figura.config.helper_errors.tooltip": "Enables the game throwing errors for extra things to help preventing confusing errors later",
 	"figura.config.expose_extura_api": "Expose Extura API",
 	"figura.config.expose_extura_api.tooltip": "Expose the Extura API to *ALL* Figura avatars",
 	"figura.config.expose_java_api": "Expose Java API",

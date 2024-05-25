@@ -268,10 +268,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         if (thisPassedPredicate) {
             // recalculate world matrices
             FiguraMod.popPushProfiler("worldMatrices");
-            if (allowMatrixUpdate) {
-                FiguraMat4 mat = partToWorldMatrices(custom);
-                part.savedPartToWorldMat.set(mat);
-            }
+            if (allowMatrixUpdate) part.savedPartToWorldMat.set(partToWorldMatrices(custom));
 
             // recalculate light
             FiguraMod.popPushProfiler("calculateLight");
@@ -279,10 +276,8 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
             if (custom.light != null)
                 updateLight = false;
             else if (updateLight && (l = Minecraft.getInstance().level) != null) {
-                FiguraVec3 pos = part.savedPartToWorldMat.apply(0d, 0d, 0d);
-                int block = l.getBrightness(LightLayer.BLOCK, pos.asBlockPos());
-                int sky = l.getBrightness(LightLayer.SKY, pos.asBlockPos());
-                customizationStack.peek().light = LightTexture.pack(block, sky);
+                var pos = part.savedPartToWorldMat.apply(0d, 0d, 0d).asBlockPos();
+                customizationStack.peek().light = LightTexture.pack(l.getBrightness(LightLayer.BLOCK, pos), l.getBrightness(LightLayer.SKY, pos));
             }
         }
 
@@ -354,10 +349,10 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         // render children
         FiguraMod.popPushProfiler("children");
         for (FiguraModelPart child : List.copyOf(part.children)) {
-            if (!renderPart(child, remainingComplexity, thisPassedPredicate)) {
-                breakRender = true;
-                break;
-            }
+            if (renderPart(child, remainingComplexity, thisPassedPredicate)) continue;
+            breakRender = true;
+            break;
+            
         }
 
         // reset the parent

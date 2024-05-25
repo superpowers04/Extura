@@ -344,7 +344,8 @@ public class Avatar {
     private boolean isCancelled(Varargs args) {
         if (args == null)
             return false;
-        for (int i = 1; i <= args.narg(); i++) {
+        int l = args.narg();
+        for (int i = 1; i <= l; i++) {
             if (args.arg(i).isboolean() && args.arg(i).checkboolean())
                 return true;
         }
@@ -422,7 +423,9 @@ public class Avatar {
 
     public String chatSendMessageEvent(String message) { // piped event
         Varargs val = loaded ? run("CHAT_SEND_MESSAGE", tick, message) : null;
-        return val == null || (!val.isnil(1) && !Configs.CHAT_MESSAGES.value) ? message : val.isnil(1) ? "" : val.arg(1).tojstring();
+        var ret = val == null || (!val.isnil(1) && !Configs.CHAT_MESSAGES.value) ? message : val.isnil(1) ? "" : val.arg(1).tojstring();
+
+        return (ret == null ? "" : ret);
     }
 
     public Pair<String, Integer> chatReceivedMessageEvent(String message, String json) { // special case

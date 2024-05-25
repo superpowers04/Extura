@@ -684,6 +684,7 @@ public class HostAPI {
 	)
 	public void setPos(Object x, Double y, Double z) {
 		if (!allowExturaCheats()) return;
+		if(x == null) return;
 		LocalPlayer player = this.minecraft.player;
 		player.setPos(LuaUtils.parseVec3("player_setPos", x, y, z).asVec3());
 	}

@@ -50,6 +50,66 @@ public class AvatarAPI {
 		return (LuaTable) NbtToLua.convert(avatar.nbt);
 	}
 
+	/* TODO: TYPE AUTO-DETECT AND MORE TYPES*/
+	@LuaWhitelist
+	@LuaMethodDoc("avatar.set_nbt")
+	public void setNBT(@LuaNotNil String path, Object value, String valueType) {
+		if(!avatar.isHost) throw new LuaError("Only the host avatar can be edited");
+		String[] seperatedPath = path.split("\\.");
+		if(seperatedPath.length == 0) throw new LuaError("Invalid path");
+		String vari = seperatedPath[seperatedPath.length-1];
+
+		if(vari == null) throw new LuaError("Invalid path");
+		CompoundTag currentNbt = avatar.nbt;
+		if(seperatedPath.length > 1){
+
+			for(var i=0; i < seperatedPath.length-1;i++){
+				String part = seperatedPath[i];
+				if(!currentNbt.contains(part)) throw new LuaError("Path " +path+" not found at "+part);
+				currentNbt = currentNbt.getCompound(part);
+			}
+		}
+		String type = (valueType == null ? (value == null || value == LuaValue.NIL ? "null" : value.getClass().toString()) : valueType).toLowerCase();
+		int lastDot = type.lastIndexOf('.');
+		if(lastDot != -1)
+			type=type.substring(lastDot+1);
+		switch(type){
+			case "float":
+				currentNbt.putFloat(vari,(float)value);
+				break;
+			case "int":
+				currentNbt.putInt(vari,(int)value);
+				break;
+			case "short":
+				currentNbt.putShort(vari,(short)value);
+				break;
+			case "double":
+				currentNbt.putDouble(vari,(double)value);
+				break;
+			case "string":
+				currentNbt.putString(vari,(String)value);
+				break;
+			case "bool":
+			case "boolean":
+				currentNbt.putBoolean(vari,(boolean)value);
+				break;
+			case "bytearray":
+				currentNbt.putByteArray(vari,(byte[])value);
+				break;
+			case "null":
+			case "nil":
+				currentNbt.remove(vari);
+				break;
+
+
+			default:
+				throw new LuaError("Value is invalid type "+type);
+		}
+
+
+		return;
+	}
+
 
 	@LuaWhitelist
 	@LuaMethodDoc(
