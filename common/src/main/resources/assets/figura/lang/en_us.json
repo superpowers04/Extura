@@ -60,7 +60,9 @@
 	"figura.docs.host.set_gravity": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity",
     
     "figura.docs.client.is_integrated_server": "(Extura) Returns true if the client is on it's integrated server",
-    
+    "figura.docs.host.set_shader_pack_name": "(Extura) Sets the currently selected shader pack, an empty value will select the internal shader",
+    "figura.docs.host.iris_save_config": "(Extura) Saves Iris's config",
+    "figura.docs.client.iris_reload": "(Extura) Reloads the currently selected shader",
     "figura.docs.client.regex_find": "(Extura) Checks a string against a (java flavor) Regular Expression and returns true if any matches are found",
     "figura.docs.client.regex_match": "(Extura) Matches a string against a (java flavor) Regular Expression and returns all matches",
     "figura.docs.client.regex_replace": "(Extura) Matches a string against a (java flavor) Regular Expression and replaces all matches with a specified string",

@@ -565,7 +565,32 @@ public class HostAPI {
 
 		return list;
 	}
-
+	@LuaWhitelist
+	@LuaMethodDoc("host.set_shader_pack_name")
+	public void setShaderPackName(@LuaNotNil String name) {
+		if(!this.isHost) return;
+		try{
+			net.irisshaders.iris.Iris.getIrisConfig().setShaderPackName(name);
+			// Class.forName("net.irisshaders.iris.Iris").getMethod("getIrisConfig")().getMethod("setShaderPackName")(name);
+		}catch(Exception ignored){}
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.iris_save_config")
+	public void irisSaveConfig() {
+		if(!this.isHost) return;
+		try {
+			net.irisshaders.iris.Iris.getIrisConfig().save();
+			// .getMethod("save").invoke(conf);
+		}catch(Exception ignored){}
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.iris_reload")
+    public void irisReload() {
+		if (!this.isHost) return;
+		try {
+			net.irisshaders.iris.Iris.reload();
+        }catch (Exception ignored) {}
+    }
 	@LuaWhitelist
 	@LuaMethodDoc("host.get_clipboard")
 	public String getClipboard() {
@@ -828,30 +853,30 @@ public class HostAPI {
 		PlayerInfo playerInfo = connection != null ? connection.getPlayerInfo(owner.owner) : null;
 		return playerInfo != null && playerInfo.hasVerifiableChat();
 	}
-    @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = {
-                    @LuaMethodOverload(argumentTypes = String.class, argumentNames = "string"),
-            },
-            value = "host.write_to_log"
-    )
-    public void writeToLog(@LuaNotNil String string) {
-        if (!isHost()) return;
-        FiguraMod.LOGGER.info("[FIGURA/LUA] -- " + string);
-    }
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {
+					@LuaMethodOverload(argumentTypes = String.class, argumentNames = "string"),
+			},
+			value = "host.write_to_log"
+	)
+	public void writeToLog(@LuaNotNil String string) {
+		if (!isHost()) return;
+		FiguraMod.LOGGER.info("[FIGURA/LUA] -- " + string);
+	}
 
-    @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = {
-                    @LuaMethodOverload(argumentTypes = String.class, argumentNames = "string"),
-            },
-            value = "host.warn_to_log"
-    )
-    public void warnToLog(@LuaNotNil String string) {
-        if (!isHost()) return;
-        FiguraMod.LOGGER.warn("[FIGURA/LUA] -- " + string);
-    }
-    
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {
+					@LuaMethodOverload(argumentTypes = String.class, argumentNames = "string"),
+			},
+			value = "host.warn_to_log"
+	)
+	public void warnToLog(@LuaNotNil String string) {
+		if (!isHost()) return;
+		FiguraMod.LOGGER.warn("[FIGURA/LUA] -- " + string);
+	}
+	
 	public Object __index(String arg) {
 		if ("unlockCursor".equals(arg))
 			return unlockCursor;
