@@ -299,7 +299,7 @@
     "figura.gui.wardrobe.expand_wardrobe.tooltip": "Expand wardrobe list",
     "figura.gui.wardrobe.minimize_wardrobe.tooltip": "Minimize wardrobe list",
     "figura.gui.wardrobe.upload.tooltip": "Upload avatar to the Cloud\nOther players only see you as your uploaded avatar",
-    "figura.gui.wardrobe.reload.tooltip": "Reload avatar from the Cloud",
+    "figura.gui.wardrobe.reload.tooltip": "Unload avatar & Reconnect to the cloud",
     "figura.gui.wardrobe.delete.tooltip": "Delete avatar from the Cloud",
     "figura.gui.wardrobe.sound.tooltip": "Avatar Sounds",
     "figura.gui.wardrobe.keybind.tooltip": "Avatar Keybinds",

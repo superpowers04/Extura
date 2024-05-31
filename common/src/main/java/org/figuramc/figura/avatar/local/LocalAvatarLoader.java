@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -145,7 +146,6 @@ public class LocalAvatarLoader {
 				AvatarMetadataParser.injectToModels(metadata, models);
 				AvatarMetadataParser.injectToTextures(metadata, textures);
 
-				// return :3
 				if (!models.isEmpty()) nbt.put("models", models);
 				if (!textures.isEmpty()) nbt.put("textures", textures);
 				if (!animations.isEmpty()) nbt.put("animations", animations);
@@ -173,8 +173,7 @@ public class LocalAvatarLoader {
 		Map<String, Path> pathMap = new HashMap<>();
 		matchPathsRecursive(pathMap, parentPath, parentPath, pathMatchers);
 		CompoundTag resourcesTag = new CompoundTag();
-		for (String p:
-				pathMap.keySet()) {
+		for (String p:pathMap.keySet()) {
 			try (FileInputStream fis = new FileInputStream(pathMap.get(p).toFile())) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				GZIPOutputStream gos = new GZIPOutputStream(baos);
@@ -315,14 +314,36 @@ public class LocalAvatarLoader {
 
 		return result;
 	}
-
+	public static Matcher ValidFileMatcher = Pattern.compile(".*(avatar.json|(\\.lua|\\.bbmodel|\\.ogg|\\.png))$").matcher("");
 	/**
 	 * Tick the watched key for hotswapping avatars
 	 */
 	public static void tick() {
 		WatchEvent<?> event = null;
-		boolean reload = false;
+		if(IS_WINDOWS){ // This literally just removes one unix-only check, but it prevents some useless looping :3
+			for (Map.Entry<Path, WatchKey> entry : KEYS.entrySet()) {
+				WatchKey key = entry.getValue();
+				if (!key.isValid())
+					continue;
 
+				for (WatchEvent<?> watchEvent : key.pollEvents()) {
+					if (watchEvent.kind() == StandardWatchEventKinds.OVERFLOW)
+						continue;
+
+					event = watchEvent;
+					Path path = entry.getKey().resolve((Path) event.context());
+					String name = IOUtils.getFileNameOrEmpty(path);
+
+					if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
+						continue;
+					FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
+					AvatarManager.loadLocalAvatar(lastLoadedPath);
+					return;
+				}
+			}
+			return;
+		}
+		boolean reload = false;
 		for (Map.Entry<Path, WatchKey> entry : KEYS.entrySet()) {
 			WatchKey key = entry.getValue();
 			if (!key.isValid())
@@ -337,18 +358,16 @@ public class LocalAvatarLoader {
 				Path path = entry.getKey().resolve((Path) event.context());
 				String name = IOUtils.getFileNameOrEmpty(path);
 
-				if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || name == "avatar.json" || name.matches("(\\.lua|\\.bbmodel|\\.ogg|\\.png)$")))
+				if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
 					continue;
 
-				if (kind == StandardWatchEventKinds.ENTRY_CREATE && !IS_WINDOWS)
+				// This is it, this is the Unix-only check. I(superpowers04) dunno why only Unix needs to add paths like this
+				if (kind == StandardWatchEventKinds.ENTRY_CREATE) 
 					addWatchKey(path, KEYS::put);
 
 				reload = true;
-				break;
-			}
 
-			if (reload)
-				break;
+			}
 		}
 
 		// reload avatar

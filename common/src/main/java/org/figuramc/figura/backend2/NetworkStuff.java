@@ -203,7 +203,11 @@ public class NetworkStuff {
 	public static void connect(String token) {
 		if (isConnected())
 			disconnect(null);
-		if(Configs.BLOCK_CLOUD.value) return;
+		if(Configs.BLOCK_CLOUD.value){
+			backendStatus = 1;
+			disconnectedReason = "Cloud disabled";
+			return;
+		}
 
 		backendStatus = 2;
 		connectAPI(token);
