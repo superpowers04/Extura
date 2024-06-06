@@ -38,6 +38,7 @@ subprojects {
 		modCompileOnly "maven.modrinth:iris:$iris"
 		modCompileOnly "maven.modrinth:immediatelyfast:$immediately_fast"
 		modCompileOnly "maven.modrinth:iris:$iris"
+		modCompileOnly "maven.modrinth:first-person-model:$firstperson"
 	}
 }
 
