@@ -353,6 +353,17 @@ public class ClientAPI {
 		LOADED_MODS.putIfAbsent(id, PlatformUtils.isModLoaded(id));
 		return LOADED_MODS.get(id);
 	}
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = @LuaMethodOverload(
+					argumentTypes = String.class,
+					argumentNames = "modID"
+			),
+			value = "host.get_mod_version"
+	)
+	public static String getModVersion(String id) {
+		return PlatformUtils.isModLoaded(id) ? PlatformUtils.getModVersion(id) : "" ;
+	}
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.has_shader_pack_mod")
