@@ -63,7 +63,7 @@
     "figura.docs.host.set_shader_pack_name": "(Extura) Sets the currently selected shader pack, an empty value will select the internal shader",
     "figura.docs.host.iris_save_config": "(Extura) Saves Iris's config",
     "figura.docs.client.iris_reload": "(Extura) Reloads the currently selected shader",
-    "figura.docs.client.get_mod_version": "(Extura) Get the Version of a mod as a string. Returns an empty string if mod isn't loaded",
+    "figura.docs.client.get_mod_version": "(Extura) Get the Version of a mod as a string. Returns an null if mod isn't loaded",
     "figura.docs.client.first_person_model_enabled": "(Extura) Gets whether First Person Model is currently enabled",
     "figura.docs.client.first_person_model_set_enabled": "(Extura) Sets whether First Person Model is currently enabled",
     "figura.docs.client.first_person_model_is_rendering_player": "(Extura) Gets whether First Person Model is currently rendering - only useful in a RENDER event",
