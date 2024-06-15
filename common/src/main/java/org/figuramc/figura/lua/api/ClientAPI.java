@@ -48,6 +48,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.io.IOException;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -352,6 +353,17 @@ public class ClientAPI {
 		LOADED_MODS.putIfAbsent(id, PlatformUtils.isModLoaded(id));
 		return LOADED_MODS.get(id);
 	}
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = @LuaMethodOverload(
+					argumentTypes = String.class,
+					argumentNames = "modID"
+			),
+			value = "host.get_mod_version"
+	)
+	public static String getModVersion(String id) {
+		return PlatformUtils.isModLoaded(id) ? PlatformUtils.getModVersion(id) : "" ;
+	}
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.has_shader_pack_mod")
@@ -413,27 +425,20 @@ public class ClientAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("client.first_person_model_enabled")
 	public static Boolean fpmIsEnabled() {
-	if (HAS_FIRSTPERSON) {
-		return dev.tr7zw.firstperson.api.FirstPersonAPI.isEnabled();
+		return HAS_FIRSTPERSON && dev.tr7zw.firstperson.api.FirstPersonAPI.isEnabled();
 	}
-        return false;
-    }
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.first_person_model_set_enabled")
-	public static void fpmSetEnabled(@LuaNotNil Boolean enabled) {
-		if (HAS_FIRSTPERSON) {
-			dev.tr7zw.firstperson.api.FirstPersonAPI.setEnabled(enabled);
-		}
+	public static void fpmSetEnabled(Boolean enabled) {
+		if (!HAS_FIRSTPERSON) return;
+		dev.tr7zw.firstperson.api.FirstPersonAPI.setEnabled(enabled);
 	}
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.first_person_model_is_rendering_player")
 	public static Boolean fpmIsRenderingPlayer() {
-		if (HAS_FIRSTPERSON) {
-			return dev.tr7zw.firstperson.api.FirstPersonAPI.isRenderingPlayer();
-		}
-		return false;
+		return HAS_FIRSTPERSON && dev.tr7zw.firstperson.api.FirstPersonAPI.isRenderingPlayer();
 	}
 
 	@LuaWhitelist
