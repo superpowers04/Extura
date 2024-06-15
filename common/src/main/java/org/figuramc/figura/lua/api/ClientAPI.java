@@ -61,6 +61,7 @@ public class ClientAPI {
 	private static final HashMap<String, Boolean> LOADED_MODS = new HashMap<>();
 	private static final boolean HAS_IRIS = PlatformUtils.isModLoaded("iris") || PlatformUtils.isModLoaded("oculus"); // separated to avoid indexing the list every frame
 	private static final boolean HAS_FIRSTPERSON = PlatformUtils.isModLoaded("firstperson");
+	public static final boolean HAS_CURIOS = PlatformUtils.isModLoaded("curios");
 	public static final Supplier<Boolean> OPTIFINE_LOADED = Suppliers.memoize(() ->
 	{
 		try

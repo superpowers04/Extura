@@ -28,6 +28,7 @@ subprojects {
 				includeGroup("com.eliotlash.mclib")
 			}
 		}
+		maven { url 'https://maven.theillusivec4.top/' }
 	}
 
 	dependencies {
@@ -37,8 +38,8 @@ subprojects {
 		// Mods
 		modCompileOnly "maven.modrinth:iris:$iris"
 		modCompileOnly "maven.modrinth:immediatelyfast:$immediately_fast"
-		modCompileOnly "maven.modrinth:iris:$iris"
 		modCompileOnly "maven.modrinth:first-person-model:$firstperson"
+		modCompileOnly "top.theillusivec4.curios:curios-forge:$curios:api"
 	}
 }
 
