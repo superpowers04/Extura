@@ -64,13 +64,10 @@ public class ClientAPI {
 	public static final boolean HAS_CURIOS = PlatformUtils.isModLoaded("curios");
 	public static final Supplier<Boolean> OPTIFINE_LOADED = Suppliers.memoize(() ->
 	{
-		try
-		{
+		try{
 			Class.forName("net.optifine.Config");
 			return true;
-		}
-		catch (ClassNotFoundException ignored)
-		{
+		}catch (ClassNotFoundException ignored){
 			return false;
 		}
 	});
@@ -90,9 +87,7 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_fps")
 	public static int getFPS() {
 		String s = getFPSString();
-		if (s.length() == 0)
-			return 0;
-		return Integer.parseInt(s.split(" ")[0]);
+		return s.length() == 0 ? 0 : Integer.parseInt(s.substring(0,s.indexOf(' ')));
 	}
 
 	@LuaWhitelist

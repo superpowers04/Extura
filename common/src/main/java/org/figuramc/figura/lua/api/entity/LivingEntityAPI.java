@@ -196,15 +196,11 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
         checkEntity();
 
         MobType mobType = entity.getMobType(); // why it is not an enum
-        if (mobType == MobType.ARTHROPOD)
-            return "ARTHROPOD";
-        if (mobType == MobType.UNDEAD)
-            return "UNDEAD";
-        if (mobType == MobType.WATER)
-            return "WATER";
-        if (mobType == MobType.ILLAGER)
-            return "ILLAGER";
-
+		if(mobType==MobType.ARTHROPOD) return "ARTHROPOD";
+		if(mobType==MobType.UNDEAD) return "UNDEAD";
+		if(mobType==MobType.WATER) return "WATER";
+		if(mobType==MobType.ILLAGER) return "ILLAGER";
+        
         return "UNDEFINED";
     }
 
@@ -239,41 +235,40 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
     @LuaWhitelist
     @LuaMethodDoc("entity.get_curio")
     public ItemStackAPI getCurio(@LuaNotNil String slotType, int slot) {
-        if(ClientAPI.HAS_CURIOS) {
-            try {
-                Class<?> CuriosAPI = Class.forName("top.theillusivec4.curios.api.CuriosApi");
-                Method getCuriosInventory = CuriosAPI.getDeclaredMethod("getCuriosInventory", LivingEntity.class);
-                Object cInventoryLazyOptionalOBJ = getCuriosInventory.invoke(CuriosAPI,entity);
+        if(!ClientAPI.HAS_CURIOS) return null;
+        try {
+            Class<?> CuriosAPI = Class.forName("top.theillusivec4.curios.api.CuriosApi");
+            Method getCuriosInventory = CuriosAPI.getDeclaredMethod("getCuriosInventory", LivingEntity.class);
+            Object cInventoryLazyOptionalOBJ = getCuriosInventory.invoke(CuriosAPI,entity);
 
-                Class<?> LazyOptional = cInventoryLazyOptionalOBJ.getClass();
-                Method resolve = LazyOptional.getDeclaredMethod("resolve");
-                Object cInventoryOptionalOBJ = resolve.invoke(cInventoryLazyOptionalOBJ);
+            Class<?> LazyOptional = cInventoryLazyOptionalOBJ.getClass();
+            Method resolve = LazyOptional.getDeclaredMethod("resolve");
+            Object cInventoryOptionalOBJ = resolve.invoke(cInventoryLazyOptionalOBJ);
 
-                Class<?> Optional = cInventoryOptionalOBJ.getClass();
-                Method get = Optional.getDeclaredMethod("get");
-                Object curiosInventoryOBJ = get.invoke(cInventoryOptionalOBJ);
+            Class<?> Optional = cInventoryOptionalOBJ.getClass();
+            Method get = Optional.getDeclaredMethod("get");
+            Object curiosInventoryOBJ = get.invoke(cInventoryOptionalOBJ);
 
-                Class<?> curiosInventory = curiosInventoryOBJ.getClass();
-                Method getStacksHandler = curiosInventory.getDeclaredMethod("getStacksHandler", String.class);
-                Object sHandlerOptionalOBJ = getStacksHandler.invoke(curiosInventoryOBJ,slotType);
+            Class<?> curiosInventory = curiosInventoryOBJ.getClass();
+            Method getStacksHandler = curiosInventory.getDeclaredMethod("getStacksHandler", String.class);
+            Object sHandlerOptionalOBJ = getStacksHandler.invoke(curiosInventoryOBJ,slotType);
 
-                Object stacksHandlerOBJ = get.invoke(sHandlerOptionalOBJ);
+            Object stacksHandlerOBJ = get.invoke(sHandlerOptionalOBJ);
 
-                Class<?> stacksHandler = stacksHandlerOBJ.getClass();
-                Method getStacks = stacksHandler.getDeclaredMethod("getStacks");
-                Object dynamicStackOBJ = getStacks.invoke(stacksHandlerOBJ);
+            Class<?> stacksHandler = stacksHandlerOBJ.getClass();
+            Method getStacks = stacksHandler.getDeclaredMethod("getStacks");
+            Object dynamicStackOBJ = getStacks.invoke(stacksHandlerOBJ);
 
-                Class<?> dynamicStack = Class.forName("net.minecraftforge.items.IItemHandler");
-                Method getStackInSlot = dynamicStack.getDeclaredMethod("getStackInSlot", int.class);
-                Object itemStackOBJ = getStackInSlot.invoke(dynamicStackOBJ,slot);
+            Class<?> dynamicStack = Class.forName("net.minecraftforge.items.IItemHandler");
+            Method getStackInSlot = dynamicStack.getDeclaredMethod("getStackInSlot", int.class);
+            Object itemStackOBJ = getStackInSlot.invoke(dynamicStackOBJ,slot);
 
-                return ItemStackAPI.verify((ItemStack) itemStackOBJ);
+            return ItemStackAPI.verify((ItemStack) itemStackOBJ);
 
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                return null;
-            }
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            return null;
         }
-        return null;
+        
     }
 
 

@@ -107,7 +107,7 @@ public class FiguraMod {
 	// mod root directory
 	public static Path getFiguraDirectory() {
 		String config = Configs.MAIN_DIR.value;
-		if(!config.isBlank()) return IOUtils.createDirIfNeeded(Path.of(config));
+		if(!config.isBlank()) return IOUtils.createDirIfNeeded(Path.of(config.toString()));
 		Path p = GAME_DIR.resolve(MOD_ID);
 		int indexOfInstances = p.toAbsolutePath().toString().lastIndexOf("instances");
 		

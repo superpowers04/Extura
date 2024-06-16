@@ -321,7 +321,10 @@ public class LocalAvatarLoader {
 	public static void tick() {
 		WatchEvent<?> event = null;
 		if(IS_WINDOWS){ // This literally just removes one unix-only check, but it prevents some useless looping :3
-			for (Map.Entry<Path, WatchKey> entry : KEYS.entrySet()) {
+
+			var entries = KEYS.entrySet();
+			for (Map.Entry<Path, WatchKey> entry : entries) {
+				if(entry == null) continue;
 				WatchKey key = entry.getValue();
 				if (!key.isValid())
 					continue;
@@ -344,7 +347,9 @@ public class LocalAvatarLoader {
 			return;
 		}
 		boolean reload = false;
-		for (Map.Entry<Path, WatchKey> entry : KEYS.entrySet()) {
+		var entries = KEYS.entrySet();
+		for (Map.Entry<Path, WatchKey> entry : entries) {
+			if(entry == null) continue;
 			WatchKey key = entry.getValue();
 			if (!key.isValid())
 				continue;
@@ -379,7 +384,8 @@ public class LocalAvatarLoader {
 
 	public static void resetWatchKeys() {
 		lastLoadedPath = null;
-		for (WatchKey key : KEYS.values())
+		var values = KEYS.values();
+		for (WatchKey key : values)
 			key.cancel();
 		KEYS.clear();
 	}
