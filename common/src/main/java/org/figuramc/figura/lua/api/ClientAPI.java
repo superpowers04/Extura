@@ -377,17 +377,17 @@ public class ClientAPI {
 	
 
 	
-	@LuaWhitelist
-	@LuaMethodDoc("client.iris_reload")
-	public static void irisReload() {
-		try {
-			if (HAS_IRIS) {
-				Class Iris = Class.forName("net.irisshaders.iris.Iris");
-				Iris.getMethod("reload").invoke(Iris);
-			}
-		}catch (Exception ignored) {
-		}
-	}
+	// @LuaWhitelist
+	// @LuaMethodDoc("client.iris_reload")
+	// public static void irisReload() {
+	// 	try {
+	// 		if (HAS_IRIS) {
+	// 			Class Iris = Class.forName("net.irisshaders.iris.Iris");
+	// 			Iris.getMethod("reload").invoke(Iris);
+	// 		}
+	// 	}catch (Exception ignored) {
+	// 	}
+	// }
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_shader_pack_name")
@@ -422,13 +422,6 @@ public class ClientAPI {
 	@LuaMethodDoc("client.first_person_model_enabled")
 	public static Boolean fpmIsEnabled() {
 		return HAS_FIRSTPERSON && dev.tr7zw.firstperson.api.FirstPersonAPI.isEnabled();
-	}
-
-	@LuaWhitelist
-	@LuaMethodDoc("client.first_person_model_set_enabled")
-	public static void fpmSetEnabled(Boolean enabled) {
-		if (!HAS_FIRSTPERSON) return;
-		dev.tr7zw.firstperson.api.FirstPersonAPI.setEnabled(enabled);
 	}
 
 	@LuaWhitelist

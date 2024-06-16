@@ -568,7 +568,7 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.set_shader_pack_name")
 	public void setShaderPackName(@LuaNotNil String name) {
-		if(!this.isHost) return;
+		if (!isHost || !ClientAPI.HAS_IRIS) return;
 		try{
 			net.irisshaders.iris.Iris.getIrisConfig().setShaderPackName(name);
 			// Class.forName("net.irisshaders.iris.Iris").getMethod("getIrisConfig")().getMethod("setShaderPackName")(name);
@@ -577,24 +577,33 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.iris_save_config")
 	public void irisSaveConfig() {
-		if(!this.isHost) return;
+		if (!isHost || !ClientAPI.HAS_IRIS) return;
 		try {
 			net.irisshaders.iris.Iris.getIrisConfig().save();
 			// .getMethod("save").invoke(conf);
 		}catch(Exception ignored){}
 	}
 	@LuaWhitelist
-	@LuaMethodDoc("host.iris_reload")
-    public void irisReload() {
-		if (!this.isHost) return;
-		try {
-			net.irisshaders.iris.Iris.reload();
-        }catch (Exception ignored) {}
-    }
-	@LuaWhitelist
 	@LuaMethodDoc("host.get_clipboard")
 	public String getClipboard() {
 		return this.isHost ? this.minecraft.keyboardHandler.getClipboard() : null;
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.iris_reload")
+	public static void irisReload() {
+		if (!isHost || !ClientAPI.HAS_IRIS) return;
+		try {
+			Class Iris = Class.forName("net.irisshaders.iris.Iris");
+			Iris.getMethod("reload").invoke(Iris);
+		}catch (Exception ignored) {
+		}
+	}
+
+	@LuaWhitelist
+	@LuaMethodDoc("client.first_person_model_set_enabled")
+	public static void fpmSetEnabled(Boolean enabled) {
+		if (!isHost || !ClientAPI.HAS_FIRSTPERSON) return;
+		dev.tr7zw.firstperson.api.FirstPersonAPI.setEnabled(enabled);
 	}
 
 	@LuaWhitelist
