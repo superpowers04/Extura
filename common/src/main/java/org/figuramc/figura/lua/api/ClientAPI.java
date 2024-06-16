@@ -59,8 +59,8 @@ public class ClientAPI {
 
 	public static final ClientAPI INSTANCE = new ClientAPI();
 	private static final HashMap<String, Boolean> LOADED_MODS = new HashMap<>();
-	private static final boolean HAS_IRIS = PlatformUtils.isModLoaded("iris") || PlatformUtils.isModLoaded("oculus"); // separated to avoid indexing the list every frame
-	private static final boolean HAS_FIRSTPERSON = PlatformUtils.isModLoaded("firstperson");
+	public static final boolean HAS_IRIS = PlatformUtils.isModLoaded("iris") || PlatformUtils.isModLoaded("oculus"); // separated to avoid indexing the list every frame
+	public static final boolean HAS_FIRSTPERSONMOD = PlatformUtils.isModLoaded("firstperson");
 	public static final boolean HAS_CURIOS = PlatformUtils.isModLoaded("curios");
 	public static final Supplier<Boolean> OPTIFINE_LOADED = Suppliers.memoize(() ->
 	{
@@ -421,13 +421,13 @@ public class ClientAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("client.first_person_model_enabled")
 	public static Boolean fpmIsEnabled() {
-		return HAS_FIRSTPERSON && dev.tr7zw.firstperson.api.FirstPersonAPI.isEnabled();
+		return HAS_FIRSTPERSONMOD && dev.tr7zw.firstperson.api.FirstPersonAPI.isEnabled();
 	}
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.first_person_model_is_rendering_player")
 	public static Boolean fpmIsRenderingPlayer() {
-		return HAS_FIRSTPERSON && dev.tr7zw.firstperson.api.FirstPersonAPI.isRenderingPlayer();
+		return HAS_FIRSTPERSONMOD && dev.tr7zw.firstperson.api.FirstPersonAPI.isRenderingPlayer();
 	}
 
 	@LuaWhitelist

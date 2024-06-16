@@ -590,8 +590,8 @@ public class HostAPI {
 	}
 	@LuaWhitelist
 	@LuaMethodDoc("host.iris_reload")
-	public static void irisReload() {
-		if (!isHost || !ClientAPI.HAS_IRIS) return;
+	public void irisReload() {
+		if (!this.isHost || !ClientAPI.HAS_IRIS) return;
 		try {
 			Class Iris = Class.forName("net.irisshaders.iris.Iris");
 			Iris.getMethod("reload").invoke(Iris);
@@ -601,8 +601,8 @@ public class HostAPI {
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.first_person_model_set_enabled")
-	public static void fpmSetEnabled(Boolean enabled) {
-		if (!isHost || !ClientAPI.HAS_FIRSTPERSON) return;
+	public void fpmSetEnabled(Boolean enabled) {
+		if (!this.isHost || !ClientAPI.HAS_FIRSTPERSONMOD) return;
 		dev.tr7zw.firstperson.api.FirstPersonAPI.setEnabled(enabled);
 	}
 

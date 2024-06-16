@@ -6,10 +6,10 @@
   "name": "Figura - Extura(Fabric)",
   "description": "Extensive customization of the Player model. Extura fork",
   "authors": [
-    "skyrina", "lumelia", "UnlikePaladin", "omoflop","ConstantDust - Original Extura","Superpowers04 - Extura","PoolloverNathan - ExtExtura"
+    "skyrina", "lumelia", "UnlikePaladin", "omoflop","ConstantDust - Original Extura","Superpowers04 - Extura","soup587 - Extura","PoolloverNathan - ExtExtura"
   ],
   "contributors": [
-    "TooManyLimits", "Lexize", "KitCat962", "Manuel-3", "superpowers04","ConstantDust", "auriafoxgirl", "applejuiceyy", "4P5","PoolloverNathan"
+    "TooManyLimits", "Lexize", "KitCat962", "Manuel-3", "superpowers04", "auriafoxgirl", "applejuiceyy", "4P5","PoolloverNathan","soup587","ConstantDust"
   ],
   "contact": {
     "homepage": "https://github.com/FiguraMC/Figura",
@@ -41,7 +41,8 @@
   "conflicts": {
     "immersive_portals": "*",
     "canvas": "*",
-    "immediatelyfast":  "*"
+    "optifine":  "*",
+    "optifabric":  "*"
   },
   "provides": [
     "figura"
