@@ -320,8 +320,35 @@ public class LocalAvatarLoader {
 	 */
 	public static void tick() {
 		WatchEvent<?> event = null;
-		if(IS_WINDOWS){ // This literally just removes one unix-only check, but it prevents some useless looping :3
+		try{
 
+			if(IS_WINDOWS){ // This literally just removes one unix-only check, but it prevents some useless looping :3
+
+				var entries = KEYS.entrySet();
+				for (Map.Entry<Path, WatchKey> entry : entries) {
+					if(entry == null) continue;
+					WatchKey key = entry.getValue();
+					if (!key.isValid())
+						continue;
+
+					for (WatchEvent<?> watchEvent : key.pollEvents()) {
+						if (watchEvent.kind() == StandardWatchEventKinds.OVERFLOW)
+							continue;
+
+						event = watchEvent;
+						Path path = entry.getKey().resolve((Path) event.context());
+						String name = IOUtils.getFileNameOrEmpty(path);
+
+						if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
+							continue;
+						FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
+						AvatarManager.loadLocalAvatar(lastLoadedPath);
+						return;
+					}
+				}
+				return;
+			}
+			boolean reload = false;
 			var entries = KEYS.entrySet();
 			for (Map.Entry<Path, WatchKey> entry : entries) {
 				if(entry == null) continue;
@@ -330,7 +357,8 @@ public class LocalAvatarLoader {
 					continue;
 
 				for (WatchEvent<?> watchEvent : key.pollEvents()) {
-					if (watchEvent.kind() == StandardWatchEventKinds.OVERFLOW)
+					WatchEvent.Kind<?> kind = watchEvent.kind();
+					if (kind == StandardWatchEventKinds.OVERFLOW)
 						continue;
 
 					event = watchEvent;
@@ -339,46 +367,23 @@ public class LocalAvatarLoader {
 
 					if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
 						continue;
-					FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
-					AvatarManager.loadLocalAvatar(lastLoadedPath);
-					return;
+
+					// This is it, this is the Unix-only check. I(superpowers04) dunno why only Unix needs to add paths like this
+					if (kind == StandardWatchEventKinds.ENTRY_CREATE) 
+						addWatchKey(path, KEYS::put);
+
+					reload = true;
+
 				}
 			}
-			return;
-		}
-		boolean reload = false;
-		var entries = KEYS.entrySet();
-		for (Map.Entry<Path, WatchKey> entry : entries) {
-			if(entry == null) continue;
-			WatchKey key = entry.getValue();
-			if (!key.isValid())
-				continue;
 
-			for (WatchEvent<?> watchEvent : key.pollEvents()) {
-				WatchEvent.Kind<?> kind = watchEvent.kind();
-				if (kind == StandardWatchEventKinds.OVERFLOW)
-					continue;
-
-				event = watchEvent;
-				Path path = entry.getKey().resolve((Path) event.context());
-				String name = IOUtils.getFileNameOrEmpty(path);
-
-				if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
-					continue;
-
-				// This is it, this is the Unix-only check. I(superpowers04) dunno why only Unix needs to add paths like this
-				if (kind == StandardWatchEventKinds.ENTRY_CREATE) 
-					addWatchKey(path, KEYS::put);
-
-				reload = true;
-
+			// reload avatar
+			if (reload) {
+				FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
+				AvatarManager.loadLocalAvatar(lastLoadedPath);
 			}
-		}
-
-		// reload avatar
-		if (reload) {
-			FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
-			AvatarManager.loadLocalAvatar(lastLoadedPath);
+		}catch(java.util.ConcurrentModificationException meow){
+			FiguraMod.debug("LocalAvatarLoader.java:tick java.util.ConcurrentModificationException ignored");
 		}
 	}
 
