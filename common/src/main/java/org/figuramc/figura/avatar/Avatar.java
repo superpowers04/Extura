@@ -463,6 +463,10 @@ public class Avatar {
 		if (loaded) run("CHAR_TYPED", tick, chars, modifiers, codePoint);
 	}
 
+    public void damageEvent(EntityAPI<?> entity, String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect) {
+        if (loaded) run("DAMAGE", tick, entity, sourceType, sourceCause, sourceDirect);
+    }
+
 
 	// -- rendering events -- // 
 
