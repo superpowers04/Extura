@@ -26,13 +26,15 @@ public class ClientPacketListenerMixin {
 
     @Inject(at = @At("HEAD"), method = "handleDamageEvent")
     private void handleDamageEvent(ClientboundDamageEventPacket packet, CallbackInfo ci) {
+        if (Minecraft.getInstance().player == null) return;
         Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
         Level level = Minecraft.getInstance().player.level();
-        if (avatar != null) ;
-            avatar.damageEvent(
-            level.registryAccess().registry(Registries.DAMAGE_TYPE).get().toString(),
-            EntityAPI.wrap(level.getEntity(packet.sourceCauseId())),
-            EntityAPI.wrap(level.getEntity(packet.sourceDirectId()))
-            );
+        if (avatar == null) return;
+        avatar.damageEvent(
+        EntityAPI.wrap(level.getEntity(packet.entityId())),
+        level.registryAccess().registry(Registries.DAMAGE_TYPE).get().getHolder(packet.sourceTypeId()).get().unwrapKey().get().location().toString(),
+        EntityAPI.wrap(level.getEntity(packet.sourceCauseId())),
+        EntityAPI.wrap(level.getEntity(packet.sourceDirectId()))
+        );
     }
 }
