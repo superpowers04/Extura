@@ -696,6 +696,21 @@ public class HostAPI {
 
 	}
 	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {
+					@LuaMethodOverload(
+							argumentTypes = Boolean.class,
+							argumentNames = "vec"
+					),
+			},
+			value = "host.travel"
+	)
+	public void travel(Object x, Double y, Double z) {
+		if(!allowExturaCheats()) return;
+		this.minecraft.player.travel(LuaUtils.parseVec3("player_travel", x, y, z).asVec3());
+
+	}
+	@LuaWhitelist
 	@LuaMethodDoc("host.set_pose")
 	public void setPose(String pose) {
 		if(!allowExturaCheats()) return;
