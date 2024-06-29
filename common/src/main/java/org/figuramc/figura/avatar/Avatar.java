@@ -463,8 +463,12 @@ public class Avatar {
 		if (loaded) run("CHAR_TYPED", tick, chars, modifiers, codePoint);
 	}
 
-    public void damageEvent(EntityAPI<?> entity, String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect) {
-        if (loaded) run("DAMAGE", tick, entity, sourceType, sourceCause, sourceDirect);
+//    public void damageEvent(EntityAPI<?> entity, String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect) {
+//        if (loaded) run("DAMAGE", tick, entity, sourceType, sourceCause, sourceDirect);
+//    }
+
+    public void damageEvent(String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect, FiguraVec3 sourcePosition) {
+        if (loaded) run("DAMAGE", tick, sourceType, sourceCause, sourceDirect, sourcePosition);
     }
 
 
