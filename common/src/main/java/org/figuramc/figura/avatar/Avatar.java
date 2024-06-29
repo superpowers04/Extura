@@ -471,6 +471,10 @@ public class Avatar {
         if (loaded) run("DAMAGE", tick, sourceType, sourceCause, sourceDirect, sourcePosition);
     }
 
+    public boolean totemEvent() {
+        return isCancelled(loaded ? run("TOTEM",tick) : null);
+    }
+
 
 	// -- rendering events -- // 
 
