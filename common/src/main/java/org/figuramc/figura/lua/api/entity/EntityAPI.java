@@ -71,7 +71,6 @@ public class EntityAPI<T extends Entity> {
             return new LivingEntityAPI<>(le);
         return new EntityAPI<>(e);
     }
-
     protected final boolean checkEntity() {
         boolean thingy = true;
         if (entity.isRemoved() || getLevel() != Minecraft.getInstance().level) {

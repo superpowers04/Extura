@@ -14,6 +14,7 @@ import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.mixin.LivingEntityAccessor;
 import org.luaj.vm2.LuaError;
+import java.lang.reflect.Field;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -126,6 +127,7 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
         checkEntity();
         return entity.getMainArm() == HumanoidArm.LEFT;
     }
+
 
     @LuaWhitelist
     @LuaMethodDoc("living_entity.is_using_item")

@@ -1140,6 +1140,7 @@
     "figura.docs.events.on_play_sound": "Called every time a new sound is played\nTakes the following as arguments: the sound's ID, its world position, volume, pitch, if the sound should loop, the sound's category, and the sound's file path\nReturn true to prevent this sound from playing",
     "figura.docs.events.resource_reload": "Called every time that the client resources are reloaded, allowing you to re-create or update resource texture references",
     "figura.docs.events.damage": "Called every time you take damage\nTakes four arguments: the damage type as a string, the entity that dealt the damage, the attacking entity, and the damage position\nThe last three arguments may return nil if there is no direct damage source",
+    "figura.docs.events.attack": "Called every time you take damage\nTakes three arguments: the damage type as a string, the damaged entity, and the damage position",
     "figura.docs.events.totem": "Called whenever you use a Totem of Undying to cheat death\nIf returned true the animation is cancelled",
     "figura.docs.events.get_events": "Returns a table with all events types",
     "figura.docs.event": "A hook for a certain event in Minecraft\nYou may register functions to one, and those functions will be called when the event occurs",

@@ -2,6 +2,8 @@ package org.figuramc.figura.lua.api;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.util.Pair;
+import dev.tr7zw.firstperson.api.FirstPersonAPI;
+import net.irisshaders.iris.Iris;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
@@ -52,6 +54,8 @@ import org.figuramc.figura.avatar.local.LocalAvatarLoader;
 import org.figuramc.figura.gui.widgets.lists.AvatarList;
 import org.figuramc.figura.backend2.NetworkStuff;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 @LuaWhitelist
@@ -331,6 +335,61 @@ public class HostAPI {
 					@LuaMethodOverload,
 					@LuaMethodOverload(
 							argumentTypes = Boolean.class,
+							argumentNames = "sprinting"
+					)
+			},
+			value = "host.run_method"
+	)
+	public Object runMethod(String name, Object... args) {
+		if (!this.isHost || !this.allowExturaCheats()) return this;
+		Method med;
+		try {
+			Class c = this.minecraft.player.getClass();
+			if(args == null || args.length == 0){
+				med = c.getMethod(name);
+
+			}else{
+
+				Class<?>[] argumentTypes = new Class[args.length];
+				var len = args.length;
+				for (int i = 0; i < len; i++) {
+					argumentTypes[i] = args[i].getClass();
+				}
+				med = c.getMethod(name, argumentTypes);
+			}
+		} catch (NoSuchMethodException e) {
+			throw new LuaError("No such method method "+name);
+		}
+		try{
+			return med.invoke(name,args);
+		}catch (InvocationTargetException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new LuaError("Unable to access method "+name);
+		}
+	}
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {
+					@LuaMethodOverload,
+					@LuaMethodOverload(
+							argumentTypes = Boolean.class,
+							argumentNames = "sprinting"
+					)
+			},
+			value = "host.setSprinting"
+	)
+	public HostAPI setSprinting(boolean bool) {
+		if (!this.isHost) return this;
+		this.minecraft.player.setSprinting(bool == true);
+		return this;
+	}
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {
+					@LuaMethodOverload,
+					@LuaMethodOverload(
+							argumentTypes = Boolean.class,
 							argumentNames = "offhand"
 					)
 			},
@@ -570,7 +629,7 @@ public class HostAPI {
 	public void setShaderPackName(@LuaNotNil String name) {
 		if (!isHost || !ClientAPI.HAS_IRIS) return;
 		try{
-			net.irisshaders.iris.Iris.getIrisConfig().setShaderPackName(name);
+			Iris.getIrisConfig().setShaderPackName(name);
 			// Class.forName("net.irisshaders.iris.Iris").getMethod("getIrisConfig")().getMethod("setShaderPackName")(name);
 		}catch(Exception ignored){}
 	}
@@ -579,7 +638,7 @@ public class HostAPI {
 	public void irisSaveConfig() {
 		if (!isHost || !ClientAPI.HAS_IRIS) return;
 		try {
-			net.irisshaders.iris.Iris.getIrisConfig().save();
+			Iris.getIrisConfig().save();
 			// .getMethod("save").invoke(conf);
 		}catch(Exception ignored){}
 	}
@@ -603,7 +662,7 @@ public class HostAPI {
 	@LuaMethodDoc("client.first_person_model_set_enabled")
 	public void fpmSetEnabled(Boolean enabled) {
 		if (!this.isHost || !ClientAPI.HAS_FIRSTPERSONMOD) return;
-		dev.tr7zw.firstperson.api.FirstPersonAPI.setEnabled(enabled);
+		FirstPersonAPI.setEnabled(enabled);
 	}
 
 	@LuaWhitelist

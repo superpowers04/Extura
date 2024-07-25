@@ -64,7 +64,7 @@ public abstract class MinecraftMixin {
             if (Configs.ACTION_WHEEL_BUTTON.keyBind.consumeClick())
                 wheel = !ActionWheel.isEnabled();
         } else if (Configs.ACTION_WHEEL_BUTTON.keyBind.isDown()) {
-            wheel = true;
+            wheel = Configs.ACTION_WHEEL_BUTTON.keyBind.isDown();
         } else if (ActionWheel.isEnabled()) {
             wheel = false;
         }

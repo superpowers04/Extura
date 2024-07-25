@@ -470,6 +470,9 @@ public class Avatar {
     public void damageEvent(String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect, FiguraVec3 sourcePosition) {
         if (loaded) run("DAMAGE", tick, sourceType, sourceCause, sourceDirect, sourcePosition);
     }
+    public void attackEvent(String sourceType, EntityAPI<?> loser, FiguraVec3 sourcePosition) {
+        if (loaded) run("ATTACK", tick, sourceType, loser, sourcePosition);
+    }
 
     public boolean totemEvent() {
         return isCancelled(loaded ? run("TOTEM",tick) : null);
