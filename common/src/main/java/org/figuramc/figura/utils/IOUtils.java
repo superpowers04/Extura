@@ -179,10 +179,7 @@ public class IOUtils {
      * @return {@code true} if given file is hidden
      */
     public static boolean isHiddenAvatarResource(@NotNull Path path) {
-        final Path avatarsDirectory = FiguraMod.getFiguraDirectory().resolve("avatars/");
-        if (!path.toAbsolutePath().startsWith(avatarsDirectory.toAbsolutePath())) {
-            throw new IllegalArgumentException("A path to a file within avatars folder was expected");
-        }
+        final Path avatarsDirectory = FiguraMod.getFiguraDirectory().resolve("avatars");
         try {
             // Iterate through all parent folders of the avatars
             // resource to find a hidden one (if any)
