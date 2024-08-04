@@ -315,11 +315,20 @@ public class EntityAPI<T extends Entity> {
     }
 
     @LuaWhitelist
-    @LuaMethodDoc("entity.is_moving")
-    public boolean isMoving() {
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload,
+                    @LuaMethodOverload(
+                            argumentTypes = Boolean.class,
+                            argumentNames = "ignoreY"
+                    )
+            },
+            value = "entity.is_moving"
+    )
+    public boolean isMoving(boolean ignoreY) {
         checkEntity();
         return entity.getX() != entity.xOld
-                || entity.getY() != entity.yOld
+                || (ignoreY ? false : (entity.getY() != entity.yOld))
                 || entity.getZ() != entity.zOld;
     }
 
