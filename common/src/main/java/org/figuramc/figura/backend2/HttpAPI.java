@@ -29,8 +29,18 @@ public class HttpAPI {
     }
 
     protected static String getBackendAddress() {
+        return "https://" + getBackendAddressWithPort() + "/api";
+    }
+
+    private static String getBackendAddressWithPort() {
         ServerAddress backendIP = ServerAddress.parseString(Configs.SERVER_IP.value);
-        return "https://" + backendIP.getHost() + "/api";
+        boolean hasPort = Configs.SERVER_IP.value.matches("[^:]+:\\d+");
+        if (hasPort) {
+            try {
+                return backendIP.getHost() + ":" + backendIP.getPort();
+            } catch (IllegalStateException ignored) { }
+        }
+        return backendIP.getHost();
     }
 
     protected HttpRequest.Builder header(String url) {

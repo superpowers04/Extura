@@ -103,8 +103,10 @@ public class Animation {
             }
             case HOLD -> {
                 time = inverted ? Math.max(time, offset) : Math.min(time, length);
-                if (time == length)
-                playState = PlayState.HOLDING;
+                if (!inverted && time >= length)
+                    playState = PlayState.HOLDING;
+                else if (inverted && time <= 0)
+                    playState = PlayState.HOLDING;
             }
         }
 
@@ -576,6 +578,10 @@ public class Animation {
         if (speed == null) speed = 1f;
         this.speed = speed;
         this.inverted = speed < 0;
+        if (inverted && this.time >= this.length && this.playState == PlayState.HOLDING)
+            this.playState = PlayState.PLAYING;
+        else if (!inverted && this.time <= 0 && this.playState == PlayState.HOLDING)
+            this.playState = PlayState.PLAYING;
         return this;
     }
 
