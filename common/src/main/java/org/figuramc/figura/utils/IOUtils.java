@@ -180,6 +180,9 @@ public class IOUtils {
      */
     public static boolean isHiddenAvatarResource(@NotNull Path path) {
         final Path avatarsDirectory = FiguraMod.getFiguraDirectory().resolve("avatars");
+        if (!path.startsWith(avatarsDirectory))
+            return true;
+
         try {
             // Iterate through all parent folders of the avatars
             // resource to find a hidden one (if any)
