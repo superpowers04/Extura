@@ -29,7 +29,7 @@ public class HttpAPI {
     }
 
     protected static String getBackendAddress() {
-        if(Configs.BLOCK_CLOUD.value) return "http://invalidHost.thisisdumb/api";
+        if(Configs.BLOCK_CLOUD.value) return "http://127.0.0.1:9/api";
         if(Configs.VANILLA_CLOUD.value){
             return "https://" + ServerAddress.parseString(Configs.SERVER_IP.defaultValue).getHost() + "/api";
         }

@@ -828,7 +828,8 @@
     "figura.docs.wheel_action.set_toggled": "Sets the toggle state of the Action",
     "figura.docs.animations": "A global API used for control of Blockbench Animations",
     "figura.docs.animations.get_animations": "Returns a table with all animations",
-    "figura.docs.animations.get_playing": "Return a table with all playing animations",
+    "figura.docs.animations.get_playing": "Return a table with all playing animations\nTakes a boolean parameter, where if true, animations in the HOLDING play state will be included in the table",
+
     "figura.docs.animations.stop_all": "Stops all playing (and paused) animations",
     "figura.docs.animation": "A Blockbench animation",
     "figura.docs.animation.name": "This animation's name",
@@ -1080,6 +1081,7 @@
     "figura.docs.entity.get_variable": "Gets the value of a variable this entity stored in themselves using the Avatar API's store() function",
     "figura.docs.entity.is_living": "Gets if this entity is a Living Entity",
     "figura.docs.entity.is_player": "Gets if this entity is a Player Entity",
+    "figura.docs.entity.is_moving": "Returns true if this entity has some velocity\nTakes a boolean parameter, where if true, the y velocity is ignored",
     "figura.docs.living_entity": "Acts as a proxy for a living entity in the Minecraft world",
     "figura.docs.living_entity.get_body_yaw": "Gets the yaw of this entity's body in degrees\nIf delta is passed in, then it will be used to linearly interpolate the rotation of the body between the previous tick and the current tick\nThe default value of delta is 1",
     "figura.docs.living_entity.get_held_item": "Returns an ItemStack representing the item in this entity's main hand\nIf true is passed in for \"offhand\", then it will instead look at the item in the entity's offhand\nIf the entity isn't holding an item in that hand, returns air",
@@ -1122,6 +1124,7 @@
     "figura.docs.player.get_shoulder_entity": "Returns a table of the nbt of this entity left or right shoulder entity",
     "figura.docs.player.get_team_info": "Returns a table with information about the team of this player\nReturns nil if the player doesn't have a team",
     "figura.docs.player.get_ip_address": "Returns this player's IP address",
+
     "figura.docs.player.get_cooldown_percent": "Returns the whether a given ItemStack has an active cool down as a percent from 0.0 to 1.0\nIf it has none, it returns 0.0\nTakes two parameters stack, and delta, delta offsets the cooldown's tick count by it, used for smoother animation.",
     "figura.docs.viewer": "An extension of the Player, used for the viewer only, meant as a proxy to allow access to some host-only functions",
     "figura.docs.events": "A global API that contains all of the figura Events\nAccessed using the name \"events\"",

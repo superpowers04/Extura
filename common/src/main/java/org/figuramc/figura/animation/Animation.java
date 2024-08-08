@@ -104,7 +104,11 @@ public class Animation {
                 else if (inverted && time < offset - loopDelay)
                     time += length + loopDelay - offset;
             }
-            case HOLD -> time = inverted ? Math.max(time, offset) : Math.min(time, length);
+            case HOLD -> {
+                time = inverted ? Math.max(time, offset) : Math.min(time, length);
+                if ((!inverted && time >= length) || (inverted && time <= 0))
+                    playState = PlayState.HOLDING;
+            }
         }
 
         this.lastTime = this.frameTime;
@@ -569,6 +573,8 @@ public class Animation {
         if (speed == null) speed = 1f;
         this.speed = speed;
         this.inverted = speed < 0;
+        if (this.playState == PlayState.HOLDING && (inverted ? this.time >= this.length : this.time <= 0))
+            this.playState = PlayState.PLAYING;
         return this;
     }
 
@@ -601,6 +607,7 @@ public class Animation {
     public enum PlayState {
         STOPPED,
         PAUSED,
+        HOLDING,
         PLAYING
     }
 

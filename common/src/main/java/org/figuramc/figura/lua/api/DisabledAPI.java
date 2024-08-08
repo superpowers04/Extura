@@ -27,21 +27,26 @@ public class DisabledAPI {
     @LuaWhitelist
 	@LuaMethodDoc("disabled.fake")
     public Object __index(String arg) {
-    	if(arg.contains("allowed")){
+    	if(arg.toLowerCase().contains("allowed")){
     		return this;
     	}
     	anyAccess();
     	return null;
     }
+    @LuaWhitelist
+	@LuaMethodDoc("disabled.call")
     public boolean __call(){
     	return false;
     }
+    @LuaWhitelist
     public boolean isNetworkingAllowed() {
     	return false;
     }
+    @LuaWhitelist
     public boolean isLinkAllowed(Object meow) {
     	return false;
     }
+    @LuaWhitelist
     public boolean isPathAllowed(Object meow) {
     	return false;
     }
