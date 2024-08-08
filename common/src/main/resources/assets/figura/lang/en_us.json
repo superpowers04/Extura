@@ -1,4 +1,10 @@
 {
+	"figura.gui.status.uploaded": "Avatar upload status",
+	"figura.gui.status.uploaded.0": "No Avatar loaded\n* Everyone else will see last uploaded avatar",
+	"figura.gui.status.uploaded.1": "Avatar loaded from another plane of existance\n* ????\n* run",
+	"figura.gui.status.uploaded.2": "Avatar loaded from disk\n* File auto-reload enabled\n* Everyone else will see last uploaded avatar\n* No pings will be synced",
+	"figura.gui.status.uploaded.3": "Avatar loaded from cloud\n* No file auto-reload\n* Everyone else will see the avatar you're using\n* Pings will be synced",
+
 	"figura.docs.globals.extura": "The Extura object that contains some random stuff. Only visible if it's enabled in the settings.",
 	"figura.docs.globals.add_script": "(Extura) Allows you to add, edit or remove scripts from your avatar.\nAccepts 2 strings, if the second string is nil, the script is unloaded. Note this will NOT remove events",
 	"figura.docs.globals.get_scripts": "(Extura) Returns a table of script names.",

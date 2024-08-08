@@ -21,7 +21,7 @@ import java.util.List;
 public class StatusWidget implements FiguraWidget, FiguraTickable, GuiEventListener {
 
     public static final String STATUS_INDICATORS = "-*/+";
-    public static final List<String> STATUS_NAMES = List.of("size", "texture", "script", "backend");
+    public static final List<String> STATUS_NAMES = List.of("size", "texture", "script", "backend","uploaded");
     public static final List<Style> TEXT_COLORS = List.of(
             Style.EMPTY.withColor(ChatFormatting.WHITE),
             Style.EMPTY.withColor(ChatFormatting.RED),
@@ -74,6 +74,9 @@ public class StatusWidget implements FiguraWidget, FiguraTickable, GuiEventListe
 
         String dc = NetworkStuff.disconnectedReason;
         disconnectedReason = backend == 1 && dc != null && !dc.isBlank() ? Component.literal(dc) : null;
+        
+        int uploaded = (empty ? 0 : (AvatarManager.localUploaded ? 3 : 2));
+        status += uploaded << 8;
     }
 
     @Override

@@ -66,7 +66,11 @@ public class NetworkingAPI {
             )
     )
     public boolean isNetworkingAllowed() {
-        return Configs.ALLOW_NETWORKING.value && owner.permissions.get(Permissions.NETWORKING) >= 1;
+    	try{
+			return Configs.ALLOW_NETWORKING.value && owner.permissions.get(Permissions.NETWORKING) >= 1;
+    	}catch(RuntimeException e){
+    		return false;
+    	}
     }
 
     @LuaWhitelist

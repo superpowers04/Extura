@@ -103,7 +103,7 @@ public class WardrobeScreen extends AbstractPanelScreen {
         );
         delete.setActive(false);
 
-        StatusWidget statusWidget = new StatusWidget(entity.getX() + entity.getWidth() - 64, 0, 64);
+        StatusWidget statusWidget = new StatusWidget(entity.getX() + entity.getWidth() - 64, 0, 72);
         statusWidget.setY(entity.getY() - statusWidget.getHeight() - 4);
         addRenderableOnly(statusWidget);
 
