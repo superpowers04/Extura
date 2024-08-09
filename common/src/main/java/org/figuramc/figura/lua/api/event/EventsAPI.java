@@ -1,11 +1,12 @@
 package org.figuramc.figura.lua.api.event;
 
 import com.mojang.datafixers.util.Pair;
+import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.entries.FiguraEvent;
-import org.figuramc.figura.entries.FiguraVanillaPart;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
-import org.figuramc.figura.lua.api.vanilla_model.VanillaPart;
 import org.figuramc.figura.lua.docs.LuaFieldDoc;
 import org.figuramc.figura.lua.docs.LuaMetamethodDoc;
 import org.figuramc.figura.lua.docs.LuaMetamethodDoc.LuaMetamethodOverload;
@@ -142,6 +143,24 @@ public class EventsAPI {
     @LuaMethodDoc("events.get_events")
     public Map<String, LuaEvent> getEvents() {
         return events;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("events.new_event")
+    public void newEvent(@LuaNotNil String name) {
+        Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+        if (avatar != null) {
+            events.put(name, new LuaEvent());
+        }
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("events.fire_event")
+    public void fireEvent(@LuaNotNil String name) {
+        Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+        if (avatar != null) {
+            avatar.customEvent(name);
+        }
     }
 
     @LuaWhitelist
