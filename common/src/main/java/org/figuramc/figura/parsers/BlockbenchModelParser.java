@@ -136,12 +136,16 @@ public class BlockbenchModelParser {
                 if (p.getFileSystem() == FileSystems.getDefault())
                     p = p.toFile().getCanonicalFile().toPath();
 
-                if (!Files.exists(p)) {
+                p = p.normalize();
+
+                if (!Files.exists(p) || (avatar.getNameCount() > 1 && !p.startsWith(avatar))) {
                     // Compatibility with old Blockbench models. (BB 4.9-)
                     if (texture.relative_path.startsWith("../")) {
                         p = sourceFile.resolve(texture.relative_path);
                         if (p.getFileSystem() == FileSystems.getDefault())
                             p = p.toFile().getCanonicalFile().toPath();
+
+                        p = p.normalize();
 
                         if (!Files.exists(p))
                             throw new IllegalStateException("File does not exist!");
@@ -150,7 +154,6 @@ public class BlockbenchModelParser {
                     }
                 }
 
-                p = p.normalize();
 
                 // Make sure we are still looking in the avatar's folder
                 if ((avatar.getNameCount() > 1 && !p.startsWith(avatar)) || p.getFileSystem() != avatar.getFileSystem())
