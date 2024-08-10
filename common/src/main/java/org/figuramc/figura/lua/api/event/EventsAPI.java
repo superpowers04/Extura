@@ -147,11 +147,13 @@ public class EventsAPI {
 
     @LuaWhitelist
     @LuaMethodDoc("events.new_event")
-    public void newEvent(@LuaNotNil String name) {
-        Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
-        if (avatar != null) {
-            events.put(name, new LuaEvent());
-        }
+    public LuaEvent newEvent(@LuaNotNil String name) {
+        name = name.toUpperCase(Locale.US);
+        LuaEvent ev = events.get(name);
+        if(ev != null) throw new LuaError("Event \"" + name + "\" already exists!");
+        LuaEvent event = new LuaEvent();
+        events.put(name, event);
+        return event;
     }
 
     @LuaWhitelist

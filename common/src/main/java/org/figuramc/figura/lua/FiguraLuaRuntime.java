@@ -541,8 +541,7 @@ public class FiguraLuaRuntime {
 			if (toRun instanceof LuaEvent event)
 				ret = event.call(val);
 			else if (toRun instanceof String event)
-				//ret = events.__index(event).call(val);
-				ret = events.getEvents().get(event).call(val);
+				ret = events.__index(event).call(val);
 			else if (toRun instanceof LuaValue func)
 				ret = func.invoke(val);
 			else
