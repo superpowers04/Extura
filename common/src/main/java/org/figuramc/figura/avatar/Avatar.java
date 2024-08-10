@@ -478,6 +478,10 @@ public class Avatar {
         return isCancelled(loaded ? run("TOTEM",tick) : null);
     }
 
+    public void customEvent(String event) {
+        if (loaded) run(event,tick);
+    }
+
 
 	// -- rendering events -- // 
 

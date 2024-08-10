@@ -2,6 +2,8 @@ package org.figuramc.figura.lua.api.event;
 
 import com.google.common.collect.HashMultimap;
 import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaMetamethodDoc;
@@ -9,10 +11,7 @@ import org.figuramc.figura.lua.docs.LuaMetamethodDoc.LuaMetamethodOverload;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
-import org.luaj.vm2.LuaError;
-import org.luaj.vm2.LuaFunction;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.Varargs;
+import org.luaj.vm2.*;
 
 import java.util.Deque;
 import java.util.Set;
@@ -81,6 +80,18 @@ public class LuaEvent {
         }
         return vars;
     }
+
+    @LuaWhitelist
+    @LuaMethodDoc("event.run")
+    public LuaEvent run(Object... args){
+        Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+        if (avatar != null) {
+            if (args != null) avatar.run(this,avatar.tick,args);
+            else    avatar.run(this,avatar.tick);
+        }
+        return this;
+    }
+
 
     @LuaWhitelist
     @LuaMethodDoc(
