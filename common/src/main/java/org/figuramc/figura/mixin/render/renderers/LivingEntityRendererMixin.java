@@ -148,12 +148,12 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
             cir.setReturnValue(Configs.PREVIEW_NAMEPLATE.value);
         else if (!Minecraft.renderNames() || livingEntity.getUUID().equals(PopupMenu.getEntityId()))
             cir.setReturnValue(false);
-        else if (!AvatarManager.panic) {
-            if (Configs.SELF_NAMEPLATE.value && livingEntity == Minecraft.getInstance().player)
-                cir.setReturnValue(true);
-            else if (Configs.NAMEPLATE_RENDER.value == 2 || (Configs.NAMEPLATE_RENDER.value == 1 && livingEntity != FiguraMod.extendedPickEntity))
-                cir.setReturnValue(false);
-        }
+        else if (AvatarManager.panic) 
+        	return;
+        else if (Configs.SELF_NAMEPLATE.value && livingEntity == Minecraft.getInstance().player)
+            cir.setReturnValue(true);
+		else if (Configs.NAMEPLATE_RENDER.value == 2 || (Configs.NAMEPLATE_RENDER.value == 1 && livingEntity != FiguraMod.extendedPickEntity))
+			cir.setReturnValue(false);
     }
 
     @Inject(method = "isEntityUpsideDown", at = @At("HEAD"), cancellable = true)

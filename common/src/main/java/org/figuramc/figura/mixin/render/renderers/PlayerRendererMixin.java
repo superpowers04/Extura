@@ -72,8 +72,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 
     @Inject(method = "renderNameTag(Lnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/network/chat/Component;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/scores/Scoreboard;getDisplayObjective(I)Lnet/minecraft/world/scores/Objective;"))
     private void setHasScore(AbstractClientPlayer player, Component text, PoseStack stack, MultiBufferSource multiBufferSource, int light, CallbackInfo ci) {
-        Scoreboard scoreboard = player.getScoreboard();
-        Objective objective = scoreboard.getDisplayObjective(2);
+        Objective objective = player.getScoreboard().getDisplayObjective(2);
         hasScore = objective != null;
     }
 
@@ -160,17 +159,17 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
     @Inject(at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/client/model/PlayerModel;setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V"), method = "renderHand")
     private void onRenderHand(PoseStack stack, MultiBufferSource multiBufferSource, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
         avatar = AvatarManager.getAvatarForPlayer(player.getUUID());
-        if (avatar != null && avatar.luaRuntime != null) {
-            VanillaPart part = avatar.luaRuntime.vanilla_model.PLAYER;
-            PlayerModel<AbstractClientPlayer> model = this.getModel();
+        if (avatar == null || avatar.luaRuntime == null) return;
+        VanillaPart part = avatar.luaRuntime.vanilla_model.PLAYER;
+        PlayerModel<AbstractClientPlayer> model = this.getModel();
 
-            part.save(model);
+        part.save(model);
 
-            if (avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT) == 1) {
-                part.preTransform(model);
-                part.posTransform(model);
-            }
-        }
+        if (avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT) != 1) return;
+        part.preTransform(model);
+        part.posTransform(model);
+        
+        
     }
 
     @Inject(at = @At("RETURN"), method = "renderHand")
