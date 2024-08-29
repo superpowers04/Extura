@@ -156,6 +156,9 @@ public class FiguraLuaRuntime {
 		this.setGlobal("addScript", addScript);
 		this.setGlobal("getScripts", getScripts);
 		this.setGlobal("getScript", getScript);
+		this.setGlobal("add_script", addScript);
+		this.setGlobal("get_scripts", getScripts);
+		this.setGlobal("get_script", getScript);
 
 		// listFiles
 		this.setGlobal("listFiles", listFiles);
@@ -293,12 +296,13 @@ public class FiguraLuaRuntime {
 			// iterate over all script names and add them if their name starts with the path query
 
 			LuaTable table = new LuaTable();
-			if(path.isnil()){
+
+			String _path = path.isnil() ? "" : path.checkjstring();
+			if(_path.isEmpty()){
 				for (String s : scripts.keySet()) {
 					table.set(s,scripts.get(s));
 				}
 			}else{
-				String _path = path.checkjstring();
 				for (String s : scripts.keySet()) {
 					if(!s.startsWith(_path)) continue;
 					table.set(s,scripts.get(s));
@@ -317,7 +321,6 @@ public class FiguraLuaRuntime {
 	private final OneArgFunction getScript = new OneArgFunction() {
 		@Override
 		public LuaValue call(LuaValue val) {
-			// iterate over all script names and add them if their name starts with the path query
 			String script = scripts.get(val.checkjstring());
 			return (script == null) ? LuaValue.NIL : LuaValue.valueOf(script);
 		}
