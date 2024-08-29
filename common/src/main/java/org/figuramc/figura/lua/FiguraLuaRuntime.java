@@ -20,6 +20,7 @@ import org.figuramc.figura.lua.api.ping.PingAPI;
 import org.figuramc.figura.lua.api.vanilla_model.VanillaModelAPI;
 import org.figuramc.figura.permissions.Permissions;
 import org.figuramc.figura.utils.PathUtils;
+import net.minecraft.nbt.ByteArrayTag;
 import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
@@ -148,6 +149,11 @@ public class FiguraLuaRuntime {
         LuaValue loadstring = loadstringConstructor.apply(this);
         this.setGlobal("load", loadstring);
         this.setGlobal("loadstring", loadstring);
+
+        // addScript & getScript
+        this.setGlobal("add_script", addScript);
+        this.setGlobal("get_scripts", getScripts);
+        this.setGlobal("get_script", getScript);
 
         // load print functions
         FiguraLuaPrinter.loadPrintFunctions(this);
@@ -345,6 +351,65 @@ public class FiguraLuaRuntime {
         }
     };
 
+    private final OneArgFunction getScripts = new OneArgFunction() {
+        @Override
+        public LuaValue call(LuaValue path) {
+            // iterate over all script names and add them if their name starts with the path query
+
+            LuaTable table = new LuaTable();
+            String _path = path.isnil() ? "" : path.checkjstring();
+            if(_path.isEmpty()){
+                for (String s : scripts.keySet()) {
+                    table.set(s,scripts.get(s));
+                }
+            }else{
+                for (String s : scripts.keySet()) {
+                    if(!s.startsWith(_path)) continue;
+                    table.set(s,scripts.get(s));
+                }
+            }
+
+            return table;
+        }
+        @Override
+        public String tojstring() {
+            return "function: getScripts";
+        }
+    };
+
+    private final OneArgFunction getScript = new OneArgFunction() {
+        @Override
+        public LuaValue call(LuaValue val) {
+            String script = scripts.get(val.checkjstring());
+            return (script == null) ? LuaValue.NIL : LuaValue.valueOf(script);
+        }
+        @Override
+        public String tojstring() {
+            return "function: getScript";
+        }
+    };
+    private final TwoArgFunction addScript = new TwoArgFunction() {
+        @Override
+        public LuaValue call(LuaValue path,LuaValue contents) {
+            String scriptName = path.checkjstring();
+            if(contents.isnil()){
+                owner.nbt.getCompound("scripts").remove(scriptName);
+                scripts.remove(scriptName);
+                loadedScripts.remove(scriptName);
+                return LuaValue.NIL;
+            }
+            String scriptContent = contents.checkjstring();
+            scripts.put(scriptName,scriptContent);
+            loadedScripts.remove(scriptName);
+
+            owner.nbt.getCompound("scripts").put(scriptName,new ByteArrayTag(scriptContent.getBytes(StandardCharsets.UTF_8)));
+            return LuaValue.NIL;
+        }
+        @Override
+        public String tojstring() {
+            return "function: addScript";
+        }
+    };
     // init event //
 
     private Varargs initializeScript(String str){
