@@ -480,6 +480,9 @@
     "figura.config.render_debug_parts_pivot.1.tooltip": "Do not render pivots",
     "figura.config.render_debug_parts_pivot.2.tooltip": "Render pivots of only the Host Avatar",
     "figura.config.render_debug_parts_pivot.3.tooltip": "Render pivots of all Avatars",
+
+    "figura.config.inventory_scissor": "Render Inventory with Scissors",
+    "figura.config.inventory_scissor.tooltip": "Enabling this stops the player from rendering outside of the inventory entity view box.",
     "figura.config.first_person_matrices": "First Person Matrices",
     "figura.config.first_person_matrices.tooltip": "Toggles if the model part matrices should be updated while in first person",
     "figura.config.action_wheel": "Action Wheel",
