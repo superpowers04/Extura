@@ -5,19 +5,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.avatar.Avatar;
-import org.figuramc.figura.math.matrix.FiguraMat3;
-import org.figuramc.figura.math.matrix.FiguraMat4;
-import org.luaj.vm2.LuaError;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaFieldDoc;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
+import org.figuramc.figura.math.matrix.FiguraMat3;
+import org.figuramc.figura.math.matrix.FiguraMat4;
 import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.utils.LuaUtils;
+import org.luaj.vm2.LuaError;
 
 import java.util.UUID;
 
@@ -32,31 +32,6 @@ public class RendererAPI {
 
     public Float shadowRadius, fov;
 
-    @LuaFieldDoc("renderer.render_hotbar")
-    public boolean renderHotbar = true;
-    @LuaFieldDoc("renderer.render_effects")
-    public boolean renderEffects = true;
-    @LuaFieldDoc("renderer.render_experience_bar")
-    public boolean renderExperienceBar = true;
-    @LuaFieldDoc("renderer.render_jump_meter")
-    public boolean renderJumpMeter = true;
-    @LuaFieldDoc("renderer.render_selected_item_name")
-    public boolean renderSelectedItemName = true;
-    @LuaFieldDoc("renderer.render_selected_player_health")
-    public boolean renderPlayerHealth = true;
-
-    @LuaWhitelist
-    @LuaMethodDoc("renderer.should_render_hotbar")
-    public boolean shouldRenderHotbar() {
-        return renderHotbar;
-    }
-
-    @LuaWhitelist
-    @LuaMethodDoc(overloads = @LuaMethodOverload(argumentTypes = Boolean.class,argumentNames = "renderHotbar"), value = "renderer.set_render_hotbar")
-    public RendererAPI setRenderHotbar(boolean renderHotbar) {
-        this.renderHotbar = renderHotbar;
-        return this;
-    }
     @LuaWhitelist
     @LuaFieldDoc("renderer.render_fire")
     public boolean renderFire = true;
@@ -188,24 +163,6 @@ public class RendererAPI {
     }
 
     @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = @LuaMethodOverload(
-                    argumentTypes = Boolean.class,
-                    argumentNames = "smoothCamera"
-            ),
-            value = "renderer.set_smooth_camera")
-    public RendererAPI setSmoothCamera(boolean smoothCamera) {
-        Minecraft.getInstance().options.smoothCamera = smoothCamera;
-        return this;
-    }
-
-    @LuaWhitelist
-    @LuaMethodDoc("renderer.get_smooth_camera")
-    public boolean getSmoothCamera() {
-        return Minecraft.getInstance().options.smoothCamera;
-    }
-
-    @LuaWhitelist
     @LuaMethodDoc("renderer.is_upside_down")
     public boolean isUpsideDown() {
         return upsideDown != null ? upsideDown : false;
@@ -241,31 +198,6 @@ public class RendererAPI {
     }
 
     @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = {
-                    @LuaMethodOverload,
-                    @LuaMethodOverload(
-                            argumentTypes = Float.class,
-                            argumentNames = "sensitivity"
-                    )
-            },
-            aliases = "sensitivity",
-            value = "renderer.set_sensitivity"
-    )
-    public RendererAPI setSensitivity(Float sensitivity) {
-        Minecraft.getInstance().options.sensitivity().set(Mth.clamp(sensitivity.doubleValue(), 0D, 1D));
-        return this;
-    }
-
-    @LuaWhitelist
-    @LuaMethodDoc(
-            value = "renderer.get_sensitivity"
-    )
-    public Double getSensitivity() {
-        return Minecraft.getInstance().options.sensitivity().get();
-    }
-
-    @LuaWhitelist
     public RendererAPI shadowRadius(Float shadowRadius) {
         return setShadowRadius(shadowRadius);
     }
@@ -293,10 +225,6 @@ public class RendererAPI {
     public FiguraVec3 getCameraPos() {
         return this.cameraPos;
     }
-
-    @LuaWhitelist
-    @LuaMethodDoc("renderer.get_delta_time")
-    public Float getDeltaTime() { return Minecraft.getInstance().getDeltaFrameTime(); }
 
     @LuaWhitelist
     @LuaMethodDoc(
@@ -500,22 +428,12 @@ public class RendererAPI {
             value = "renderer.set_post_effect"
     )
     public RendererAPI setPostEffect(String effect) {
-        if(effect == null)
-            this.postShader = null;
-        else
-            this.postShader = effect.endsWith(".json") ?
-                    LuaUtils.parsePath(effect) :
-                    LuaUtils.parsePath("shaders/post/" + effect + ".json");
+        this.postShader = effect == null ? null : LuaUtils.parsePath("shaders/post/" + effect + ".json");
+        if (postShader != null && Minecraft.getInstance().getResourceManager().getResource(postShader).isEmpty())
+            throw new LuaError("The post shader %s does not exist or could not be found".formatted(postShader.toString()));
         return this;
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc(
-            value = "renderer.get_post_effect"
-    )
-    public String getPostEffect() {
-        return this.postShader.toString();
-    }
     @LuaWhitelist
     public RendererAPI postEffect(String effect) {
         return setPostEffect(effect);
@@ -825,12 +743,6 @@ public class RendererAPI {
             case "renderCrosshair" -> renderCrosshair;
             case "forcePaperdoll" -> forcePaperdoll;
             case "renderHUD" -> renderHUD;
-            case "renderSelectedItemName" -> renderSelectedItemName;
-            case "renderJumpMeter" -> renderJumpMeter;
-            case "renderEffects" -> renderEffects;
-            case "renderPlayerHealth" -> renderPlayerHealth;
-            case "renderExperienceBar" -> renderExperienceBar;
-            case "renderHotbar" -> renderHotbar;
             default -> null;
         };
     }
@@ -843,11 +755,6 @@ public class RendererAPI {
             case "renderCrosshair" -> renderCrosshair = value;
             case "forcePaperdoll" -> forcePaperdoll = value;
             case "renderHUD" -> renderHUD = value;
-            case "renderJumpMeter" -> renderJumpMeter = value;
-            case "renderEffects" -> renderEffects = value;
-            case "renderPlayerHealth" -> renderPlayerHealth = value;
-            case "renderExperienceBar" -> renderExperienceBar = value;
-            case "renderHotbar" -> renderHotbar = value;
             default -> throw new LuaError("Cannot assign value on key \"" + key + "\"");
         }
     }
