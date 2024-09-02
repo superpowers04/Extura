@@ -429,6 +429,8 @@ public class RendererAPI {
     )
     public RendererAPI setPostEffect(String effect) {
         this.postShader = effect == null ? null : LuaUtils.parsePath("shaders/post/" + effect + ".json");
+        if (postShader != null && Minecraft.getInstance().getResourceManager().getResource(postShader).isEmpty())
+            throw new LuaError("The post shader %s does not exist or could not be found".formatted(postShader.toString()));
         return this;
     }
 
