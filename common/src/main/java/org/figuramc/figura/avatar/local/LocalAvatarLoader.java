@@ -56,7 +56,8 @@ public class LocalAvatarLoader {
 
             String namespace = split[split.length - 2];
             String path = split[split.length - 1];
-            ResourceLocation id = new ResourceLocation(namespace, path.substring(0, path.length() - 5));
+            // This is a 4 because .nbt has 4 characters
+            ResourceLocation id = new ResourceLocation(namespace, path.substring(0, path.length() - 4));
 
             // nbt
             CompoundTag nbt;
