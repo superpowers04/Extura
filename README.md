@@ -26,7 +26,7 @@
 
 ![skullemoji](https://raw.githubusercontent.com/FiguraMC/Figura/HEAD/.github/assets/skull.png)
 
-Meet us on the [FiguraMC Discord Server](https://discord.figuramc.org/) for more info and help!\
+Meet us on the [FiguraMC Discord Server](https://discord.figuramc.org/) for more info and help!
 
 Help translate Figura to your native language on [Weblate](https://translate.figuramc.org/projects/figuramc/figura/)!\
 ![translate]
