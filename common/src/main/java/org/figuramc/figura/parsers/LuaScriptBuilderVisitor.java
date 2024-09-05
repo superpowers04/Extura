@@ -294,7 +294,7 @@ public class LuaScriptBuilderVisitor extends Visitor {
     public void visit(Exp.Constant exp) {
         LuaValue value = exp.value;
         if (value instanceof LuaString str) {
-            String input = new String(str.m_bytes, StandardCharsets.UTF_8);
+            String input = new String(str.m_bytes, str.m_offset, str.m_length, StandardCharsets.UTF_8);
             int sdq = 0;
             for (char c : input.toCharArray()) {
                 if (c == '\'') sdq--;
