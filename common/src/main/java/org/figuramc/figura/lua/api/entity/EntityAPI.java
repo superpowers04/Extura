@@ -71,16 +71,20 @@ public class EntityAPI<T extends Entity> {
             return new LivingEntityAPI<>(le);
         return new EntityAPI<>(e);
     }
-    protected final boolean checkEntity() {
-        boolean thingy = true;
-        if (entity.isRemoved() || getLevel() != Minecraft.getInstance().level) {
-            @SuppressWarnings("unchecked")
-            T newEntityInstance = (T) EntityUtils.getEntityByUUID(entityUUID);
-            thingy = newEntityInstance != null;
-            if (thingy)
-                entity = newEntityInstance;
+    @LuaWhitelist
+    @LuaMethodDoc("entity.regrab_entity")
+    public boolean regrabEntity(){
+    	@SuppressWarnings("unchecked")
+        T newEntityInstance = (T) EntityUtils.getEntityByUUID(entityUUID);
+        if (newEntityInstance != null){
+            entity = newEntityInstance;
+            return true;
         }
-        return thingy;
+        return false;
+    }
+    protected final boolean checkEntity() {
+        if (!entity.isRemoved() && getLevel() == Minecraft.getInstance().level) return true;
+        return regrabEntity();
     }
 
     protected Level getLevel() {
@@ -364,7 +368,13 @@ public class EntityAPI<T extends Entity> {
     public LuaTable getNbt() {
         checkEntity();
         CompoundTag tag = new CompoundTag();
-        entity.saveWithoutId(tag);
+        try{
+
+	        entity.saveWithoutId(tag);
+        }catch(net.minecraft.ReportedException meow){
+        	regrabEntity();
+        	entity.saveWithoutId(tag);
+        }
         return (LuaTable) NbtToLua.convert(tag);
     }
 
