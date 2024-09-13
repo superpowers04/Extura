@@ -28,6 +28,10 @@ public class GuiMixin {
     @Inject(at = @At("HEAD"), method = "render", cancellable = true)
     private void onRender(GuiGraphics guiGraphics, float tickDelta, CallbackInfo ci) {
         FiguraGui.onRender(guiGraphics, tickDelta, ci);
+        Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
+        if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderGUI)
+            return;
+        ci.cancel();
     }
 
     @Inject(at = @At("RETURN"), method = "render")

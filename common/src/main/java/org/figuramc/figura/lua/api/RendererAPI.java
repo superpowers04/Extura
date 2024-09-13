@@ -47,6 +47,27 @@ public class RendererAPI {
     @LuaWhitelist
     @LuaFieldDoc("renderer.render_hud")
     public boolean renderHUD = true;
+    @LuaWhitelist
+    @LuaFieldDoc("renderer.render_player_health")
+    public boolean renderPlayerHealth = true;
+    @LuaWhitelist
+    @LuaFieldDoc("renderer.render_selected_item_name")
+    public boolean renderSelectedItemName = true;
+    @LuaWhitelist
+    @LuaFieldDoc("renderer.render_hotbar")
+    public boolean renderHotbar = true;
+    @LuaWhitelist
+    @LuaFieldDoc("renderer.render_experience_bar")
+    public boolean renderExperienceBar = true;
+    @LuaWhitelist
+    @LuaFieldDoc("renderer.render_jump_meter")
+    public boolean renderJumpMeter = true;
+    @LuaWhitelist
+    @LuaFieldDoc("renderer.render_Effects")
+    public boolean renderEffects = true;
+    @LuaWhitelist
+    @LuaFieldDoc("renderer.render_gui")
+    public boolean renderGUI = true;
 
     public FiguraVec3 cameraPos;
     public FiguraVec3 cameraPivot, cameraOffsetPivot;
@@ -743,6 +764,13 @@ public class RendererAPI {
             case "renderCrosshair" -> renderCrosshair;
             case "forcePaperdoll" -> forcePaperdoll;
             case "renderHUD" -> renderHUD;
+            case "renderPlayerHealth" -> renderPlayerHealth;
+			case "renderSelectedItemName" -> renderSelectedItemName;
+			case "renderHotbar" -> renderHotbar;
+			case "renderExperienceBar" -> renderExperienceBar;
+			case "renderJumpMeter" -> renderJumpMeter;
+			case "renderEffects" -> renderEffects;
+			case "renderGUI" -> renderGUI;
             default -> null;
         };
     }
@@ -755,6 +783,13 @@ public class RendererAPI {
             case "renderCrosshair" -> renderCrosshair = value;
             case "forcePaperdoll" -> forcePaperdoll = value;
             case "renderHUD" -> renderHUD = value;
+            case "renderPlayerHealth" -> renderPlayerHealth = value;
+			case "renderSelectedItemName" -> renderSelectedItemName = value;
+			case "renderHotbar" -> renderHotbar = value;
+			case "renderExperienceBar" -> renderExperienceBar = value;
+			case "renderJumpMeter" -> renderJumpMeter = value;
+			case "renderEffects" -> renderEffects = value;
+			case "renderGUI" -> renderGUI = value;
             default -> throw new LuaError("Cannot assign value on key \"" + key + "\"");
         }
     }
