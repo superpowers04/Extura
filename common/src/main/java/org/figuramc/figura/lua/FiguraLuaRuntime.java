@@ -85,7 +85,7 @@ public class FiguraLuaRuntime {
 				userGlobals.load(new JseIoLib());
 				userGlobals.load(new JseOsLib());
 				userGlobals.load(new CoroutineLib());
-				userGlobals.set("expose_sensitive_libraries", LuaValue.TRUE);
+				userGlobals.rawset("expose_sensitive_libraries", LuaValue.TRUE);
 			}
 		}else{
 			userGlobals.set("isHost", LuaValue.FALSE);
@@ -94,7 +94,7 @@ public class FiguraLuaRuntime {
 		LuaC.install(userGlobals);
 
 		userGlobals.load(new DebugLib());
-		LuaTable debugLib = userGlobals.get("debug").checktable();
+		LuaTable debugLib = userGlobals.rawget("debug").checktable();
 		setHookFunction = debugLib.get("sethook").checkfunction();
 		getInfoFunction = debugLib.get("getinfo").checkfunction();
 
@@ -115,7 +115,7 @@ public class FiguraLuaRuntime {
 	}
 
 	public void setGlobal(String name, Object obj) {
-		userGlobals.set(name, typeManager.javaToLua(obj).arg1());
+		userGlobals.rawset(name, typeManager.javaToLua(obj).arg1());
 	}
 
 	public void setUser(Entity user) {
@@ -127,8 +127,8 @@ public class FiguraLuaRuntime {
 			val = entityAPI = EntityAPI.wrap(user);
 		}
 		LuaValue _user = typeManager.javaToLua(val).arg1();
-		userGlobals.set("user", _user);
-		userGlobals.set("player", _user);
+		userGlobals.rawset("user", _user);
+		userGlobals.rawset("player", _user);
 	}
 
 	public Entity getUser() {
