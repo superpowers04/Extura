@@ -231,6 +231,36 @@ public class FiguraLuaPrinter {
         }
     };
 
+    private static Component tableToTextLimited(LuaTypeManager typeManager, LuaValue value, int depth, int indent, boolean hasTooltip) {
+        // attempt to parse top
+        if (value.isuserdata())
+            return userdataToText(typeManager, value, depth, indent, hasTooltip);
+
+        // normal print when invalid type or depth limit
+        if (!value.istable() || depth <= 0)
+            return getPrintText(typeManager, value, hasTooltip, true);
+
+        // format text
+        MutableComponent text = Component.empty()
+                .append(Component.literal("table:").withStyle(getTypeColor(value)))
+                .append(Component.literal(" {\n").withStyle(ChatFormatting.GRAY));
+
+        String spacing = "\t".repeat(indent - 1);
+
+        LuaTable table = value.checktable();
+        int limit = 150;
+        for (LuaValue key : table.keys()){
+            if(limit <= 0){
+                text.append(Component.literal("...").withStyle(ChatFormatting.GRAY));
+                break;
+            }
+            text.append(getTableEntry(typeManager, spacing, key, table.get(key), hasTooltip, depth, indent));
+            limit--;
+        }
+
+        text.append(spacing).append(Component.literal("}").withStyle(ChatFormatting.GRAY));
+        return text;
+    }
     private static Component tableToText(LuaTypeManager typeManager, LuaValue value, int depth, int indent, boolean hasTooltip) {
         // attempt to parse top
         if (value.isuserdata())
@@ -339,7 +369,7 @@ public class FiguraLuaPrinter {
 
         // table tooltip
         if (hasTooltip && (value.istable() || value.isuserdata())) {
-            Component table = TextUtils.replaceTabs(tableToText(typeManager, value, 1, 1, false));
+            Component table = TextUtils.replaceTabs(tableToTextLimited(typeManager, value, 1, 1, false));
             text.withStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, table)));
         }
 
@@ -352,7 +382,7 @@ public class FiguraLuaPrinter {
             case LuaValue.TNIL -> ColorUtils.Colors.LUA_ERROR.style;
             case LuaValue.TBOOLEAN -> ColorUtils.Colors.LUA_PING.style;
             case LuaValue.TNUMBER -> ColorUtils.Colors.BLUE.style;
-            case LuaValue.TSTRING -> Style.EMPTY.withColor(ChatFormatting.GREEN);
+            case LuaValue.TSTRING -> Style.EMPTY.withColor(ChatFormatting.WHITE);
             case LuaValue.TUSERDATA -> {
                 final var data = value.checkuserdata();
                 if (data instanceof ClassAPI<?>) yield Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE);
