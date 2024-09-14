@@ -83,7 +83,8 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
     public FiguraVec3 getLastDeathPos() {
         return FiguraVec3.fromBlockPos(entity.getLastDeathLocation().get().pos());
     }
-
+    
+    @LuaWhitelist
     @LuaMethodDoc("player.get_xp_for_next_level")
     public int getExperienceForNextLevel(){
         checkEntity();
