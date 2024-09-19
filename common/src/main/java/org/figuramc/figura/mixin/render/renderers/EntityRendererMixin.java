@@ -121,6 +121,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements EntityRen
             backgroundColor = figura$custom.background != null ? figura$custom.background : backgroundColor;
             boolean deadmau = component.getString().equals("deadmau5");
 
+            // This renders the translucent part of the nametag you see when shifting, and the background
             if (figura$isRenderingName()) {
                 int ret = 0;
                 // If the player's name is being rendered, render by lines otherwise just render whatever component is being passed. Applies for the rest of the loops below
@@ -130,7 +131,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements EntityRen
                     if (text1.getString().isEmpty())
                         continue;
 
-                    int line = i - figura$textList.size() + (figura$hasScore() ? 0 : 1);
+                    int line = i - figura$textList.size() + 1;
                     x = -font.width(text1) / 2f;
                     y = (deadmau ? -10f : 0f) + (font.lineHeight + 1) * line;
                     ret = original.call(font, text1, x, y, color, shadow, matrix4f, multiBufferSource, displayMode, backgroundColor, light);
@@ -151,6 +152,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements EntityRen
         boolean deadmau = component.getString().equals("deadmau5");
 
         if (figura$enabled && figura$avatar != null && figura$hasCustomNameplate && figura$custom.outline) {
+            // This renders the opaque text with an outline if the player has that enabled.
             int outlineColor = figura$custom.outlineColor != null ? figura$custom.outlineColor : 0x202020;
             if (figura$isRenderingName()) {
                 for (int i = 0; i < figura$textList.size(); i++) {
@@ -159,7 +161,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements EntityRen
                     if (text1.getString().isEmpty())
                         continue;
 
-                    int line = i - figura$textList.size() + (figura$hasScore() ? 0 : 1);
+                    int line = i - figura$textList.size() + 1;
                     x = -font.width(text1) / 2f;
                     y = (deadmau ? -10f : 0f) + (font.lineHeight + 1) * line;
                     font.drawInBatch8xOutline(text1.getVisualOrderText(), x, y, color, outlineColor, matrix4f, multiBufferSource, light);
@@ -169,16 +171,16 @@ public abstract class EntityRendererMixin<T extends Entity> implements EntityRen
             }
             return original.call(font, Component.empty(), x, y, color, shadow, textMatrix.get(), multiBufferSource, displayMode, backgroundColor, light);
         } else {
-            if (figura$enabled && figura$isRenderingName()) {
+            if (figura$enabled && figura$avatar != null && figura$hasCustomNameplate && figura$isRenderingName()) {
                 int ret = 0;
-
+                // This renders the opaque part of the nametag, that is text
                 for (int i = 0; i < figura$textList.size(); i++) {
                     Component text1 = figura$textList.get(i);
 
                     if (text1.getString().isEmpty())
                         continue;
 
-                    int line = i - figura$textList.size() + (figura$hasScore() ? 0 : 1);
+                    int line = i - figura$textList.size() + 1;
                     x = -font.width(text1) / 2f;
                     y = (deadmau ? -10f : 0f) + (font.lineHeight + 1) * line;
                     ret = original.call(font, text1, x, y, color, shadow, textMatrix.get(), multiBufferSource, displayMode, backgroundColor, light);
