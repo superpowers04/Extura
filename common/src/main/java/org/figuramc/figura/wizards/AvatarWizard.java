@@ -282,13 +282,13 @@ public class AvatarWizard {
             Group leftElytra = model.addGroup(LeftElytra, FiguraVec3.of(-5, 24, 2), elytra);
             Cube cube = model.addCube(FiguraVec3.of(-5, 4, 2), FiguraVec3.of(10, 20, 2), leftElytra);
             cube.inflate = 1;
-            cube.generateBoxFaces(22, 0, capeTex, 1, hasPlayer ? 2 : 1);
+            cube.generateBoxFaces(22, 0, capeTex, 1, 1);
 
             //right wing
             Group rightElytra = model.addGroup(RightElytra, FiguraVec3.of(5, 24, 2), elytra);
             cube = model.addCube(FiguraVec3.of(-5, 4, 2), FiguraVec3.of(10, 20, 2), rightElytra);
             cube.inflate = 1;
-            cube.generateBoxFaces(22, 0, capeTex, -1, hasPlayer ? 2 : 1);
+            cube.generateBoxFaces(22, 0, capeTex, -1, 1);
         }
 
         //pivots
