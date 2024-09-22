@@ -177,7 +177,9 @@ public class WorldAPI {
                     Math.min(min.getZ() + 8, max.getZ())
             );
         }
-
+        if (min.compareTo(max) > 0) {
+            throw new LuaError("Your max value can't be smaller than your min!");
+        }
         Level world = getCurrentWorld();
         if (!world.hasChunksAt(min, max))
             return list;

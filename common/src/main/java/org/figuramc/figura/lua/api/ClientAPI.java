@@ -86,7 +86,7 @@ public class ClientAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_fps")
 	public static int getFPS() {
-		String s = getFPSString();
+		String s = Minecraft.getInstance().fpsString;
 		return s.length() == 0 ? 0 : Integer.parseInt(s.substring(0,s.indexOf(' ')));
 	}
 

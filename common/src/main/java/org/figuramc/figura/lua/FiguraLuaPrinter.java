@@ -207,9 +207,10 @@ public class FiguraLuaPrinter {
     private static final Function<FiguraLuaRuntime, LuaValue> PRINT_TABLE_FUNCTION = runtime -> new VarArgFunction() {
         @Override
         public Varargs invoke(Varargs args) {
-            if (!Configs.LOG_OTHERS.value && !FiguraMod.isLocal(runtime.owner.owner))
-                return NIL;
-
+            if (!FiguraMod.isLocal(runtime.owner.owner) && (!Configs.LOG_OTHERS.value || runtime.owner.permissions.get(Permissions.PRINTING) < 1))
+	            return NIL;
+	        
+		    
             boolean silent = false;
             MutableComponent text = Component.empty();
 

@@ -24,15 +24,15 @@ public class SNIHelperMixin {
     @Inject(method = "setServerNames(Ljava/net/Socket;[Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Ljavax/net/ssl/SSLSocket;getSSLParameters()Ljavax/net/ssl/SSLParameters;"), cancellable = true, remap = false)
     private static void fixMissingSNI(Socket socket, String[] hostnames, CallbackInfo ci) {
         String version = System.getProperty("java.version");
-        if (figura$isOldJavaVersion(version)) {
-            FiguraMod.LOGGER.info("Old Java version (" + version + ") detected, fixing missing SNI...");
-            try {
-                Method setHost = socket.getClass().getMethod("setHost", String.class);
-                setHost.invoke(socket, hostnames[0]);
-            } catch (Exception e) {
-                FiguraMod.LOGGER.error("SNI fix failed!", e);
-            }
-            ci.cancel();
+        if (!figura$isOldJavaVersion(version)) return;
+        FiguraMod.LOGGER.info("Old Java version (" + version + ") detected, fixing missing SNI...");
+        try {
+            Method setHost = socket.getClass().getMethod("setHost", String.class);
+            setHost.invoke(socket, hostnames[0]);
+        } catch (Exception e) {
+            FiguraMod.LOGGER.error("SNI fix failed!", e);
         }
+        ci.cancel();
+        
     }
 }

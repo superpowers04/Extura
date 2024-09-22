@@ -226,7 +226,7 @@ public class RendererAPI {
     @LuaWhitelist
     @LuaMethodDoc("renderer.get_shadow_radius")
     public Float getShadowRadius() {
-        return this.shadowRadius;
+        return this.shadowRadius != null ? this.shadowRadius : 0.5f;
     }
 
     @LuaWhitelist

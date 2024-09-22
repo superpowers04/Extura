@@ -130,7 +130,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements EntityRen
                     if (text1.getString().isEmpty())
                         continue;
 
-                    int line = i - figura$textList.size() + (figura$hasScore() ? 0 : 1);
+                    int line = i - figura$textList.size() + 1;
                     x = -font.width(text1) / 2f;
                     y = (deadmau ? -10f : 0f) + (font.lineHeight + 1) * line;
                     ret = original.call(font, text1, x, y, color, shadow, matrix4f, multiBufferSource, displayMode, backgroundColor, light);
@@ -158,7 +158,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements EntityRen
                     if (text1.getString().isEmpty())
                         continue;
 
-                    int line = i - figura$textList.size() + (figura$hasScore() ? 0 : 1);
+                    int line = i - figura$textList.size() + 1;
                     x = -font.width(text1) / 2f;
                     y = 0f + (font.lineHeight + 1) * line;
                     font.drawInBatch8xOutline(text1.getVisualOrderText(), x, y, color, outlineColor, matrix4f, multiBufferSource, light);
@@ -168,7 +168,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements EntityRen
             }
             return original.call(font, Component.empty(), x, y, color, shadow, textMatrix.get(), multiBufferSource, displayMode, backgroundColor, light);
         } else {
-            if (figura$enabled && figura$isRenderingName()) {
+            if (figura$enabled && figura$avatar != null && figura$hasCustomNameplate && figura$isRenderingName()) {
                 int ret = 0;
 
                 for (int i = 0; i < figura$textList.size(); i++) {

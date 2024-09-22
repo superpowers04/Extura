@@ -68,7 +68,7 @@ public class HostAPI {
 	private final Avatar owner;
 	private final boolean isHost;
 	private final Minecraft minecraft;
-	private Input defaultInput;
+	private static Input defaultInput;
 	private boolean hasPlayerMovement = false;
 
 	@LuaWhitelist
@@ -77,7 +77,7 @@ public class HostAPI {
 	public Integer chatColor;
 
 	public HostAPI(Avatar owner) {
-		this.defaultInput = null;
+		defaultInput = null;
 		this.minecraft = Minecraft.getInstance();
 		this.isHost = (this.owner = owner).isHost;
 	}
@@ -809,8 +809,8 @@ public class HostAPI {
 	)
 	public void setPlayerMovement(Boolean playerMovement) {
 		LocalPlayer player;
-		if (!this.isHost || (player = this.minecraft.player) == null) return;
-		if (this.defaultInput == null) this.defaultInput = player.input; // set default input
+		if (!this.isHost || (player = this.minecraft.player) == null || playerMovement == hasPlayerMovement) return;
+		if (defaultInput == null) defaultInput = player.input; // set default input
 		player.input = (playerMovement ? this.defaultInput : new NoInput());
 		hasPlayerMovement = playerMovement;
 
