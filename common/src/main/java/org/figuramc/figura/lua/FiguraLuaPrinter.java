@@ -158,8 +158,9 @@ public class FiguraLuaPrinter {
     private static final Function<FiguraLuaRuntime, LuaValue> PRINT_FUNCTION = runtime -> new VarArgFunction() {
         @Override
         public Varargs invoke(Varargs args) {
-            if (!Configs.LOG_OTHERS.value && !FiguraMod.isLocal(runtime.owner.owner))
-                return NIL;
+            boolean local = FiguraMod.isLocal(runtime.owner.owner);
+            if (!local && (!Configs.LOG_OTHERS.value || runtime.owner.permissions.get(Permissions.PRINTING) < 1))
+	            return NIL;
 
             MutableComponent text = Component.empty();
             for (int i = 0; i < args.narg(); i++)
@@ -181,8 +182,8 @@ public class FiguraLuaPrinter {
         @Override
         public Varargs invoke(Varargs args) {
             boolean local = FiguraMod.isLocal(runtime.owner.owner);
-            if (!Configs.LOG_OTHERS.value && !local)
-                return NIL;
+            if (!local && (!Configs.LOG_OTHERS.value || runtime.owner.permissions.get(Permissions.PRINTING) < 1))
+	            return NIL;
 
             TextUtils.allowScriptEvents = true;
 
