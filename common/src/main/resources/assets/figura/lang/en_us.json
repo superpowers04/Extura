@@ -239,6 +239,7 @@
     "figura.badges.no_permissions.cancel_sounds": "Could not cancel a sound",
     "figura.badges.no_permissions.custom_sounds": "Could not use Custom Sounds",
     "figura.badges.no_permissions.vanilla_model_edit": "Tried to change the Vanilla Model",
+    "figura.badges.no_permissions.extura_cheating": "Tried to use Extura's cheating options without OP!",
     "figura.emoji.face_angry": "Angry",
     "figura.emoji.face_biba": "Biba",
     "figura.emoji.face_fear": "Fear",

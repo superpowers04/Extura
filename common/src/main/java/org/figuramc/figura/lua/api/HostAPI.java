@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
+import org.figuramc.figura.permissions.Permissions;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionHand;
@@ -111,11 +112,23 @@ public class HostAPI {
 	public Boolean allowExturaCheats() {
 		if(!this.isHost) return false;
 		LocalPlayer player = this.minecraft.player;
-		if(player == null) return false;
-		return (player.hasPermissions(2)  || 
+		return player != null && ((player.hasPermissions(2)  || 
 				this.minecraft.isLocalServer() ||
 				(player.getScoreboard().hasObjective("extura_can_cheat"))
-			);
+			));
+	}
+	public Boolean canExturaCheat() {
+		if(!this.isHost) return false;
+		LocalPlayer player = this.minecraft.player;
+		if(player == null) return false;
+		if(player.hasPermissions(2)  || 
+				this.minecraft.isLocalServer() ||
+				(player.getScoreboard().hasObjective("extura_can_cheat"))
+			) return true;
+		if(!owner.noPermissions.contains(Permissions.EXTURA_CHEATING)){
+			owner.noPermissions.add(Permissions.EXTURA_CHEATING);
+		}
+		return false;
 	}
 	@LuaWhitelist
 	@LuaMethodDoc(
@@ -341,7 +354,7 @@ public class HostAPI {
 			value = "host.run_method"
 	)
 	public Object runMethod(String name, Object... args) {
-		if (!this.isHost || !this.allowExturaCheats()) return this;
+		if (!this.isHost || !this.canExturaCheat()) return this;
 		Method med;
 		try {
 			Class c = this.minecraft.player.getClass();
@@ -750,7 +763,7 @@ public class HostAPI {
 			value = "host.set_velocity"
 	)
 	public void setVelocity(Object x, Double y, Double z) {
-		if(!allowExturaCheats()) return;
+		if(!canExturaCheat()) return;
 		this.minecraft.player.setDeltaMovement(LuaUtils.parseVec3("player_setVelocity", x, y, z).asVec3());
 
 	}
@@ -765,14 +778,14 @@ public class HostAPI {
 			value = "host.travel"
 	)
 	public void travel(Object x, Double y, Double z) {
-		if(!allowExturaCheats()) return;
+		if(!canExturaCheat()) return;
 		this.minecraft.player.travel(LuaUtils.parseVec3("player_travel", x, y, z).asVec3());
 
 	}
 	@LuaWhitelist
 	@LuaMethodDoc("host.set_pose")
 	public void setPose(String pose) {
-		if(!allowExturaCheats()) return;
+		if(!canExturaCheat()) return;
 		try{
 			Pose _pose = Pose.valueOf(pose);
 			this.minecraft.player.setPose(_pose);
@@ -791,7 +804,7 @@ public class HostAPI {
 			value = "host.set_pos"
 	)
 	public void setPos(Object x, Double y, Double z) {
-		if (!allowExturaCheats()) return;
+		if (!canExturaCheat()) return;
 		if(x == null) return;
 		LocalPlayer player = this.minecraft.player;
 		player.setPos(LuaUtils.parseVec3("player_setPos", x, y, z).asVec3());
@@ -851,7 +864,7 @@ public class HostAPI {
 			value = "host.set_rot"
 	)
 	public void setRot(Object x, Double y) {
-		if(!allowExturaCheats()) return;
+		if(!canExturaCheat()) return;
 		FiguraVec2 vec = LuaUtils.parseVec2("player_setRot", x, y);
 		LocalPlayer player = this.minecraft.player;
 		player.setXRot((float) vec.x);
@@ -870,7 +883,7 @@ public class HostAPI {
 			value = "host.set_body_rot"
 	)
 	public void setBodyRot(Double angle) {
-		if(!allowExturaCheats()) return;
+		if(!canExturaCheat()) return;
 		LocalPlayer player = this.minecraft.player;
 		player.setYBodyRot(angle.floatValue());
 
@@ -887,7 +900,7 @@ public class HostAPI {
 			value = "host.set_body_offset_rot"
 	)
 	public void setBodyOffsetRot(Double angle) {
-		if(!allowExturaCheats()) return;
+		if(!canExturaCheat()) return;
 		LocalPlayer player = this.minecraft.player;
 		player.setYBodyRot( angle.floatValue() + player.getYRot() );
 	}
@@ -903,7 +916,7 @@ public class HostAPI {
 			value = "host.set_gravity"
 	)
 	public void setGravity(Boolean hasForce) {
-		if(!allowExturaCheats()) return;
+		if(!canExturaCheat()) return;
 		LocalPlayer player = this.minecraft.player;
 		if (player == null) return;
 		player.setNoGravity(!hasForce);
@@ -921,7 +934,7 @@ public class HostAPI {
 			value = "host.set_drag"
 	)
 	public void setDrag(Boolean hasForce) {
-		if(!allowExturaCheats()) return;
+		if(!canExturaCheat()) return;
 		LocalPlayer player = this.minecraft.player;
 		if (player == null) return;
 		player.setDiscardFriction(hasForce != true);
