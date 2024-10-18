@@ -133,7 +133,8 @@ public abstract class HumanoidArmorLayerMixin<T extends LivingEntity, M extends 
 
             boolean allFailed = true;
             VanillaPart mainPart = RenderUtils.partFromSlot(figura$avatar, slot);
-            if (figura$avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT) == 1 && mainPart != null && !mainPart.checkVisible()) return;
+            int armorEditPermission = figura$avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT);
+            if (armorEditPermission == 1 && mainPart != null && !mainPart.checkVisible()) return;
 
             // Don't render armor if GeckoLib is already doing the rendering
             if (!GeckoLibCompat.armorHasCustomModel(itemStack)) {
@@ -141,20 +142,22 @@ public abstract class HumanoidArmorLayerMixin<T extends LivingEntity, M extends 
                 for (ParentType parentType : parentTypes) {
                         // Skip the part if it's hidden
                         VanillaPart part = RenderUtils.pivotToPart(figura$avatar, parentType);
-                        if (figura$avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT) == 1 && part != null && !part.checkVisible()) continue;
-
+                        if (armorEditPermission == 1 && part != null && !part.checkVisible()) continue;
+                        boolean renderedPivot = false;
+                        // If the user has no permission disable pivot
+                        if (armorEditPermission == 1) {
                         // Try to render the pivot part
-                        boolean renderedPivot = figura$avatar.pivotPartRender(parentType, stack -> {
+                            renderedPivot = figura$avatar.pivotPartRender(parentType, stack -> {
                                 stack.pushPose();
                                 figura$prepareArmorRender(stack);
                                 renderer.renderArmorPart(stack, vertexConsumers, light, armorModel, entity, itemStack, slot, armorItem, parentType);
                                 stack.popPose();
                             });
-
-                            if (renderedPivot) {
-                                allFailed = false;
-                            }
                         }
+                        if (renderedPivot) {
+                            allFailed = false;
+                        }
+                }
             }
             // As a fallback, render armor the vanilla way
             if (allFailed) {
