@@ -362,6 +362,12 @@ public class ClientAPI {
 	}
 
 	@LuaWhitelist
+	@LuaMethodDoc("client.getModName")
+	public static String getModName(@LuaNotNil String id) {
+		return PlatformUtils.isModLoaded(id) ? PlatformUtils.getModName(id) : "";
+	}
+
+	@LuaWhitelist
 	@LuaMethodDoc("client.has_shader_pack_mod")
 	public static boolean hasShaderPackMod() {
 		return HAS_IRIS || OPTIFINE_LOADED.get();
