@@ -70,6 +70,7 @@
     "figura.docs.host.iris_reload": "(Extura) Reloads the currently selected shader",
     "figura.docs.host.first_person_model_set_enabled": "(Extura) Sets whether First Person Model is currently enabled",
     "figura.docs.client.get_mod_version": "(Extura) Get the Version of a mod as a string. Returns an null if mod isn't loaded",
+    "figura.docs.client.get_mod_name": "(Extura) Gets the name of a mod as a string. Returns an empty string if the mod isn't loaded",
     "figura.docs.client.is_integrated_server": "(Extura) Returns if the client is on it's integrated server",
     "figura.docs.client.first_person_model_enabled": "(Extura) Gets whether First Person Model is currently enabled",
     "figura.docs.client.first_person_model_is_rendering_player": "(Extura) Gets whether First Person Model is currently rendering - only useful in a RENDER event",
