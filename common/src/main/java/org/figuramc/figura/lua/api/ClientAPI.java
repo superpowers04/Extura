@@ -362,7 +362,7 @@ public class ClientAPI {
 	}
 
 	@LuaWhitelist
-	@LuaMethodDoc("client.getModName")
+	@LuaMethodDoc("client.get_mod_name")
 	public static String getModName(@LuaNotNil String id) {
 		return PlatformUtils.isModLoaded(id) ? PlatformUtils.getModName(id) : "";
 	}
