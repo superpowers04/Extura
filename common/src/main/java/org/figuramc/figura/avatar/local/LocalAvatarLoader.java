@@ -225,12 +225,10 @@ public class LocalAvatarLoader {
 		if (scripts.size() < 0) return;
 		CompoundTag scriptsNbt = new CompoundTag();
 
-		String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
+		int pathLength = (path + path.getFileSystem().getSeparator()).length();
 		for (Path script : scripts) {
-			String name = script.toString()
-					.replaceFirst(pathRegex, "")
-					.replaceAll("[/\\\\]", ".");
-			name = name.substring(0, name.length() - 4);
+			String name = script.toString();
+			name = name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
 			scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
 		}
 		nbt.put("scripts",scriptsNbt);
@@ -247,31 +245,27 @@ public class LocalAvatarLoader {
 		if (scriptsNbt == null){
 			nbt.put("scripts",scriptsNbt = new CompoundTag());
 		}
-		String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
+		int pathLength = (path + path.getFileSystem().getSeparator()).length();
 		for (Path script : scripts) {
-			String name = script.toString()
-					.replaceFirst(pathRegex, "")
-					.replaceAll("[/\\\\]", ".");
-			name = name.substring(0, name.length() - 4);
-			scriptsNbt.put("global." +name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
+			String name = script.toString();
+			name = "global."+name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
+			scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
 		}
 
 	}
 
 	private static void loadSounds(Path path, CompoundTag nbt) throws IOException {
 		List<Path> sounds = IOUtils.getFilesByExtension(path, ".ogg");
-		if (sounds.size() > 0) {
-			CompoundTag soundsNbt = new CompoundTag();
-			String pathRegex = Pattern.quote(path.toString().isEmpty() ? path.toString() : path + path.getFileSystem().getSeparator());
-			for (Path sound : sounds) {
-				String name = sound.toString()
-						.replaceFirst(pathRegex, "")
-						.replaceAll("[/\\\\]", ".");
-				name = name.substring(0, name.length() - 4);
-				soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
-			}
-			nbt.put("sounds", soundsNbt);
+		if (sounds.size() == 0) return;
+		CompoundTag soundsNbt = new CompoundTag();
+		int pathLength = (path + path.getFileSystem().getSeparator()).length();
+		for (Path sound : sounds) {
+			String name = sound.toString();
+			name = "global."+name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
+			soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
 		}
+		nbt.put("sounds", soundsNbt);
+		
 	}
 
 	private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchModelParser parser, CompoundTag textures, ListTag animations, String folders) throws Exception {

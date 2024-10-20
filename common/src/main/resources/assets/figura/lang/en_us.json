@@ -57,6 +57,8 @@
 
 	"figura.docs.host.allow_extura_cheats": "(Extura) Returns whether functions like host:setVelocity will work.\n Returns true if on a local server, permission level is above 2 or player has an objective named 'extura_can_cheat'",
 	"figura.docs.host.upload_avatar": "(Extura) Uploads your current avatar to the backend and then reloads it",
+	"figura.docs.host.reload_avatar": "(Extura) Reloads the avatar of the entity UUID provided. If no UUID is provided then it'll reload your avatar",
+	"figura.docs.host.load_local_avatar": "(Extura) Loads the avatar from the specified path. If no path is provided, current avatar is unloaded.",
 	"figura.docs.host.set_pose": "(Extura) Set the player's pose",
 	"figura.docs.host.set_player_movement": "(Extura) Set if the player can move normally",
 	"figura.docs.host.get_player_movement": "(Extura) Get if the player can move normally",

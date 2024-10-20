@@ -249,15 +249,14 @@ public class FiguraLuaRuntime {
 		@Override
 		public LuaValue call(LuaValue path,LuaValue contents) {
 			String scriptName = path.checkjstring();
+			loadedScripts.remove(scriptName);
 			if(contents.isnil()){
 				owner.nbt.getCompound("scripts").remove(scriptName);
 				scripts.remove(scriptName);
-				loadedScripts.remove(scriptName);
 				return LuaValue.NIL;
 			}
 			String scriptContent = contents.checkjstring();
 			scripts.put(scriptName,scriptContent);
-			loadedScripts.remove(scriptName);
 			// if (loadingScripts.contains(scriptNauiime))
 			// 	throw new LuaError("Detected circular dependency in script " + loadingScripts.peek());
 

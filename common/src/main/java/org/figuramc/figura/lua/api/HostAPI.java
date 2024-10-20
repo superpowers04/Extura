@@ -42,6 +42,7 @@ import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
+import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.mixin.LivingEntityAccessor;
 import org.figuramc.figura.mixin.gui.ChatComponentAccessor;
 import org.figuramc.figura.mixin.gui.ChatScreenAccessor;
@@ -58,6 +59,7 @@ import org.figuramc.figura.backend2.NetworkStuff;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -613,6 +615,41 @@ public class HostAPI {
 		NetworkStuff.uploadAvatar(avatar);
 		AvatarList.selectedEntry = null;
 		return true;
+	}
+	@LuaWhitelist
+	@LuaMethodDoc(
+		overloads = {
+			@LuaMethodOverload(argumentTypes = String.class, argumentNames = "Avatar Owner"),
+			@LuaMethodOverload(argumentTypes = EntityAPI.class, argumentNames = "Avatar Owner")
+		},
+		value = "host.reload_avatar")
+	public void reloadAvatar(Object playerUUID) {
+		if(!this.isHost) return;
+		final UUID uuid;
+		if(playerUUID instanceof EntityAPI){
+			uuid = ((EntityAPI) playerUUID).getEntity().getUUID();
+		}else if(playerUUID instanceof String){
+			uuid = UUID.fromString((String) playerUUID);
+		}else if(playerUUID != null){
+			throw new LuaError("Expected String, EntityAPI or Nil");
+		}else{
+			uuid = FiguraMod.getLocalPlayerUUID();
+		}
+		// (UUID != null && !UUID.isEmpty() ? UUID.fromString(UUID) : FiguraMod.getLocalPlayerUUID() )
+		AvatarManager.reloadAvatar(uuid);
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.load_local_avatar") // Did not steal this from GoofyPlugin, no proof
+	public void loadLocalAvatar(String path) {
+		if(!this.isHost) return;
+		if(path == null || path.isEmpty()){
+			AvatarManager.clearAvatars(FiguraMod.getLocalPlayerUUID());
+			AvatarList.selectedEntry = null;
+			return;
+		}
+		Path path = LocalAvatarFetcher.getLocalAvatarDirectory().resolve(path);
+		AvatarManager.loadLocalAvatar(path);
+		AvatarList.selectedEntry = path;
 	}
 
 	@LuaWhitelist

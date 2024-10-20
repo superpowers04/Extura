@@ -998,11 +998,7 @@ public class Avatar {
         Map<String, String> scripts = loadScript(scriptsNbt, "");
         CompoundTag metadata = nbt.getCompound("metadata");
 
-        ListTag autoScripts;
-        if (metadata.contains("autoScripts"))
-            autoScripts = metadata.getList("autoScripts", Tag.TAG_STRING);
-        else
-            autoScripts = null;
+        ListTag autoScripts = (metadata.contains("autoScripts") ? metadata.getList("autoScripts", Tag.TAG_STRING) : null);
 
         FiguraLuaRuntime runtime = new FiguraLuaRuntime(this, scripts);
         if (renderer != null && renderer.root != null)
