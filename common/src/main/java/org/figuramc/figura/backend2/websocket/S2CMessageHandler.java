@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
+import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.FiguraToast;
@@ -52,6 +53,7 @@ public class S2CMessageHandler {
     }
 
     private static void ping(ByteBuffer bytes) {
+        if (FSB.instance().connected()) return;
         UUID uuid = new UUID(bytes.getLong(), bytes.getLong());
 
         Avatar avatar = AvatarManager.getLoadedAvatar(uuid);
@@ -70,6 +72,7 @@ public class S2CMessageHandler {
     }
 
     private static void event(ByteBuffer bytes) {
+        if (FSB.instance().connected()) return;
         UUID uuid = new UUID(bytes.getLong(), bytes.getLong());
         AvatarManager.reloadAvatar(uuid);
     }

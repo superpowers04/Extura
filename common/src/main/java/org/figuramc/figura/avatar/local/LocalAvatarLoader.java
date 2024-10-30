@@ -261,7 +261,7 @@ public class LocalAvatarLoader {
 		int pathLength = (path + path.getFileSystem().getSeparator()).length();
 		for (Path sound : sounds) {
 			String name = sound.toString();
-			name = "global."+name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
+			name = name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
 			soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
 		}
 		nbt.put("sounds", soundsNbt);

@@ -91,6 +91,7 @@ public class Avatar {
     public final EntityType<?> entityType;
     public CompoundTag nbt;
     public boolean loaded = true;
+    public int loadedFrom = 0;
     public final boolean isHost;
 
     //metadata
@@ -100,6 +101,7 @@ public class Avatar {
     public String id;
     public int fileSize;
     public String color;
+    public boolean isFSB = false;
     public Map<String, String> badgeToColor = new HashMap<>();
     public Map<String, byte[]> resources = new HashMap<>();
 
@@ -203,6 +205,8 @@ public class Avatar {
                 versionStatus = getVersionStatus();
                 if (entityName.isBlank())
                     entityName = name;
+                if(nbt.contains("isFSB"))
+                	isFSB = nbt.getBoolean("isFSB");
 
                 // animations and models
                 loadAnimations();

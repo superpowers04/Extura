@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Style;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
+import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.utils.FiguraText;
 import org.figuramc.figura.utils.MathUtils;
@@ -20,18 +21,23 @@ import java.util.List;
 
 public class StatusWidget implements FiguraWidget, FiguraTickable, GuiEventListener {
 
-    public static final String STATUS_INDICATORS = "-*/+";
+    public static final String STATUS_INDICATORS = "-*/+#";
     public static final List<String> STATUS_NAMES = List.of("size", "texture", "script", "backend","uploaded");
     public static final List<Style> TEXT_COLORS = List.of(
             Style.EMPTY.withColor(ChatFormatting.WHITE),
             Style.EMPTY.withColor(ChatFormatting.RED),
             Style.EMPTY.withColor(ChatFormatting.YELLOW),
-            Style.EMPTY.withColor(ChatFormatting.GREEN)
+            Style.EMPTY.withColor(ChatFormatting.GREEN),
+            Style.EMPTY.withColor(ChatFormatting.BLUE)
     );
 
     private final Font font;
     protected final int count;
-    protected int status = 0;
+    protected int size;
+    protected int texture;
+    protected int script;
+    protected int backend;
+    protected int uploaded;
     private Component scriptError, disconnectedReason;
 
     private int x, y;
@@ -60,23 +66,21 @@ public class StatusWidget implements FiguraWidget, FiguraTickable, GuiEventListe
         Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
         boolean empty = avatar == null || avatar.nbt == null;
 
-        status = empty ? 0 : avatar.fileSize > NetworkStuff.getSizeLimit() ? 1 : avatar.fileSize > NetworkStuff.getSizeLimit() * 0.75 ? 2 : 3;
+       	size = empty ? 0 : avatar.fileSize > NetworkStuff.getSizeLimit() ? 1 : avatar.fileSize > NetworkStuff.getSizeLimit() * 0.75 ? 2 : 3;
 
-        int texture = empty || !avatar.hasTexture ? 0 : 3;
-        status += texture << 2;
+        texture = empty || !avatar.hasTexture ? 0 : 3;
+        
 
-        int script = empty ? 0 : avatar.scriptError ? 1 : avatar.luaRuntime == null ? 0 : avatar.versionStatus > 0 ? 2 : 3;
-        status += script << 4;
+        script = empty ? 0 : avatar.scriptError ? 1 : avatar.luaRuntime == null ? 0 : avatar.versionStatus > 0 ? 2 : 3;
         scriptError = script == 1 ? avatar.errorText.copy() : null;
 
-        int backend = NetworkStuff.backendStatus;
-        status += backend << 6;
+        backend = FSB.instance().connected() ? 4 : NetworkStuff.backendStatus;
+        
 
         String dc = NetworkStuff.disconnectedReason;
         disconnectedReason = backend == 1 && dc != null && !dc.isBlank() ? Component.literal(dc) : null;
         
-        int uploaded = (empty ? 0 : (AvatarManager.localUploaded ? 3 : 2));
-        status += uploaded << 8;
+        uploaded = (empty ? 0 : (AvatarManager.localUploaded ? 3 : 2));
     }
 
     @Override
@@ -111,12 +115,26 @@ public class StatusWidget implements FiguraWidget, FiguraTickable, GuiEventListe
     }
 
     public MutableComponent getStatusIcon(int type) {
-        return Component.literal(String.valueOf(STATUS_INDICATORS.charAt(status >> (type * 2) & 3))).setStyle(Style.EMPTY.withFont(UIHelper.UI_FONT));
+        return Component.literal(String.valueOf(STATUS_INDICATORS.charAt(switch (type) {
+            case 0 -> size;
+            case 1 -> texture;
+            case 2 -> script;
+            case 3 -> backend;
+            case 4 -> uploaded;
+            default -> 0;
+        }))).setStyle(Style.EMPTY.withFont(UIHelper.UI_FONT));
     }
 
     public Component getTooltipFor(int i) {
         // get name and color
-        int color = status >> (i * 2) & 3;
+        int color = switch (i) {
+            case 0 -> size;
+            case 1 -> texture;
+            case 2 -> script;
+            case 3 -> backend;
+            case 4 -> uploaded;
+            default -> 0;
+        };
         String part = "gui.status." + STATUS_NAMES.get(i);
 
         MutableComponent info;

@@ -19,6 +19,7 @@
     "LivingEntityMixin",
     "MinecraftMixin",
     "ReloadableResourceManagerMixin",
+    "ServerDataMixin",
     "SkullBlockEntityAccessor",
     "SNIHelperMixin",
     "TextDisplayMixin",
@@ -34,6 +35,7 @@
     "gui.ChatScreenMixin",
     "gui.ClickEventActionMixin",
     "gui.DebugScreenOverlayMixin",
+    "gui.EditServerScreenMixin",
     "gui.GuiAccessor",
     "gui.GuiMessageLineMixin",
     "gui.GuiMessageMixin",
@@ -96,6 +98,7 @@
     "sound.SubtitleOverlayMixin"
   ],
   "server": [
+    "network.server.PlayerListMixin"
   ],
   "injectors": {
     "defaultRequire": 1

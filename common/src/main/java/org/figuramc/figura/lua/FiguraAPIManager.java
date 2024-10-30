@@ -123,6 +123,7 @@ public class FiguraAPIManager {
 		add(ActionWheelAPI.class);
 		add(Page.class);
 		add(Action.class);
+		add(ServerPacketsAPI.class);
 
 		add(VectorsAPI.class);
 		add(MatricesAPI.class);
@@ -208,6 +209,7 @@ public class FiguraAPIManager {
 		put("config", r -> new ConfigAPI(r.owner));
 		if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
 		if(Configs.EXPOSE_JAVA_API.value) put("java", r -> r.java = new JavaAPI(r.owner));
+        put("server_packets", r -> r.serverPackets = new ServerPacketsAPI(r.owner));
 
 		put("data", r -> new DataAPI(r.owner));
 		put("json", r -> JsonAPI.INSTANCE);

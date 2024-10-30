@@ -78,16 +78,16 @@ public class FiguraDocsManager {
     // class name map
     private static final Map<Class<?>, String> NAME_MAP = new HashMap<>() {{
         // Built in type names, even for things that don't have docs
-        put(Double.class, "Number");
-        put(double.class, "Number");
-        put(Float.class, "Number");
-        put(float.class, "Number");
+        put(Double.class, "Number(Double)");
+        put(double.class, "Number(Double)");
+        put(Float.class, "Number(Float)");
+        put(float.class, "Number(Float)");
         put(Number.class, "Number");
 
         put(Integer.class, "Integer");
         put(int.class, "Integer");
-        put(Long.class, "Integer");
-        put(long.class, "Integer");
+        put(Long.class, "Integer(Long)");
+        put(long.class, "Integer(Long)");
 
         put(void.class, "nil");
 
@@ -106,10 +106,10 @@ public class FiguraDocsManager {
         put(Varargs.class, "Varargs");
 
         // converted things
-        put(Map.class, "Table");
-        put(HashMap.class, "Table");
-        put(List.class, "Table");
-        put(ArrayList.class, "Table");
+        put(Map.class, "Table(From Map)");
+        put(HashMap.class, "Table(From HashMap)");
+        put(List.class, "Table(From List)");
+        put(ArrayList.class, "Table(From ArrayList)");
 
         // Figura types
         put(FiguraVector.class, "Vector");
@@ -276,6 +276,9 @@ public class FiguraDocsManager {
         ));
         put("raycast", List.of(
                 RaycastAPI.class
+        ));
+        put("extura", List.of(
+                ExturaAPI.class
         ));
     }};
     private static final Map<String, List<FiguraDoc>> GENERATED_CHILDREN = new HashMap<>();

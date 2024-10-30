@@ -32,6 +32,7 @@ public class FiguraLuaJson {
     private static final Function<FiguraLuaRuntime, LuaValue> TO_JSON_FUNCTION = runtime -> new VarArgFunction() {
         @Override
         public Varargs invoke(Varargs args) {
+            if (args.narg() == 0) return LuaValue.NIL;
             return LuaValue.valueOf(tableToJsonString(args.arg(1)));
         }
 

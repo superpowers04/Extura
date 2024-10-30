@@ -36,6 +36,9 @@ import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.mixin.gui.GuiAccessor;
 import org.figuramc.figura.mixin.gui.PlayerTabOverlayAccessor;
 import org.figuramc.figura.mixin.render.ModelManagerAccessor;
+import org.figuramc.figura.backend2.FSB;
+import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.backend2.HttpAPI;
 import org.figuramc.figura.utils.*;
 import org.joml.Vector3f;
 import org.luaj.vm2.LuaError;
@@ -673,6 +676,37 @@ public class ClientAPI {
 		return map;
 	}
 
+	@LuaWhitelist
+	@LuaMethodDoc("client.is_using_fsb")
+	public static boolean isUsingFSB() {
+		return FSB.instance().connected();
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("client.is_backend_connected")
+	public static boolean isBackendConnected() {
+		return NetworkStuff.isConnected();
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("client.get_mod_name")
+	public static String getModName(@LuaNotNil String id) {
+		return PlatformUtils.isModLoaded(id) ? PlatformUtils.getModName(id) : "";
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("client.get_current_backend")
+	public static String getCurrentBackend(boolean skipFSB) {
+		if(!skipFSB && FSB.instance().connected()){
+
+			IntegratedServer iServer = Minecraft.getInstance().getSingleplayerServer();
+			if (iServer != null) {
+				return iServer.getLocalIp();
+			}
+			ServerData mServer = Minecraft.getInstance().getCurrentServer();
+			if (mServer != null) {
+				return mServer.ip;
+			}
+		}
+		return NetworkStuff.isConnected() ? HttpAPI.getBackendAddress() : "" ;
+	}
 	@LuaWhitelist
 	@LuaMethodDoc("client.list_atlases")
 	public static List<String> listAtlases() {

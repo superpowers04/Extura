@@ -292,7 +292,7 @@ public class LuaUtils {
             LuaTable table = value.checktable();
 
             // If it's an "array" (uses numbers as keys)
-            if (checkTableArray(table)) {
+            if (checkTableArray(table) && table.length() > 0) {
                 JsonArray arr = new JsonArray();
                 LuaValue[] keys = table.keys();
                 int arrayLength = keys[keys.length-1].checkint();

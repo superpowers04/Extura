@@ -28,7 +28,7 @@ public class HttpAPI {
         return URI.create(getBackendAddress() + "/" + url);
     }
 
-    protected static String getBackendAddress() {
+    public static String getBackendAddress() {
         if(Configs.BLOCK_CLOUD.value) return "http://127.0.0.1:9/api";
         if(Configs.VANILLA_CLOUD.value){
             return "https://" + ServerAddress.parseString(Configs.SERVER_IP.defaultValue).getHost() + "/api";

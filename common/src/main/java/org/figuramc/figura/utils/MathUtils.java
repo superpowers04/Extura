@@ -179,23 +179,35 @@ public class MathUtils {
         return p0 * d * d * d + 3 * p1 * d * d * t + 3 * p2 * d * t * t + p3 * t * t * t;
     }
 
-    // secant method for finding bezier t based on x, also provided by ChatGPT
+    // newton raphson method for finding bezier t based on x, also provided by ChatGPT
+    // this approximation method is more accurate and often requires less iterations than secant based
     public static double bezierFindT(double x, double p0, double p1, double p2, double p3) {
-        double x0 = 0.4;
-        double x1 = 0.6;
-        double tolerance = 0.001;
+        double tolerance = 0.0001;
+        double t = 0.5;
         int iterations = 100;
 
         for (int i = 0; i < iterations; i++) {
-            double fx1 = bezier(x1, p0, p1, p2, p3) - x;
-            double fx0 = bezier(x0, p0, p1, p2, p3) - x;
-            double xNext = x1 - fx1 * (x1 - x0) / (fx1 - fx0);
-            if (Math.abs(xNext - x1) < tolerance)
-                return xNext;
-            x0 = x1;
-            x1 = xNext;
+            double xBezier = bezier(t, p0, p1, p2, p3);
+            double dxBezier = bezierDerivative(t, p0, p1, p2, p3);
+
+            if (dxBezier == 0) {
+                break; // Avoid division by zero
+            }
+
+            double tNext = t - (xBezier - x) / dxBezier;
+
+            if (Math.abs(tNext - t) < tolerance) {
+                return tNext;
+            }
+
+            t = tNext;
         }
 
-        return x1;
+        return t;
+    }
+
+    private static double bezierDerivative(double t, double p0, double p1, double p2, double p3) {
+        double d = 1 - t;
+        return 3 * (p1 - p0) * d * d + 6 * (p2 - p1) * d * t + 3 * (p3 - p2) * t * t;
     }
 }

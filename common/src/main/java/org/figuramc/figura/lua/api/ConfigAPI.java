@@ -50,7 +50,7 @@ public class ConfigAPI {
     public ConfigAPI(Avatar owner) {
         this.owner = owner;
         this.isHost = owner.isHost;
-        this.name = owner.name;
+        this.name = owner.name.trim();
     }
 
 

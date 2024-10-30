@@ -30,7 +30,7 @@ import org.luaj.vm2.LuaFunction;
 
 @LuaWhitelist
 @LuaTypeDoc(
-		name = "ExturaAPI",
+		name = "ExturaAPI(Extura)",
 		value = "extura"
 )
 public class ExturaAPI {

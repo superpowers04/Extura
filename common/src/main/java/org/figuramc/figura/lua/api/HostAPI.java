@@ -7,12 +7,14 @@ import net.irisshaders.iris.Iris;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
+import org.figuramc.figura.avatar.local.LocalAvatarFetcher;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.Input;
+import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
 import org.figuramc.figura.permissions.Permissions;
 import net.minecraft.core.GlobalPos;
@@ -48,6 +50,7 @@ import org.figuramc.figura.mixin.gui.ChatComponentAccessor;
 import org.figuramc.figura.mixin.gui.ChatScreenAccessor;
 import org.figuramc.figura.model.rendering.texture.FiguraTexture;
 import org.figuramc.figura.overrides.NoInput;
+import org.figuramc.figura.overrides.ExturaInput;
 import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.LuaUtils;
 import org.figuramc.figura.utils.TextUtils;
@@ -55,10 +58,13 @@ import org.luaj.vm2.LuaError;
 import org.figuramc.figura.avatar.local.LocalAvatarLoader;
 import org.figuramc.figura.gui.widgets.lists.AvatarList;
 import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.backend2.FSB;
+
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.nio.file.Path;
 
 
 @LuaWhitelist
@@ -647,9 +653,9 @@ public class HostAPI {
 			AvatarList.selectedEntry = null;
 			return;
 		}
-		Path path = LocalAvatarFetcher.getLocalAvatarDirectory().resolve(path);
-		AvatarManager.loadLocalAvatar(path);
-		AvatarList.selectedEntry = path;
+		Path _path = LocalAvatarFetcher.getLocalAvatarDirectory().resolve(path);
+		AvatarManager.loadLocalAvatar(_path);
+		AvatarList.selectedEntry = _path;
 	}
 
 	@LuaWhitelist
@@ -846,6 +852,52 @@ public class HostAPI {
 		LocalPlayer player = this.minecraft.player;
 		player.setPos(LuaUtils.parseVec3("player_setPos", x, y, z).asVec3());
 	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.start_riding")
+	public void startRiding(EntityAPI entity,boolean bool) {
+		if (!canExturaCheat()) return;
+		LocalPlayer player = this.minecraft.player;
+		if(entity == null) player.removeVehicle();
+		Entity t = entity.getEntity();
+		if(t == player) throw new LuaError("You cannot ride yourself!");
+		player.startRiding(t,bool);
+	}
+
+	@LuaWhitelist
+	@LuaMethodDoc("host.drop_item")
+	public void dropItem(boolean dropAll) {
+		if (!canExturaCheat()) return;
+		LocalPlayer player = this.minecraft.player;
+		player.drop(dropAll == true);
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.close_container")
+	public void closeContainer() {
+		if (!canExturaCheat()) return;
+		LocalPlayer player = this.minecraft.player;
+		player.closeContainer();
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.start_using_item")
+	public void startUsingItem(boolean offHand) {
+		if (!canExturaCheat()) return;
+		LocalPlayer player = this.minecraft.player;
+		player.startUsingItem(offHand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.stop_using_item")
+	public void stopUsingItem() {
+		if (!canExturaCheat()) return;
+		LocalPlayer player = this.minecraft.player;
+		player.stopUsingItem();
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.send_open_inventory")
+	public void sendOpenInventory() {
+		if (!canExturaCheat()) return;
+		LocalPlayer player = this.minecraft.player;
+		player.sendOpenInventory();
+	}
 
 	@LuaWhitelist
 	@LuaMethodDoc(
@@ -860,12 +912,42 @@ public class HostAPI {
 	public void setPlayerMovement(Boolean playerMovement) {
 		LocalPlayer player;
 		if (!this.isHost || (player = this.minecraft.player) == null || playerMovement == hasPlayerMovement) return;
-		if (defaultInput == null) defaultInput = player.input; // set default input
-		player.input = (playerMovement ? this.defaultInput : new NoInput());
+		player.input = (playerMovement ? new ExturaInput(this.minecraft.options) : new NoInput());
 		hasPlayerMovement = playerMovement;
-
 	}
-
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {
+					@LuaMethodOverload(
+							argumentTypes = {String.class,Boolean.class},
+							argumentNames = {"input","state"}
+					),
+					@LuaMethodOverload(
+							argumentTypes = {String.class},
+							argumentNames = {"input","state"}
+					),
+			},
+			value = "host.override_player_movement"
+	)
+	public void overridePlayerMovement(@LuaNotNil String input,Boolean sta) {
+		if(!canExturaCheat()) return;
+		LocalPlayer player;
+		if (!this.isHost || (player = this.minecraft.player) == null) return;
+		if(!(player.input instanceof ExturaInput)){
+			player.input = new ExturaInput(this.minecraft.options);
+		}
+		int state = sta == null ? 0 : sta ? 2 : 1;
+		ExturaInput inputObj =(ExturaInput) player.input;
+		switch(input.toLowerCase()){
+			case "up": inputObj.upOverride = state;
+			case "down": inputObj.downOverride = state;
+			case "left": inputObj.leftOverride = state;
+			case "right": inputObj.rightOverride = state;
+			case "jump": inputObj.jumpOverride = state;
+			case "shift": inputObj.shiftOverride = state;
+			default: throw new LuaError("Invalid input");
+		}
+	}
 	@LuaWhitelist
 	@LuaMethodDoc("host.get_player_movement")
 	public Boolean getPlayerMovement() {
@@ -975,8 +1057,10 @@ public class HostAPI {
 		LocalPlayer player = this.minecraft.player;
 		if (player == null) return;
 		player.setDiscardFriction(hasForce != true);
-		
 	}
+
+
+
 
 	@LuaWhitelist
 	@LuaMethodDoc("host.is_chat_verified")
@@ -1028,3 +1112,4 @@ public class HostAPI {
 		return "HostAPI";
 	}
 }
+

@@ -7,6 +7,7 @@ import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.avatar.local.CacheAvatarLoader;
 import org.figuramc.figura.avatar.local.LocalAvatarFetcher;
+import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.gui.FiguraToast;
 import org.figuramc.figura.gui.screens.ConfigScreen;
@@ -236,6 +237,18 @@ public class Configs {
 		}, EMOJIS = new ConfigType.EnumConfig("emojis", MISC, 1, 3);
 	public static final ConfigType.BoolConfig EASTER_EGGS = new ConfigType.BoolConfig("easter_eggs", MISC, true);
 
+	public static final ConfigType.BoolConfig ENABLE_FSB = new ConfigType.BoolConfig("enable_fsb", MISC, false) {
+		@Override
+		public void onChange() {
+			super.onChange();
+			NetworkStuff.reAuth();
+			AvatarManager.clearAllAvatars();
+		}
+		{
+			this.name = this.name.copy().withStyle(ChatFormatting.RED);
+			this.tooltip = FiguraText.of("config.enable_fsb.tooltip");
+		}
+	};
 
 	// -- DEV -- //
 	public static final ConfigType.BoolConfig DEBUG_MODE = new ConfigType.BoolConfig("debug_mode", DEV, false, false);
@@ -293,6 +306,8 @@ public class Configs {
 	public static final ConfigType.BoolConfig
 			FORCE_SMOOTH_AVATAR = new ConfigType.BoolConfig("force_smooth_avatar", DEV, false),
 			GUI_FPS = new ConfigType.BoolConfig("gui_fps", DEV, false);
+
+
 	public static final ConfigType.BoolConfig USE_SECURE_CLOUD = new ConfigType.BoolConfig("use_secure_cloud", DEV, true) {
 			@Override
 			public void onChange() {
@@ -337,6 +352,8 @@ public class Configs {
 			this.tooltip = FiguraText.of("config.use_mc_host_resolver.tooltip");
 		}
 	};
+    public static final ConfigType.ButtonConfig REGENERATE_KEY =
+            new ConfigType.ButtonConfig("regen_key", DEV, () -> {FSB.instance().regenerateKey();});
 	// -- NETWORKING -- //
 	public static final ConfigType.BoolConfig ALLOW_NETWORKING =
 			new ConfigType.BoolConfig("allow_networking", NETWORKING, false);

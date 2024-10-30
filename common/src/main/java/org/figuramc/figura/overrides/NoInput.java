@@ -7,10 +7,8 @@ import net.minecraft.world.phys.Vec2;
 
 @Environment(EnvType.CLIENT)
 public class NoInput extends Input {
-
     @Override
     public Vec2 getMoveVector() {
         return new Vec2(0, 0);
     }
-
 }

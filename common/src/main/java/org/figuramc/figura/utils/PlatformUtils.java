@@ -32,6 +32,11 @@ public class PlatformUtils {
     }
 
     @ExpectPlatform
+    public static String getModName(String modId){
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static String getModVersion(String modId) {
         throw new AssertionError();
     }

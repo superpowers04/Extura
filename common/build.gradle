@@ -27,6 +27,7 @@ dependencies {
     modCompileOnly ("software.bernie.geckolib:geckolib-fabric-$geckolib_version") {
         exclude group: "net.fabricmc"
     }
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.6"))
 
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
@@ -34,6 +35,9 @@ dependencies {
 
     // Test compile only is used to mount sources on an IDE without overriding vanilla classes with Optifine's
     testCompileOnly fileTree(dir: "$rootProject.projectDir/libs", include: '*.jar')
+
+    // common(project(path: ":server-common")) { transitive false }
+    // shadowCommon(project(path: ":server-common")) { transitive false }
 }
 
 publishing {

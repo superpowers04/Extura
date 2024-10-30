@@ -77,7 +77,8 @@ public class AvatarMetadataParser {
         if (metadata.autoScripts != null) {
             ListTag autoScripts = new ListTag();
             for (String name : metadata.autoScripts) {
-                autoScripts.add(StringTag.valueOf(PathUtils.computeSafeString(name.replaceAll("\\.lua$", ""))));
+            	if(name.endsWith(".lua")) name = name.substring(0,name.length()-4);
+                autoScripts.add(StringTag.valueOf(PathUtils.computeSafeString(name)));
             }
             nbt.put("autoScripts", autoScripts);
         }
