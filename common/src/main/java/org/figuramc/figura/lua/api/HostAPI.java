@@ -939,12 +939,12 @@ public class HostAPI {
 		int state = sta == null ? 0 : sta ? 2 : 1;
 		ExturaInput inputObj =(ExturaInput) player.input;
 		switch(input.toLowerCase()){
-			case "up": inputObj.upOverride = state;
-			case "down": inputObj.downOverride = state;
-			case "left": inputObj.leftOverride = state;
-			case "right": inputObj.rightOverride = state;
-			case "jump": inputObj.jumpOverride = state;
-			case "shift": inputObj.shiftOverride = state;
+			case "up": inputObj.upOverride = state; break;
+			case "down": inputObj.downOverride = state; break;
+			case "left": inputObj.leftOverride = state; break;
+			case "right": inputObj.rightOverride = state; break;
+			case "jump": inputObj.jumpOverride = state; break;
+			case "shift": inputObj.shiftOverride = state; break;
 			default: throw new LuaError("Invalid input");
 		}
 	}
