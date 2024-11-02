@@ -64,11 +64,6 @@ public final class FiguraUser {
     public void sendPacket(Packet packet) {
         FiguraServer.getInstance().sendPacket(player, packet);
     }
-
-    public void sendDeferredPacket(CompletableFuture<? extends Packet> packet) {
-        FiguraServer.getInstance().sendDeferredPacket(player, packet);
-    }
-
     public void save(Path file) {
         file.getParent().toFile().mkdirs();
         File playerFile = file.toFile();

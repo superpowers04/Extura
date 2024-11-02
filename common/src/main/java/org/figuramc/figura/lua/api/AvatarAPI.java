@@ -21,6 +21,7 @@ import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
+import org.figuramc.figura.backend2.NetworkStuff;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -271,6 +272,12 @@ public class AvatarAPI {
 	@LuaMethodDoc("avatar.get_tick_count")
 	public int getTickCount() {
 		return avatar.tick.getTotal();
+	}
+
+	@LuaWhitelist
+	@LuaMethodDoc("avatar.get_size_limit")
+	public int getSizeLimit() {
+		return NetworkStuff.getSizeLimit();
 	}
 
 	@LuaWhitelist

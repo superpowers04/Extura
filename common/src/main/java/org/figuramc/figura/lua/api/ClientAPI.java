@@ -695,7 +695,6 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_current_backend")
 	public static String getCurrentBackend(boolean skipFSB) {
 		if(!skipFSB && FSB.instance().connected()){
-
 			IntegratedServer iServer = Minecraft.getInstance().getSingleplayerServer();
 			if (iServer != null) {
 				return iServer.getLocalIp();

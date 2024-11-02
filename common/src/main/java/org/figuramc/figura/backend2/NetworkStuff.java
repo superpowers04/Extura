@@ -379,6 +379,13 @@ public class NetworkStuff {
 
 	// TODO: multiple modes of upload (Backend, fsb, Backend + fsb)
 	public static void uploadAvatar(Avatar avatar) {
+		uploadAvatar(avatar,0);
+	}
+	// 0 = fsb main, backend fallback
+	// 1 = backend
+	// 2 = fsb only
+	// 3 = fsb + backend
+	public static void uploadAvatar(Avatar avatar,int uploadType) {
 		if (avatar == null || avatar.nbt == null)
 			return;
 
@@ -390,10 +397,12 @@ public class NetworkStuff {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			NbtIo.writeCompressed(avatar.nbt, baos);
 
-			if (fsb().connected()) {
+			if (fsb().connected() && (uploadType != 1)) {
+				avatar.isFSB = true;
 				fsb().uploadAvatar(id, baos.toByteArray());
-				return;
+				if(uploadType != 3) return;
 			}
+			if(uploadType == 2) return;
 
 			queueString(Util.NIL_UUID, api -> api.uploadAvatar(id, baos.toByteArray()), (code, data) -> {
 				responseDebug("uploadAvatar", code, data);
@@ -402,6 +411,7 @@ public class NetworkStuff {
 					//TODO - profile screen
 					// if (fsb().connected()) fsb().equipAvatar(List.of(Pair.of(id, getHash(baos.toByteArray()))));
 					// else 
+					avatar.isBackend = true;
 					equipAvatar(List.of(Pair.of(avatar.owner, id)));
 					AvatarManager.localUploaded = true;
 				}
@@ -456,12 +466,22 @@ public class NetworkStuff {
 		});
 	}
 
+	public static void getAvatar(QueuedAvatar qa) {
+		getAvatar(qa.target,qa.owner,qa.id,qa.hash,true);
+	}
+	public static void getAvatar(QueuedAvatar qa,boolean useFSB) {
+		if (useFSB && fsb().connected()) {
+			fsb().getAvatar(qa);
+			return;
+		}
+		getAvatar(qa.target,qa.owner,qa.id,qa.hash,useFSB);
+	}
 	public static void getAvatar(UserData target, UUID owner, String id, String hash) {
 		getAvatar(target,owner,id,hash,true);
 	}
 	public static void getAvatar(UserData target, UUID owner, String id, String hash,boolean useFSB) {
 		if (useFSB && fsb().connected()) {
-			fsb().getAvatar(target, hash);
+			fsb().getAvatar(new QueuedAvatar(target,owner,id,hash));
 			return;
 		}
 		if (checkUUID(target.id))
@@ -524,11 +544,17 @@ public class NetworkStuff {
 			return;
 
 		try {
-			if (!fsb().connected()) {
-				ByteBuffer buffer = C2SMessageHandler.ping(id, sync, data);
-				ws.sendBinary(buffer.array());
+			if (fsb().connected()) {
+				fsb().sendPacket(new C2SPingPacket(id, sync, data));
+				if(!Configs.ALLOW_BOTH_PINGS.value || !AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID()).isBackend ){
+					pingsSent++;
+					if (lastPing == 0) lastPing = FiguraMod.ticks;
+					return;
+				}
 			}
-			else fsb().sendPacket(new C2SPingPacket(id, sync, data));
+
+			ByteBuffer buffer = C2SMessageHandler.ping(id, sync, data);
+			ws.sendBinary(buffer.array());
 
 			pingsSent++;
 			if (lastPing == 0) lastPing = FiguraMod.ticks;
@@ -610,7 +636,7 @@ public class NetworkStuff {
 	}
 
 	public static boolean canUpload() {
-		return fsb().connected() || (isConnected() && uploadRate.check());
+		return connectedToAnyBackend() && uploadRate.check();
 	}
 
 	public static int getSizeLimit() {

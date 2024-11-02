@@ -14,12 +14,8 @@ public class ExturaInput extends Input {
    public ExturaInput(Options options) {
       this.options = options;
    }
-   private static float calculateImpulse(boolean p_205578_, boolean p_205579_) {
-      if (p_205578_ == p_205579_) {
-         return 0.0F;
-      } else {
-         return p_205578_ ? 1.0F : -1.0F;
-      }
+   private static float calculateImpulse(boolean forward, boolean back) {
+      return (forward == back ? .0F : forward ? 1.0F : -1.0F);
    }
 	public int upOverride = 0;
 	public int downOverride = 0;

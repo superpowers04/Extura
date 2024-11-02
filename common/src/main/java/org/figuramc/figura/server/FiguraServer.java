@@ -32,9 +32,7 @@ public abstract class FiguraServer {
     private final FiguraUserManager userManager = new FiguraUserManager(this);
     private final FiguraServerAvatarManager avatarManager = new FiguraServerAvatarManager(this);
     private FiguraServerConfig config = new FiguraServerConfig();
-    private final DeferredPacketsQueue deferredPacketsQueue = new DeferredPacketsQueue(this);
     private final FiguraCustomPackets customPackets = new FiguraCustomPackets();
-    private boolean initialized;
     protected FiguraServer() {
         if (INSTANCE != null) throw new IllegalStateException("Can't create more than one instance of FiguraServer");
         INSTANCE = this;
@@ -60,9 +58,11 @@ public abstract class FiguraServer {
     public static final List<Identifier> OUTCOMING_PACKETS = List.of(
             S2CBackendHandshakePacket.PACKET_ID,
             S2CInitializeAvatarStreamPacket.PACKET_ID,
+            S2CNotifyPacket.PACKET_ID,
             S2COwnedAvatarsPacket.PACKET_ID,
             S2CPingErrorPacket.PACKET_ID,
             S2CPingPacket.PACKET_ID,
+            S2CRefusedPacket.PACKET_ID,
             S2CUserdataPacket.PACKET_ID,
             AllowIncomingStreamPacket.PACKET_ID,
             AvatarDataPacket.PACKET_ID,
@@ -115,7 +115,6 @@ public abstract class FiguraServer {
         loadConfig();
         getUsersFolder().toFile().mkdirs();
         getAvatarsFolder().toFile().mkdirs();
-        initialized = true;
         logInfo("Initialization complete.");
     }
 
@@ -153,7 +152,6 @@ public abstract class FiguraServer {
     }
 
     public final void tick() {
-        deferredPacketsQueue.tick();
         avatarManager.tick();
         userManager().tick();
     }
@@ -183,9 +181,6 @@ public abstract class FiguraServer {
         }
     }
 
-    public final synchronized void sendDeferredPacket(UUID receiver, CompletableFuture<? extends Packet> packet) {
-        deferredPacketsQueue.sendPacket(receiver, packet);
-    }
 
     protected abstract void sendPacketInternal(UUID receiver, Packet packet);
 

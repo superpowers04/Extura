@@ -245,8 +245,26 @@ public class Configs {
 			AvatarManager.clearAllAvatars();
 		}
 		{
-			this.name = this.name.copy().withStyle(ChatFormatting.RED);
+			this.name = this.name.copy().withStyle(ChatFormatting.AQUA);
 			this.tooltip = FiguraText.of("config.enable_fsb.tooltip");
+		}
+	};
+	public static final ConfigType.BoolConfig DEFAULT_TO_BACKEND = new ConfigType.BoolConfig("default_to_backend", MISC, false) {
+		@Override
+		public void onChange() {
+			super.onChange();
+			// NetworkStuff.reAuth();
+			AvatarManager.clearAllAvatars();
+		}
+		{
+			this.name = this.name.copy().withStyle(ChatFormatting.AQUA);
+			this.tooltip = FiguraText.of("config.default_to_backend.tooltip");
+		}
+	};
+	public static final ConfigType.BoolConfig ALLOW_BOTH_PINGS = new ConfigType.BoolConfig("allow_both_pings", MISC, false) {
+		{
+			this.name = this.name.copy().withStyle(ChatFormatting.AQUA);
+			this.tooltip = FiguraText.of("config.allow_both_pings.tooltip");
 		}
 	};
 

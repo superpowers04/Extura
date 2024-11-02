@@ -10,6 +10,7 @@ import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.avatar.local.LocalAvatarLoader;
 import org.figuramc.figura.gui.widgets.lists.AvatarList;
 import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.avatar.local.LocalAvatarFetcher;
 import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.FiguraToast;
@@ -36,7 +37,9 @@ public class WardrobeScreen extends AbstractPanelScreen {
 
     private Label panic;
 
-    private Button upload, delete, back;
+    private Button upload, delete, back, uploadCloud, uploadBoth;
+    private FiguraIdentifier upCloud, upFSB;
+    private boolean canFSB = false; 
 
     public WardrobeScreen(Screen parentScreen) {
         super(parentScreen, FiguraText.of("gui.panels.title.wardrobe"));
@@ -76,7 +79,7 @@ public class WardrobeScreen extends AbstractPanelScreen {
         int buttY = entity.getY() + entity.getHeight() + 4;
 
         // upload
-        addRenderableWidget(upload = new Button(buttX - 48, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/upload.png"), 72, 24, FiguraText.of("gui.wardrobe.upload.tooltip"), button -> {
+        addRenderableWidget(upload = new Button(buttX - 48, buttY, 24, 24, 0, 0, 24, upCloud = new FiguraIdentifier("textures/gui/upload.png"), 72, 24, FiguraText.of("gui.wardrobe.upload_cloud.tooltip"), button -> {
             Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
             try {
                 LocalAvatarLoader.loadAvatar(null, null);
@@ -102,6 +105,27 @@ public class WardrobeScreen extends AbstractPanelScreen {
                 NetworkStuff.deleteAvatar(null))
         );
         delete.setActive(false);
+        upFSB = new FiguraIdentifier("textures/gui/upload_fsb.png");
+        // addRenderableWidget(uploadCloud = new Button(buttX - 48, buttY + 24, 24, 24, 0, 0, 24, upCloud, 72, 24, FiguraText.of("gui.wardrobe.upload_cloud.tooltip"), button -> {
+        //     Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+        //     try {
+        //         LocalAvatarLoader.loadAvatar(null, null);
+        //     } catch (Exception ignored) {}
+        //     NetworkStuff.uploadAvatar(avatar,1);
+        //     AvatarList.selectedEntry = null;
+        // }));
+        // uploadCloud.setActive(false);
+        // uploadCloud.setVisible(false);
+        addRenderableWidget(uploadBoth = new Button(buttX-12, buttY + 24, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/upload_fsb_cloud.png"), 72, 24, FiguraText.of("gui.wardrobe.upload_both.tooltip"), button -> {
+            Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+            try {
+                LocalAvatarLoader.loadAvatar(null, null);
+            } catch (Exception ignored) {}
+            NetworkStuff.uploadAvatar(avatar,3);
+            AvatarList.selectedEntry = null;
+        }));
+        uploadBoth.setVisible(false);
+        uploadBoth.setActive(false);
 
         StatusWidget statusWidget = new StatusWidget(entity.getX() + entity.getWidth() - 64, 0, 72);
         statusWidget.setY(entity.getY() - statusWidget.getHeight() - 4);
@@ -245,8 +269,23 @@ public class WardrobeScreen extends AbstractPanelScreen {
 
         // backend buttons
         Avatar avatar;
-        upload.setActive(NetworkStuff.canUpload() && !AvatarManager.localUploaded && (avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID())) != null && avatar.nbt != null && avatar.loaded);
+        boolean canUpload = NetworkStuff.canUpload() && !AvatarManager.localUploaded && (avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID())) != null && avatar.nbt != null && avatar.loaded;
         delete.setActive(NetworkStuff.connectedToAnyBackend() && AvatarManager.localUploaded);
+        upload.setActive(canUpload);
+        boolean nextFSB = Configs.ENABLE_FSB.value && FSB.instance().connected();
+        if(nextFSB != canFSB){
+        	canFSB = nextFSB;
+        	upload.setTexture(canFSB ? upFSB : upCloud);
+        	upload.setTooltip(canFSB ? FiguraText.of("gui.wardrobe.upload_fsb.tooltip") : FiguraText.of("gui.wardrobe.upload_cloud.tooltip"));
+        	// uploadCloud.setVisible(canFSB);
+        	uploadBoth.setVisible(canFSB);
+        }
+        if(canFSB){
+			upload.setActive(canUpload);
+			// uploadCloud.setActive(canUpload && NetworkStuff.isConnected());
+			uploadBoth.setActive(canUpload && FSB.instance().connected() && NetworkStuff.isConnected());
+
+        }
 
         updateMotdWidget();
     }

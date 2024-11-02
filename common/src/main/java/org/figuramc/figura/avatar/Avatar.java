@@ -102,6 +102,7 @@ public class Avatar {
     public int fileSize;
     public String color;
     public boolean isFSB = false;
+    public boolean isBackend = false;
     public Map<String, String> badgeToColor = new HashMap<>();
     public Map<String, byte[]> resources = new HashMap<>();
 
