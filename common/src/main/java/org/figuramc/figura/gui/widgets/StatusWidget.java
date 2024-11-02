@@ -80,7 +80,7 @@ public class StatusWidget implements FiguraWidget, FiguraTickable, GuiEventListe
         String dc = NetworkStuff.disconnectedReason;
         disconnectedReason = backend == 1 && dc != null && !dc.isBlank() ? Component.literal(dc) : null;
         
-        uploaded = (empty ? 0 : (AvatarManager.localUploaded ? 3 : 2));
+        uploaded = (empty ? 0 : (AvatarManager.localUploaded ? FSB.instance().connected() ? 4 : 3 : 2));
     }
 
     @Override
