@@ -37,8 +37,8 @@ public class WardrobeScreen extends AbstractPanelScreen {
 
     private Label panic;
 
-    private Button upload, delete, back, uploadCloud, uploadBoth;
-    private FiguraIdentifier upCloud, upFSB;
+    private Button upload, reload, delete, back, uploadCloud, uploadBoth;
+    private FiguraIdentifier upCloud, upFSB, delCloud, delFSB, reloadCloud, reloadFSB;
     private boolean canFSB = false; 
 
     public WardrobeScreen(Screen parentScreen) {
@@ -90,7 +90,10 @@ public class WardrobeScreen extends AbstractPanelScreen {
         upload.setActive(false);
 
         // reload
-        addRenderableWidget(new Button(buttX - 12, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/reload.png"), 72, 24, FiguraText.of("gui.wardrobe.reload.tooltip"), button -> {
+        reloadCloud = new FiguraIdentifier("textures/gui/reload.png");
+        reloadFSB = new FiguraIdentifier("textures/gui/reload_fsb.png");
+
+        addRenderableWidget(reload = new Button(buttX - 12, buttY, 24, 24, 0, 0, 24, reloadCloud, 72, 24, FiguraText.of("gui.wardrobe.reload.tooltip"), button -> {
             AvatarManager.clearAvatars(FiguraMod.getLocalPlayerUUID());
             try {
                 LocalAvatarLoader.loadAvatar(null, null);
@@ -101,7 +104,9 @@ public class WardrobeScreen extends AbstractPanelScreen {
         }));
 
         // delete
-        addRenderableWidget(delete = new Button(buttX + 24, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/delete.png"), 72, 24, FiguraText.of("gui.wardrobe.delete.tooltip"), button ->
+        delCloud = new FiguraIdentifier("textures/gui/delete.png");
+        delFSB = new FiguraIdentifier("textures/gui/delete_fsb.png");
+        addRenderableWidget(delete = new Button(buttX + 24, buttY, 24, 24, 0, 0, 24, delCloud, 72, 24, FiguraText.of("gui.wardrobe.delete.tooltip"), button ->
                 NetworkStuff.deleteAvatar(null))
         );
         delete.setActive(false);
@@ -276,6 +281,8 @@ public class WardrobeScreen extends AbstractPanelScreen {
         if(nextFSB != canFSB){
         	canFSB = nextFSB;
         	upload.setTexture(canFSB ? upFSB : upCloud);
+        	delete.setTexture(canFSB ? delFSB : delCloud);
+        	reload.setTexture(canFSB ? reloadFSB : reloadCloud);
         	upload.setTooltip(canFSB ? FiguraText.of("gui.wardrobe.upload_fsb.tooltip") : FiguraText.of("gui.wardrobe.upload_cloud.tooltip"));
         	// uploadCloud.setVisible(canFSB);
         	uploadBoth.setVisible(canFSB);

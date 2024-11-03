@@ -973,12 +973,12 @@ public class Avatar {
         ParticleAPI.getParticleEngine().figura$clearParticles(owner);
     }
 
-    private int getFileSize() {
+    public int getFileSize() {
         try {
             // get size
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             NbtIo.writeCompressed(nbt, baos);
-            return baos.size();
+            return fileSize = baos.size();
         } catch (Exception e) {
             FiguraMod.LOGGER.warn("Failed to generate file size for model " + this.name, e);
             return 0;

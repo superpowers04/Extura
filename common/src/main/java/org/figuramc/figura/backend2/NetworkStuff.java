@@ -557,6 +557,7 @@ public class NetworkStuff {
 			ws.sendBinary(buffer.array());
 
 			pingsSent++;
+			
 			if (lastPing == 0) lastPing = FiguraMod.ticks;
 		} catch (Exception e) {
 			FiguraMod.LOGGER.error("Failed to send ping", e);

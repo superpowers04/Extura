@@ -57,6 +57,9 @@
 	"figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
 	"figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used",
 
+	"figura.docs.avatar.set_nbt": "(Extura) Set nbt of object at the path\n* First argument is the path, if a name contains a dot, use '\\\\.'\n* Second argument is the object to replace with\n* Third argument is the type, use this if you need a specific type\nValid types are: float, int, short, double, string, bool, boolean, bytearray, null, nil",
+	"figura.docs.avatar.get_size_limit": "(Extura) Get the size limit of the avatar from the backend",
+
 	"figura.docs.host.allow_extura_cheats": "(Extura) Returns whether functions like host:setVelocity will work.\n Returns true if on a local server, permission level is above 2 or player has an objective named 'extura_can_cheat'",
 	"figura.docs.host.upload_avatar": "(Extura) Uploads your current avatar to the backend and then reloads it",
 	"figura.docs.host.reload_avatar": "(Extura) Reloads the avatar of the entity UUID provided. If no UUID is provided then it'll reload your avatar",
@@ -64,7 +67,6 @@
 	"figura.docs.host.set_pose": "(Extura) Set the player's pose",
 	"figura.docs.host.set_player_movement": "(Extura) Set if the player can move normally",
 	"figura.docs.host.get_player_movement": "(Extura) Get if the player can move normally",
-
 	"figura.docs.host.drop_item": "(Extura - Requires host.allowExturaCheats() to be true) Drops the player's item",
 	"figura.docs.host.start_riding": "(Extura - Requires host.allowExturaCheats() to be true) Force the player to ride a vehicle\n* First argument is the entity to ride, if nil is provided then player will dismount instead",
 	"figura.docs.host.override_player_movement": "(Extura) Lock a specific input to a state,\n* first argument is the input('up', 'down', 'left', 'right', 'jump', or 'shift')\n* second argument is the state, true, false or nil to unlock",
@@ -72,16 +74,15 @@
 	"figura.docs.host.set_position": "(Extura - Requires host.allowExturaCheats() to be true) Sets the player's position",
 	"figura.docs.host.set_natural_forces": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity and drag",
 	"figura.docs.host.set_gravity": "(Extura - Requires host.allowExturaCheats() to be true) Sets if the player is effected by gravity",
-    
     "figura.docs.host.set_shader_pack_name": "(Extura) Sets the currently selected shader pack, an empty value will select the internal shader",
     "figura.docs.host.iris_save_config": "(Extura) Saves Iris's config",
     "figura.docs.host.iris_reload": "(Extura) Reloads the currently selected shader",
     "figura.docs.host.first_person_model_set_enabled": "(Extura) Sets whether First Person Model is currently enabled",
+
     "figura.docs.client.get_mod_version": "(Extura) Get the Version of a mod as a string. Returns an null if mod isn't loaded",
     "figura.docs.client.get_mod_name": "(Extura) Gets the name of a mod as a string. Returns an empty string if the mod isn't loaded",
     "figura.docs.client.is_using_fsb": "(Extura) Returns true if using FSB",
-"figura.docs.client.is_backend_connected": "(Extura) Returns true if using backend is connected. Will NOT be effected by FSB",
-
+	"figura.docs.client.is_backend_connected": "(Extura) Returns true if using backend is connected. Will NOT be effected by FSB",
     "figura.docs.client.get_current_backend": "(Extura) Returns the current IP being used for the backend, the ip to the server if using FSB or an empty string if not connected at all.\n* if true, ignores FSB",
     "figura.docs.client.is_integrated_server": "(Extura) Returns if the client is on it's integrated server",
     "figura.docs.client.first_person_model_enabled": "(Extura) Gets whether First Person Model is currently enabled",
