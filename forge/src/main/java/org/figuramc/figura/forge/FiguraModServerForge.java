@@ -1,6 +1,5 @@
 package org.figuramc.figura.forge;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -10,7 +9,6 @@ import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.event.EventNetworkChannel;
 import org.figuramc.figura.server.FiguraModServer;
 import org.figuramc.figura.server.packets.Packet;
@@ -27,18 +25,14 @@ public class FiguraModServerForge {
     static void initServer() {
         fsbInstance = new FiguraServerForge();
         fsbInstance.init();
-        fsbInstance.forEachHandler((identifier, handler) -> {
-            var resLoc = new ResourceLocation(identifier.namespace(), identifier.path());
-            EventNetworkChannel channel = NetworkRegistry.newEventChannel(
-                    resLoc,
-                    () -> NetworkRegistry.ACCEPTVANILLA,
-                    NetworkRegistry.acceptMissingOr(NetworkRegistry.ACCEPTVANILLA),
-                    NetworkRegistry.acceptMissingOr(NetworkRegistry.ACCEPTVANILLA));
-            channel.addListener(new ForgeNetworkListener<>(identifier, handler));
-        });
         MinecraftForge.EVENT_BUS.addListener(FiguraModServerForge::onInitializeServer);
         MinecraftForge.EVENT_BUS.addListener(FiguraModServerForge::onTick);
         MinecraftForge.EVENT_BUS.addListener(FiguraModServerForge::onServerStop);
+    }
+
+    public static void registerPacketListener(Identifier id, EventNetworkChannel channel) {
+        var handler = fsbInstance.getPacketHandler(id);
+        if (handler != null) channel.addListener(new ForgeNetworkListener<>(id, handler));
     }
 
     public static void onInitializeServer(ServerStartedEvent event) {

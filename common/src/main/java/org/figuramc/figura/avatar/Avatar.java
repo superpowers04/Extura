@@ -202,12 +202,12 @@ public class Avatar {
                         badgeToColor.put(key.replace("badge_color_", ""), metadata.getString(key));
                     }
                 }
+                if(metadata.contains("isFSB"))
+                	isFSB = nbt.getBoolean("isFSB");
                 fileSize = getFileSize();
                 versionStatus = getVersionStatus();
                 if (entityName.isBlank())
                     entityName = name;
-                if(nbt.contains("isFSB"))
-                	isFSB = nbt.getBoolean("isFSB");
 
                 // animations and models
                 loadAnimations();

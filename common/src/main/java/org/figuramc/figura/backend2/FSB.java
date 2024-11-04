@@ -321,7 +321,7 @@ public abstract class FSB {
 				try {
 					ByteArrayInputStream bais = new ByteArrayInputStream(avatarData);
 					CompoundTag tag = NbtIo.readCompressed(bais);
-					tag.putBoolean("isFSB",true);
+					tag.getCompound("metadata").putBoolean("isFSB",true);
 					CacheAvatarLoader.save(hash.toString(), tag);
 					target.loadAvatar(tag);
 				}

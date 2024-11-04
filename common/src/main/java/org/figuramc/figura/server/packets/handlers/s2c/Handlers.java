@@ -15,8 +15,8 @@ public class Handlers {
         put(S2CRefusedPacket.PACKET_ID, new S2CRefusalHandler());
         put(S2CUserdataPacket.PACKET_ID, new S2CUserdataHandler());
         put(AvatarDataPacket.PACKET_ID, new S2CAvatarDataPacketHandler());
-        put(CloseOutcomingStreamPacket.PACKET_ID, new CloseIncomingStreamPacketHandler());
-        put(CloseIncomingStreamPacket.PACKET_ID, new CloseOutcomingStreamPacketHandler());
+        put(CloseIncomingStreamPacket.PACKET_ID, new CloseIncomingStreamPacketHandler());
+        put(CloseOutcomingStreamPacket.PACKET_ID, new CloseOutcomingStreamPacketHandler());
         put(AllowIncomingStreamPacket.PACKET_ID, new AllowOutcomingStreamPacketHandler());
         put(S2CPingPacket.PACKET_ID, new S2CPingPacketHandler());
         put(S2CPingErrorPacket.PACKET_ID, new S2CPingErrorPacketHandler());

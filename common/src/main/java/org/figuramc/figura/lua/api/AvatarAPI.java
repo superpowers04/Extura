@@ -56,9 +56,9 @@ public class AvatarAPI {
 	@LuaMethodDoc("avatar.set_nbt")
 	public void setNBT(@LuaNotNil String path, Object value, String valueType) {
 		if(!avatar.isHost) throw new LuaError("Only the host avatar can be edited");
-		String[] seperatedPath = path.replaceAll("\\\\\\.","THEDOT").split("\\.");
+		String[] seperatedPath = path.replaceAll("\\\\.","THEDOT").split("\\.");
 		for (int i = 1; i < seperatedPath.length; i++) {
-			seperatedPath[i]=seperatedPath[i].replaceAll("THEDOT","\\\\\\.");
+			seperatedPath[i]=seperatedPath[i].replaceAll("THEDOT",".");
 		}
 		if(seperatedPath.length == 0) throw new LuaError("Invalid path");
 		String vari = seperatedPath[seperatedPath.length-1];

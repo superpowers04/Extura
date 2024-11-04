@@ -2,25 +2,20 @@ package org.figuramc.figura.forge;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.event.EventNetworkChannel;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
@@ -31,7 +26,6 @@ import org.figuramc.figura.config.forge.ModConfig;
 import org.figuramc.figura.gui.forge.GuiOverlay;
 import org.figuramc.figura.gui.forge.GuiUnderlay;
 import org.figuramc.figura.server.packets.Packet;
-import org.figuramc.figura.server.packets.handlers.c2s.C2SPacketHandler;
 import org.figuramc.figura.server.packets.handlers.s2c.Handlers;
 import org.figuramc.figura.server.packets.handlers.s2c.S2CPacketHandler;
 import org.figuramc.figura.server.utils.Identifier;
@@ -91,16 +85,12 @@ public class FiguraModClientForge extends FiguraMod {
 
     static void initClient() {
         MinecraftForge.EVENT_BUS.addListener(FiguraModClientForge::cancelVanillaOverlays);
-        Handlers.forEachHandler((id, handler) -> {
-            var resLoc = new ResourceLocation(id.namespace(), id.path());
-            EventNetworkChannel channel = NetworkRegistry.newEventChannel(
-                    resLoc,
-                    () -> NetworkRegistry.ACCEPTVANILLA,
-                    NetworkRegistry.acceptMissingOr(NetworkRegistry.ACCEPTVANILLA),
-                    NetworkRegistry.acceptMissingOr(NetworkRegistry.ACCEPTVANILLA));
-            channel.addListener(new ForgeNetworkListener<>(id, handler));
-        });
         new FSBForge();
+    }
+
+    public static void registerPacketListener(Identifier id, EventNetworkChannel channel) {
+        var handler = Handlers.getHandler(id);
+        if (handler != null) channel.addListener(new ForgeNetworkListener<>(id, handler));
     }
 
     private static final class ForgeNetworkListener<P extends Packet> implements Consumer<NetworkEvent> {

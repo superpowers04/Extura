@@ -55,25 +55,6 @@ public abstract class FiguraServer {
         PACKET_HANDLERS.forEach(consumer);
     }
 
-    public static final List<Identifier> OUTCOMING_PACKETS = List.of(
-            S2CBackendHandshakePacket.PACKET_ID,
-            S2CInitializeAvatarStreamPacket.PACKET_ID,
-            S2CNotifyPacket.PACKET_ID,
-            S2COwnedAvatarsPacket.PACKET_ID,
-            S2CPingErrorPacket.PACKET_ID,
-            S2CPingPacket.PACKET_ID,
-            S2CRefusedPacket.PACKET_ID,
-            S2CUserdataPacket.PACKET_ID,
-            AllowIncomingStreamPacket.PACKET_ID,
-            AvatarDataPacket.PACKET_ID,
-            CloseIncomingStreamPacket.PACKET_ID,
-            CloseOutcomingStreamPacket.PACKET_ID,
-            CustomFSBPacket.PACKET_ID
-    );
-
-    public final Collection<Identifier> getIncomingPacketIds() {
-        return PACKET_HANDLERS.keySet();
-    }
 
     public static FiguraServer getInstance() {
         return INSTANCE;

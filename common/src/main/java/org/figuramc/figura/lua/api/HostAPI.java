@@ -78,7 +78,6 @@ public class HostAPI {
 	private final boolean isHost;
 	private final Minecraft minecraft;
 	private static Input defaultInput;
-	private boolean hasPlayerMovement = false;
 
 	@LuaWhitelist
 	@LuaFieldDoc("host.unlock_cursor")
@@ -911,9 +910,9 @@ public class HostAPI {
 	)
 	public void setPlayerMovement(Boolean playerMovement) {
 		LocalPlayer player;
-		if (!this.isHost || (player = this.minecraft.player) == null || playerMovement == hasPlayerMovement) return;
+		if (!this.isHost || (player = this.minecraft.player) == null) return;
 		player.input = (playerMovement ? new ExturaInput(this.minecraft.options) : new NoInput());
-		hasPlayerMovement = playerMovement;
+
 	}
 	@LuaWhitelist
 	@LuaMethodDoc(
@@ -951,8 +950,9 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.get_player_movement")
 	public Boolean getPlayerMovement() {
-		if(!isHost) return false;
-		return hasPlayerMovement;
+		LocalPlayer player;
+		if (!this.isHost || (player = this.minecraft.player) == null) return true;
+		return (player.input instanceof NoInput);
 	}
 
 	@LuaWhitelist
