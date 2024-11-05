@@ -377,39 +377,47 @@ public class FiguraLuaRuntime {
         }
     };
 
-    private final OneArgFunction getScript = new OneArgFunction() {
-        @Override
-        public LuaValue call(LuaValue val) {
-            String script = scripts.get(val.checkjstring());
-            return (script == null) ? LuaValue.NIL : LuaValue.valueOf(script);
-        }
-        @Override
-        public String tojstring() {
-            return "function: getScript";
-        }
-    };
-    private final TwoArgFunction addScript = new TwoArgFunction() {
-        @Override
-        public LuaValue call(LuaValue path,LuaValue contents) {
-            String scriptName = path.checkjstring();
-            if(contents.isnil()){
-                owner.nbt.getCompound("scripts").remove(scriptName);
-                scripts.remove(scriptName);
-                loadedScripts.remove(scriptName);
-                return LuaValue.NIL;
-            }
-            String scriptContent = contents.checkjstring();
-            scripts.put(scriptName,scriptContent);
-            loadedScripts.remove(scriptName);
 
-            owner.nbt.getCompound("scripts").put(scriptName,new ByteArrayTag(scriptContent.getBytes(StandardCharsets.UTF_8)));
-            return LuaValue.NIL;
-        }
-        @Override
-        public String tojstring() {
-            return "function: addScript";
-        }
-    };
+	private final OneArgFunction getScript = new OneArgFunction() {
+		@Override
+		public LuaValue call(LuaValue arg) {
+			Path path = PathUtils.getPath(arg.checkstring(1));
+			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
+			return LuaValue.valueOf(scripts.get(PathUtils.computeSafeString(PathUtils.isAbsolute(path) ? path : dir.resolve(path))));
+		}
+		@Override
+		public String tojstring() {
+			return "function: getscript";
+		}
+	};
+	private final TwoArgFunction addScript = new TwoArgFunction() {
+		@Override
+		public LuaValue call(LuaValue arg,LuaValue contents) {
+			Path path = PathUtils.getPath(arg.checkjstring());
+			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
+			String scriptName = PathUtils.computeSafeString(
+				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
+			);
+			// String scriptName = path.checkjstring();
+			loadedScripts.remove(scriptName);
+			if(contents.isnil()){
+				owner.nbt.getCompound("scripts").remove(scriptName);
+				scripts.remove(scriptName);
+				return LuaValue.NIL;
+			}
+			String scriptContent = contents.checkjstring();
+			scripts.put(scriptName,scriptContent);
+			// if (loadingScripts.contains(scriptNauiime))
+			// 	throw new LuaError("Detected circular dependency in script " + loadingScripts.peek());
+
+			owner.nbt.getCompound("scripts").put(scriptName,new ByteArrayTag(scriptContent.getBytes(StandardCharsets.UTF_8)));
+			return LuaValue.NIL;
+		}
+		@Override
+		public String tojstring() {
+			return "function: addscript";
+		}
+	};
     // init event //
 
     private Varargs initializeScript(String str){
