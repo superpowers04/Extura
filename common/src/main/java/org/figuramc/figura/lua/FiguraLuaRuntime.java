@@ -245,8 +245,13 @@ public class FiguraLuaRuntime {
 
 	private final TwoArgFunction addScript = new TwoArgFunction() {
 		@Override
-		public LuaValue call(LuaValue path,LuaValue contents) {
-			String scriptName = path.checkjstring();
+		public LuaValue call(LuaValue arg,LuaValue contents) {
+			Path path = PathUtils.getPath(arg.checkjstring());
+			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
+			String scriptName = PathUtils.computeSafeString(
+				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
+			);
+			// String scriptName = path.checkjstring();
 			loadedScripts.remove(scriptName);
 			if(contents.isnil()){
 				owner.nbt.getCompound("scripts").remove(scriptName);
@@ -317,9 +322,10 @@ public class FiguraLuaRuntime {
 
 	private final OneArgFunction getScript = new OneArgFunction() {
 		@Override
-		public LuaValue call(LuaValue val) {
-			String script = scripts.get(val.checkjstring());
-			return (script == null) ? LuaValue.NIL : LuaValue.valueOf(script);
+		public LuaValue call(LuaValue arg) {
+			Path path = PathUtils.getPath(arg.checkstring(1));
+			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
+			return LuaValue.valueOf(scripts.get(PathUtils.computeSafeString(PathUtils.isAbsolute(path) ? path : dir.resolve(path))));
 		}
 		@Override
 		public String tojstring() {
