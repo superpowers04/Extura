@@ -393,11 +393,7 @@ public class FiguraLuaRuntime {
 	private final TwoArgFunction addScript = new TwoArgFunction() {
 		@Override
 		public LuaValue call(LuaValue arg,LuaValue contents) {
-			Path path = PathUtils.getPath(arg.checkjstring());
-			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
-			String scriptName = PathUtils.computeSafeString(
-				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
-			);
+			String scriptName = PathUtils.getPath(arg.checkjstring());
 			// String scriptName = path.checkjstring();
 			loadedScripts.remove(scriptName);
 			if(contents.isnil()){
