@@ -48,6 +48,7 @@ public class NameplateCustomization {
             value = "nameplate_customization.set_text"
     )
     public NameplateCustomization setText(String text) {
+    	
         this.text = text;
         if (text != null) {
             Component component = parseJsonText(text);

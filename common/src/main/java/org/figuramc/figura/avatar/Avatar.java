@@ -203,7 +203,7 @@ public class Avatar {
                     }
                 }
                 if(metadata.contains("isFSB"))
-                	isFSB = nbt.getBoolean("isFSB");
+                	isFSB = metadata.getBoolean("isFSB");
                 fileSize = getFileSize();
                 versionStatus = getVersionStatus();
                 if (entityName.isBlank())
