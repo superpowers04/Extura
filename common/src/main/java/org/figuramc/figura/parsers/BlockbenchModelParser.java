@@ -11,6 +11,7 @@ import org.figuramc.figura.FiguraMod;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -130,18 +131,34 @@ public class BlockbenchModelParser {
             String path;
             byte[] source;
             try {
-                //check the file to load
-                Path p = sourceFile.resolve(texture.relative_path);
-                if (p.getFileSystem() == FileSystems.getDefault()) {
-                    File f = p.toFile().getCanonicalFile();
-                    p = f.toPath();
-                    if (!f.exists()) throw new IllegalStateException("File does not exist!");
-                } else {
-                    p = p.normalize();
-                    if (p.getFileSystem() != avatar.getFileSystem())
-                        throw new IllegalStateException("File from outside the avatar folder!");
+                // Check the file to load
+                Path p = sourceFile.getParent().resolve(texture.relative_path);
+                if (p.getFileSystem() == FileSystems.getDefault())
+                    p = p.toFile().getCanonicalFile().toPath();
+
+                p = p.normalize();
+
+                if (!Files.exists(p) || (avatar.getNameCount() > 1 && !p.startsWith(avatar))) {
+                    // Compatibility with old Blockbench models. (BB 4.9-)
+                    if (texture.relative_path.startsWith("../")) {
+                        p = sourceFile.resolve(texture.relative_path);
+                        if (p.getFileSystem() == FileSystems.getDefault())
+                            p = p.toFile().getCanonicalFile().toPath();
+
+                        p = p.normalize();
+
+                        if (!Files.exists(p))
+                            throw new IllegalStateException("File does not exist!");
+                    } else {
+                        throw new IllegalStateException("File does not exist!");
+                    }
                 }
-                if (avatar.getNameCount() > 1) if (!p.startsWith(avatar)) throw new IllegalStateException("File is outside of the avatar folder!");
+
+
+                // Make sure we are still looking in the avatar's folder
+                if ((avatar.getNameCount() > 1 && !p.startsWith(avatar)) || p.getFileSystem() != avatar.getFileSystem())
+                    throw new IllegalStateException("File from outside the avatar folder!");
+
                 FiguraMod.debug("path is {}", p.toString());
                 //load texture
                 source = IOUtils.readFileBytes(p);

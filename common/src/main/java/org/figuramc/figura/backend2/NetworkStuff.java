@@ -58,7 +58,7 @@ public class NetworkStuff {
 	private static final ConcurrentLinkedQueue<Request<HttpAPI>> API_REQUESTS = new ConcurrentLinkedQueue<>();
 	private static final ConcurrentLinkedQueue<Request<WebSocket>> WS_REQUESTS = new ConcurrentLinkedQueue<>();
 	private static final List<UUID> SUBSCRIPTIONS = new ArrayList<>();
-    private static final ArrayList<AvatarEquipInstruction> AVATAR_EQUIP_INSTRUCTIONS = new ArrayList<>();
+	private static final ArrayList<AvatarEquipInstruction> AVATAR_EQUIP_INSTRUCTIONS = new ArrayList<>();
 	private static CompletableFuture<Void> tasks;
 
 	private static final int RECONNECT = 6000; //5 min
@@ -79,10 +79,8 @@ public class NetworkStuff {
 	public static Version latestVersion;
 
 	//limits
-	private static final RefilledNumber
-			uploadRate = new RefilledNumber(),
-			downloadRate = new RefilledNumber();
-	private static int maxAvatarSize = Integer.MAX_VALUE;
+	private static final RefilledNumber uploadRate = new RefilledNumber(), downloadRate = new RefilledNumber();
+	private static int maxAvatarSize = Integer.MAX_VALUE, pingsRateLimit = Integer.MAX_VALUE, pingsSizeLimit = Integer.MAX_VALUE;
 
 	public static void tick() {
 		if(Configs.BLOCK_CLOUD.value) return;
@@ -112,11 +110,10 @@ public class NetworkStuff {
 		//pings counter
 		if (lastPing > 0 && FiguraMod.ticks - lastPing >= 20)
 			lastPing = pingsSent = pingsReceived = 0;
-        for (AvatarEquipInstruction instruction: AVATAR_EQUIP_INSTRUCTIONS) {
-            instruction.avatar.loadData(instruction.avatars(), instruction.bitPair());
-        }
-        
-        AVATAR_EQUIP_INSTRUCTIONS.clear();
+		if(!AVATAR_EQUIP_INSTRUCTIONS.isEmpty()){
+			AvatarEquipInstruction instruction = AVATAR_EQUIP_INSTRUCTIONS.remove(AVATAR_EQUIP_INSTRUCTIONS.size()-1);
+			instruction.avatar.loadData(instruction.avatars(), instruction.bitPair());
+		}
 	}
 
 	private static void tickSubscriptions() {
@@ -230,7 +227,7 @@ public class NetworkStuff {
 	}
 
 	public static void disconnect(String reason) {
-        if (tasks != null) tasks.cancel(true);
+		if (tasks != null) tasks.cancel(true);
 		backendStatus = 1;
 		disconnectedReason = reason;
 		disconnectAPI();
@@ -308,8 +305,23 @@ public class NetworkStuff {
 
 			JsonObject limits = json.getAsJsonObject("limits");
 			maxAvatarSize = limits.get("maxAvatarSize").getAsInt();
+			try {
+				pingsRateLimit = rate.get("pingRate").getAsInt();
+				pingsSizeLimit = rate.get("pingSize").getAsInt();
+			}
+			catch (Exception e) {
+				pingsRateLimit = 32;
+				pingsSizeLimit = 1024;
+			}
 		});
 	}
+	public static int pingsRateLimit() {
+        return fsb().connected() ? fsb().handshake().pingsRateLimit() : pingsRateLimit;
+    }
+
+    public static int pingsSizeLimit() {
+        return fsb().connected() ? fsb().handshake().pingsSizeLimit() : pingsSizeLimit;
+    }
 
 	public static void getUser(UserData user) {
 		getUser(user,true);
@@ -331,7 +343,7 @@ public class NetworkStuff {
 				if(Configs.CONNECTION_TOASTS.value){
 
 					if (code == 404)
-						FiguraToast.sendToast(FiguraText.of("backend.user_not_found"), FiguraToast.ToastType.ERROR);
+						FiguraToast.sendToast(FiguraText.of("backend.user_not_found",user.id.toString()), FiguraToast.ToastType.ERROR);
 					else
 						FiguraToast.sendToast(FiguraText.of("backend.user_not_found"),code.toString(), FiguraToast.ToastType.ERROR);
 				}
@@ -503,7 +515,7 @@ public class NetworkStuff {
 			}
 
 			//success
-            if (useFSB && fsb().connected()) return;
+			if (useFSB && fsb().connected()) return;
 			try {
 				CompoundTag nbt = NbtIo.readCompressed(stream);
 				CacheAvatarLoader.save(hash, nbt);
@@ -599,9 +611,9 @@ public class NetworkStuff {
 			subscribe(uuid);
 	}
 
-    private static FSB fsb() {
-        return FSB.instance();
-    }
+	private static FSB fsb() {
+		return FSB.instance();
+	}
 	public static void unsubscribeAll() {
 		for (UUID uuid : SUBSCRIPTIONS)
 			unsubscribe(uuid);
@@ -655,5 +667,5 @@ public class NetworkStuff {
 			return o instanceof Request request && owner.equals(request.owner);
 		}
 	}
-    private record AvatarEquipInstruction(UserData avatar, ArrayList<Pair<String, Pair<String, UUID>>> avatars, Pair<BitSet, BitSet> bitPair) {}
+	private record AvatarEquipInstruction(UserData avatar, ArrayList<Pair<String, Pair<String, UUID>>> avatars, Pair<BitSet, BitSet> bitPair) {}
 }

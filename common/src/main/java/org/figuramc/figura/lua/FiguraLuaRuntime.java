@@ -246,12 +246,8 @@ public class FiguraLuaRuntime {
 	private final TwoArgFunction addScript = new TwoArgFunction() {
 		@Override
 		public LuaValue call(LuaValue arg,LuaValue contents) {
-			Path path = PathUtils.getPath(arg.checkjstring());
-			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
-			String scriptName = PathUtils.computeSafeString(
-				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
-			);
-			// String scriptName = path.checkjstring();
+			String scriptName = arg.checkjstring();
+			
 			loadedScripts.remove(scriptName);
 			if(contents.isnil()){
 				owner.nbt.getCompound("scripts").remove(scriptName);
@@ -325,11 +321,12 @@ public class FiguraLuaRuntime {
 		public LuaValue call(LuaValue arg) {
 			Path path = PathUtils.getPath(arg.checkstring(1));
 			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
+
 			return LuaValue.valueOf(scripts.get(PathUtils.computeSafeString(PathUtils.isAbsolute(path) ? path : dir.resolve(path))));
 		}
 		@Override
 		public String tojstring() {
-			return "function: getScript";
+			return "function: getscript";
 		}
 	};
 	private final TwoArgFunction listFiles = new TwoArgFunction() {

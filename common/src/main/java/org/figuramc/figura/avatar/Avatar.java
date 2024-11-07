@@ -245,9 +245,9 @@ public class Avatar {
         for (Permissions t : permissionsToTick) {
             if (permissions.get(t) > 0) {
                 noPermissions.remove(t);
-            } else {
-                noPermissions.add(t);
+                continue;
             }
+            noPermissions.add(t);
         }
         if (lastPlayingSound > 0)
             lastPlayingSound--;

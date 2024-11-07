@@ -280,6 +280,9 @@ public class FiguraDocsManager {
         put("extura", List.of(
                 ExturaAPI.class
         ));
+        put("server_packets", List.of(
+                ServerPacketsAPI.class
+        ));
     }};
     private static final Map<String, List<FiguraDoc>> GENERATED_CHILDREN = new HashMap<>();
 
