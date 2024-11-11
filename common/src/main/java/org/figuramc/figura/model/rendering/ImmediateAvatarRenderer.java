@@ -288,8 +288,10 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
                 pivotOffsetter.light = customizationStack.peek().light;
             }
 
-            pivotOffsetter.alpha = Objects.requireNonNullElse(custom.alpha, 0.0f);
-            pivotOffsetter.overlay = Objects.requireNonNullElse(custom.overlay, 1);
+            if (custom.alpha != null)
+                pivotOffsetter.alpha = custom.alpha;
+            if (custom.overlay != null)
+                pivotOffsetter.overlay = custom.overlay;
         }
 
         // mid render function
