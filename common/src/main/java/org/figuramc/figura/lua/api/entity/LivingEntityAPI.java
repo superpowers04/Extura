@@ -281,7 +281,7 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
 	public String getNameplate(String type) {
 		checkEntity();
 		Avatar avi = AvatarManager.getAvatar(entity);
-		if(avi == null) return null;
+		if(avi == null || avi.luaRuntime == null) return null;
 		switch(type.toUpperCase()){
 			case "ENTITY": return avi.luaRuntime.nameplate.ENTITY.getText();
 			case "LIST": return avi.luaRuntime.nameplate.LIST.getText();

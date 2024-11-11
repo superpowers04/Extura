@@ -668,4 +668,6 @@ public class NetworkStuff {
 		}
 	}
 	private record AvatarEquipInstruction(UserData avatar, ArrayList<Pair<String, Pair<String, UUID>>> avatars, Pair<BitSet, BitSet> bitPair) {}
+
+
 }

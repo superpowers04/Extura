@@ -110,7 +110,7 @@ public class MathUtils {
         int i = 0;
         while (i < SIZE_UNITS.length) {
             if (size < 1000) break;
-            size /= 1000;
+            size *= 0.001;
             i++;
         }
 
