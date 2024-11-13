@@ -393,8 +393,8 @@ public class FiguraLuaRuntime {
 	private final TwoArgFunction addScript = new TwoArgFunction() {
 		@Override
 		public LuaValue call(LuaValue arg,LuaValue contents) {
-			String scriptName = PathUtils.getPath(arg.checkjstring());
-			// String scriptName = path.checkjstring();
+			String scriptName = arg.checkjstring();
+			
 			loadedScripts.remove(scriptName);
 			if(contents.isnil()){
 				owner.nbt.getCompound("scripts").remove(scriptName);
@@ -411,7 +411,7 @@ public class FiguraLuaRuntime {
 		}
 		@Override
 		public String tojstring() {
-			return "function: addscript";
+			return "function: addScript";
 		}
 	};
     // init event //
