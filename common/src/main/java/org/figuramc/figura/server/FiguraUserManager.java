@@ -3,12 +3,10 @@ package org.figuramc.figura.server;
 import org.figuramc.figura.server.events.Events;
 import org.figuramc.figura.server.events.users.LoadPlayerDataEvent;
 import org.figuramc.figura.server.events.users.SavePlayerDataEvent;
-import org.figuramc.figura.server.events.users.UserLoadingExceptionEvent;
-import org.figuramc.figura.server.utils.Either;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -26,6 +24,12 @@ public final class FiguraUserManager {
         return users.get(playerUUID);
     }
 
+    public boolean userExists(UUID player) {
+        return users.containsKey(player) ||
+                parent.getUserdataFile(player).toFile().exists() ||
+                parent.getOldUserdataFile(player).toFile().exists();
+    }
+
     public FiguraUser getUser(UUID player) {
         return users.computeIfAbsent(player, (p) -> loadPlayerData(player));
     }
@@ -41,8 +45,14 @@ public final class FiguraUserManager {
     private FiguraUser loadPlayerData(UUID player) {
         LoadPlayerDataEvent playerDataEvent = Events.call(new LoadPlayerDataEvent(player));
         if (playerDataEvent.returned()) return playerDataEvent.returnValue();
-        Path dataFile = parent.getUserdataFile(player);
-        return FiguraUser.load(player, dataFile);
+        try {
+            Path dataFile = parent.getUserdataFile(player);
+            return FiguraUser.load(player, dataFile);
+        }
+        catch (Exception e) {
+            Path dataFile = parent.getOldUserdataFile(player);
+            return FiguraUser.loadByteBuf(player, dataFile);
+        }
     }
 
     public void forEachUser(Consumer<FiguraUser> func) {

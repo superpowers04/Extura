@@ -49,7 +49,7 @@ public class FiguraModFabric extends FiguraMod implements ClientModInitializer {
         @Override
         public void receive(Minecraft client, ClientPacketListener handler, FriendlyByteBuf buf, PacketSender responseSender) {
             P packet = parent.serialize(new FriendlyByteBufWrapper(buf));
-            parent.handle(packet);
+            Minecraft.getInstance().execute(() -> parent.handle(packet));
         }
     }
 }

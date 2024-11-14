@@ -11,9 +11,9 @@ import org.figuramc.figura.server.packets.s2c.S2CInitializeAvatarStreamPacket;
 import org.figuramc.figura.server.utils.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 public final class FiguraServerAvatarManager {
     private final FiguraServer parent;
@@ -144,7 +144,14 @@ public final class FiguraServerAvatarManager {
             return owners.get(owner);
         }
 
-        public static AvatarMetadata read(byte[] bytes) {
+        public static AvatarMetadata read(String json) {
+            AvatarMetadata metadata = FiguraServer.getInstance().GSON.fromJson(json, AvatarMetadata.class);
+            return metadata;
+        }
+
+
+        @Deprecated(forRemoval = true)
+        public static AvatarMetadata readOld(byte[] bytes) {
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             InputStreamByteBuf byteBuf = new InputStreamByteBuf(bais);
 
@@ -156,8 +163,9 @@ public final class FiguraServerAvatarManager {
                 owners.put(owner, ehash);
             }
 
+            int equippedCount = byteBuf.readInt();
             HashMap<UUID, Hash> equipped = new HashMap<>();
-            for (int i = 0; i < ownersCount; i++) {
+            for (int i = 0; i < equippedCount; i++) {
                 UUID owner = byteBuf.readUUID();
                 Hash ehash = byteBuf.readHash();
                 equipped.put(owner, ehash);
@@ -166,19 +174,9 @@ public final class FiguraServerAvatarManager {
             return new AvatarMetadata(owners, equipped);
         }
 
-        public void write(OutputStream os) {
-            OutputStreamByteBuf byteBuf = new OutputStreamByteBuf(os);
-            byteBuf.writeInt(owners.size());
-            for (Map.Entry<UUID, Hash> entry : owners.entrySet()) {
-                byteBuf.writeUUID(entry.getKey());
-                byteBuf.writeBytes(entry.getValue().get());
-            }
-
-            byteBuf.writeInt(equipped.size());
-            for (Map.Entry<UUID, Hash> entry : equipped.entrySet()) {
-                byteBuf.writeUUID(entry.getKey());
-                byteBuf.writeBytes(entry.getValue().get());
-            }
+        public void write(FileOutputStream fos) throws IOException {
+            String data = FiguraServer.getInstance().GSON.toJson(this);
+            fos.write(data.getBytes(StandardCharsets.UTF_8));
         }
 
         public boolean canBeDeleted() {
@@ -266,6 +264,7 @@ public final class FiguraServerAvatarManager {
         if (f.isCancelled()) return;
         parent.getAvatar(avatarHash.get()).toFile().delete();
         parent.getAvatarMetadata(avatarHash.get()).toFile().delete();
+        parent.getOldAvatarMetadata(avatarHash.get()).toFile().delete();
     }
 
     private class AvatarHandle {
@@ -330,7 +329,7 @@ public final class FiguraServerAvatarManager {
                 FileInputStream fis = new FileInputStream(avatarFile.toFile());
                 byte[] data = fis.readAllBytes();
                 fis.close();
-                return AvatarMetadata.read(data);
+                return AvatarMetadata.read(new String(data, StandardCharsets.UTF_8));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -460,9 +459,9 @@ public final class FiguraServerAvatarManager {
             }
 
             private void finish() {
-                close(StatusCode.FINISHED);
-                finished = true;
                 parent.userManager().getUser(uploader).replaceOrAddOwnedAvatar(avatarId, hash, ehash);
+                finished = true;
+                close(StatusCode.FINISHED);
             }
 
             private boolean isFinished() {

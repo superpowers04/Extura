@@ -28,6 +28,7 @@ public class FiguraModServerForge {
         MinecraftForge.EVENT_BUS.addListener(FiguraModServerForge::onInitializeServer);
         MinecraftForge.EVENT_BUS.addListener(FiguraModServerForge::onTick);
         MinecraftForge.EVENT_BUS.addListener(FiguraModServerForge::onServerStop);
+        MinecraftForge.EVENT_BUS.register(new FiguraForgePermissions());
     }
 
     public static void registerPacketListener(Identifier id, EventNetworkChannel channel) {

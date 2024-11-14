@@ -1,7 +1,6 @@
 package org.figuramc.figura.server.packets.handlers.s2c;
 
 import net.minecraft.resources.ResourceLocation;
-import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.server.packets.*;
 import org.figuramc.figura.server.packets.s2c.*;
 import org.figuramc.figura.server.utils.Identifier;
@@ -14,6 +13,8 @@ public class Handlers {
         put(S2CBackendHandshakePacket.PACKET_ID, new S2CHandshakeHandler());
         put(S2CRefusedPacket.PACKET_ID, new S2CRefusalHandler());
         put(S2CUserdataPacket.PACKET_ID, new S2CUserdataHandler());
+        put(S2CConnectedPacket.PACKET_ID, new S2CConnectedHandler());
+        put(S2CUserdataNotFoundPacket.PACKET_ID, new S2CUserdataNotFoundHandler());
         put(AvatarDataPacket.PACKET_ID, new S2CAvatarDataPacketHandler());
         put(CloseIncomingStreamPacket.PACKET_ID, new CloseIncomingStreamPacketHandler());
         put(CloseOutcomingStreamPacket.PACKET_ID, new CloseOutcomingStreamPacketHandler());

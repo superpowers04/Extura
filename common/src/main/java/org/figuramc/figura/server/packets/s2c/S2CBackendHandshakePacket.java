@@ -4,6 +4,9 @@ import org.figuramc.figura.server.packets.Packet;
 import org.figuramc.figura.server.utils.IFriendlyByteBuf;
 import org.figuramc.figura.server.utils.Identifier;
 
+import java.util.ArrayList;
+import java.util.UUID;
+
 public class S2CBackendHandshakePacket implements Packet {
     public static final Identifier PACKET_ID = new Identifier("figura", "s2c/handshake");
 
@@ -13,11 +16,14 @@ public class S2CBackendHandshakePacket implements Packet {
     private final int maxAvatarSize;
     private final int maxAvatarsCount;
 
-    public S2CBackendHandshakePacket(int pingsRateLimit, int pingsSizeLimit, int maxAvatarSize, int maxAvatarsCount) {
+    private final ArrayList<UUID> connectedPlayers;
+
+    public S2CBackendHandshakePacket(int pingsRateLimit, int pingsSizeLimit, int maxAvatarSize, int maxAvatarsCount, ArrayList<UUID> connectedPlayers) {
         this.pingsRateLimit = pingsRateLimit;
         this.pingsSizeLimit = pingsSizeLimit;
         this.maxAvatarSize = maxAvatarSize;
         this.maxAvatarsCount = maxAvatarsCount;
+        this.connectedPlayers = connectedPlayers;
     }
 
     public S2CBackendHandshakePacket(IFriendlyByteBuf source) {
@@ -26,6 +32,12 @@ public class S2CBackendHandshakePacket implements Packet {
 
         maxAvatarSize = source.readInt();
         maxAvatarsCount = source.readInt();
+
+        int playersCount = source.readInt();
+        connectedPlayers = new ArrayList<>();
+        for (int i = 0; i < playersCount; i++) {
+            connectedPlayers.add(source.readUUID());
+        }
     }
 
     public int pingsRateLimit() {
@@ -44,6 +56,10 @@ public class S2CBackendHandshakePacket implements Packet {
         return maxAvatarsCount;
     }
 
+    public ArrayList<UUID> connectedPlayers() {
+        return connectedPlayers;
+    }
+
     @Override
     public void write(IFriendlyByteBuf byteBuf) {
         byteBuf.writeInt(pingsRateLimit);
@@ -51,6 +67,11 @@ public class S2CBackendHandshakePacket implements Packet {
 
         byteBuf.writeInt(maxAvatarSize);
         byteBuf.writeInt(maxAvatarsCount);
+        byteBuf.writeInt(connectedPlayers.size());
+
+        for (UUID player: connectedPlayers) {
+            byteBuf.writeUUID(player);
+        }
     }
 
     @Override

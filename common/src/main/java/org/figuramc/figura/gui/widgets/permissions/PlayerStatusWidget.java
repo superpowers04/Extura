@@ -12,6 +12,7 @@ import org.figuramc.figura.permissions.Permissions;
 import org.figuramc.figura.utils.FiguraText;
 import org.figuramc.figura.utils.MathUtils;
 import org.figuramc.figura.utils.ui.UIHelper;
+import org.figuramc.figura.backend2.FSB;
 
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +57,7 @@ public class PlayerStatusWidget extends StatusWidget {
         if (avatar == null || avatar.nbt == null) {
             // HOVER_TEXT[5].append(FiguraText.of("gui.status.backend", 0))
             size = complexity = init = tick = render = backend = 0;
+            backend = FSB.instance().isPlayerConnected(owner) ? 4 : 3;
             return;
         }
 
@@ -73,7 +75,7 @@ public class PlayerStatusWidget extends StatusWidget {
 
         // script render
         render = avatar.scriptError ? 1 : avatar.luaRuntime == null ? 0 : avatar.render.getTotal() >= avatar.permissions.get(Permissions.RENDER_INST) * 0.75 || avatar.worldRender.getTotal() >= avatar.permissions.get(Permissions.WORLD_RENDER_INST) * 0.75 ? 2 : 3;
-    	backend = avatar.scriptError ? 1 : avatar.isFSB ? 4 : 3;
+    	backend = avatar.scriptError ? 1 : FSB.instance().isPlayerConnected(owner) ? 4 : 3;
         // HOVER_TEXT[5].append(FiguraText.of("gui.status.backend",))
      }
 

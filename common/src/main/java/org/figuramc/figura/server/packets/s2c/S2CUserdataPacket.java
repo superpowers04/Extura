@@ -5,10 +5,10 @@ import org.figuramc.figura.server.packets.Packet;
 import org.figuramc.figura.server.utils.Hash;
 import org.figuramc.figura.server.utils.IFriendlyByteBuf;
 import org.figuramc.figura.server.utils.Identifier;
+import org.figuramc.figura.server.utils.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -16,27 +16,33 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class S2CUserdataPacket implements Packet {
     public static final Identifier PACKET_ID = new Identifier("figura", "s2c/userdata");
 
+    private final int responseId;
     private final UUID target;
     private final BitSet prideBadges;
-    private final HashMap<String, EHashPair> avatars;
+    private final @Nullable Pair<String, EHashPair> avatar;
 
-    public S2CUserdataPacket(UUID target, BitSet prideBadges, HashMap<String, EHashPair> avatars) {
+    public S2CUserdataPacket(int responseId, UUID target, BitSet prideBadges, @Nullable Pair<String, EHashPair> avatar) {
+        this.responseId = responseId;
         this.target = target;
         this.prideBadges = prideBadges;
-        this.avatars = avatars;
+        this.avatar = avatar;
     }
 
     public S2CUserdataPacket(IFriendlyByteBuf byteBuf) {
+        this.responseId = byteBuf.readInt();
         this.target = byteBuf.readUUID();
         this.prideBadges = BitSet.valueOf(byteBuf.readByteArray(Integer.MAX_VALUE));
-        avatars = new HashMap<>();
-        int avatarsCount = byteBuf.readVarInt();
-        for (int i = 0; i < avatarsCount; i++) {
+        if (byteBuf.readByte() != 0) {
             String avatarId = new String(byteBuf.readByteArray(Integer.MAX_VALUE), UTF_8);
             Hash hash = byteBuf.readHash();
             Hash ehash = byteBuf.readHash();
-            avatars.put(avatarId, new EHashPair(hash, ehash));
+            avatar = new Pair<>(avatarId, new EHashPair(hash, ehash));
         }
+        else avatar = null;
+    }
+
+    public int responseId() {
+        return responseId;
     }
 
     public UUID target() {
@@ -47,19 +53,23 @@ public class S2CUserdataPacket implements Packet {
         return prideBadges;
     }
 
-    public HashMap<String, EHashPair> avatars() {
-        return avatars;
+    public Pair<String, EHashPair> avatar() {
+        return avatar;
     }
 
     @Override
     public void write(IFriendlyByteBuf byteBuf) {
+        byteBuf.writeInt(responseId);
         byteBuf.writeUUID(target);
         byteBuf.writeByteArray(prideBadges.toByteArray());
-        byteBuf.writeVarInt(avatars.size());
-        for (Map.Entry<String, EHashPair> avatar: avatars.entrySet()) {
-            byteBuf.writeByteArray(avatar.getKey().getBytes(UTF_8));
-            byteBuf.writeBytes(avatar.getValue().hash().get());
-            byteBuf.writeBytes(avatar.getValue().ehash().get());
+        if (avatar != null) {
+            byteBuf.writeByte(1);
+            byteBuf.writeByteArray(avatar.left().getBytes(UTF_8));
+            byteBuf.writeBytes(avatar.right().hash().get());
+            byteBuf.writeBytes(avatar.right().ehash().get());
+        }
+        else {
+            byteBuf.writeByte(0);
         }
     }
 

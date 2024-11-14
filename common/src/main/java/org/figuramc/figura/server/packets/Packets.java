@@ -26,11 +26,13 @@ public class Packets {
 
         put(S2CRefusedPacket.PACKET_ID, desc(SERVER, empty(S2CRefusedPacket::new)));
         put(S2CBackendHandshakePacket.PACKET_ID, desc(SERVER, S2CBackendHandshakePacket::new));
+        put(S2CConnectedPacket.PACKET_ID, desc(SERVER, S2CConnectedPacket::new));
         put(S2CInitializeAvatarStreamPacket.PACKET_ID, desc(SERVER, S2CInitializeAvatarStreamPacket::new));
         put(S2COwnedAvatarsPacket.PACKET_ID, desc(SERVER, S2COwnedAvatarsPacket::new));
         put(S2CPingErrorPacket.PACKET_ID, desc(SERVER, S2CPingErrorPacket::new));
         put(S2CPingPacket.PACKET_ID, desc(SERVER, S2CPingPacket::new));
         put(S2CUserdataPacket.PACKET_ID, desc(SERVER, S2CUserdataPacket::new));
+        put(S2CUserdataNotFoundPacket.PACKET_ID, desc(SERVER, S2CUserdataNotFoundPacket::new));
         put(S2CNotifyPacket.PACKET_ID, desc(SERVER, S2CNotifyPacket::new));
 
         put(AllowIncomingStreamPacket.PACKET_ID, desc(BOTH, AllowIncomingStreamPacket::new));

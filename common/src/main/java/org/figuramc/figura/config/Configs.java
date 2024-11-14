@@ -261,12 +261,12 @@ public class Configs {
 			this.tooltip = FiguraText.of("config.default_to_backend.tooltip");
 		}
 	};
-	public static final ConfigType.BoolConfig ALLOW_BOTH_PINGS = new ConfigType.BoolConfig("allow_both_pings", MISC, false) {
-		{
-			this.name = this.name.copy().withStyle(ChatFormatting.AQUA);
-			this.tooltip = FiguraText.of("config.allow_both_pings.tooltip");
-		}
-	};
+	// public static final ConfigType.BoolConfig ALLOW_BOTH_PINGS = new ConfigType.BoolConfig("allow_both_pings", MISC, false) {
+	// 	{
+	// 		this.name = this.name.copy().withStyle(ChatFormatting.AQUA);
+	// 		this.tooltip = FiguraText.of("config.allow_both_pings.tooltip");
+	// 	}
+	// };
 
 	// -- DEV -- //
 	public static final ConfigType.BoolConfig DEBUG_MODE = new ConfigType.BoolConfig("debug_mode", DEV, false, false);

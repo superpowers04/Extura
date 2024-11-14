@@ -109,7 +109,7 @@ public class FiguraModClientForge extends FiguraMod {
             if (ctx.getDirection().equals(NetworkDirection.PLAY_TO_CLIENT)) {
                 try {
                     P packet = handler.serialize(new FriendlyByteBufWrapper(event.getPayload()));
-                    handler.handle(packet);
+                    Minecraft.getInstance().execute(() -> handler.handle(packet));
                     ctx.setPacketHandled(true);
                 }
                 catch (Exception e) {
