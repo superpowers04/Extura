@@ -28,6 +28,7 @@ import org.figuramc.figura.utils.FiguraText;
 import org.figuramc.figura.utils.RefilledNumber;
 import org.figuramc.figura.utils.TextUtils;
 import org.figuramc.figura.utils.Version;
+import org.figuramc.figura.backend2.Destination;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -51,295 +52,297 @@ import static org.figuramc.figura.server.utils.Utils.getHash;
 
 public class NetworkStuff {
 
-    protected static final HttpClient client = HttpClient.newHttpClient();
-    protected static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+	protected static final HttpClient client = HttpClient.newHttpClient();
+	protected static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
-    private static final ConcurrentLinkedQueue<Request<HttpAPI>> API_REQUESTS = new ConcurrentLinkedQueue<>();
-    private static final ConcurrentLinkedQueue<Request<WebSocket>> WS_REQUESTS = new ConcurrentLinkedQueue<>();
-    private static final List<UUID> SUBSCRIPTIONS = new ArrayList<>();
-    private static CompletableFuture<Void> tasks;
+	private static final ConcurrentLinkedQueue<Request<HttpAPI>> API_REQUESTS = new ConcurrentLinkedQueue<>();
+	private static final ConcurrentLinkedQueue<Request<WebSocket>> WS_REQUESTS = new ConcurrentLinkedQueue<>();
+	private static final List<UUID> SUBSCRIPTIONS = new ArrayList<>();
+	private static CompletableFuture<Void> tasks;
 
-    private static final int RECONNECT = 6000; //5 min
-    private static int authCheck = RECONNECT;
+	private static final int RECONNECT = 6000; //5 min
+	private static int authCheck = RECONNECT;
 
-    protected static HttpAPI api;
-    protected static WebSocket ws;
+	protected static HttpAPI api;
+	protected static WebSocket ws;
 
-    public static int backendStatus = 1;
-    public static String disconnectedReason;
+	public static int backendStatus = 1;
+	public static String disconnectedReason;
 
-    public static boolean debug = false;
-    @Nullable
-    public static Component motd;
+	public static boolean debug = false;
+	@Nullable
+	public static Component motd;
 
-    public static int lastPing, pingsSent, pingsReceived;
+	public static int lastPing, pingsSent, pingsReceived;
 
-    public static Version latestVersion;
+	public static Version latestVersion;
 
-    //limits
-    private static final RefilledNumber
-            uploadRate = new RefilledNumber(),
-            downloadRate = new RefilledNumber();
-    private static int maxAvatarSize = Integer.MAX_VALUE;
-    private static int pingsRateLimit = Integer.MAX_VALUE, pingsSizeLimit = Integer.MAX_VALUE;
+	//limits
+	private static final RefilledNumber
+			uploadRate = new RefilledNumber(),
+			downloadRate = new RefilledNumber();
+	private static int maxAvatarSize = Integer.MAX_VALUE;
+	private static int pingsRateLimit = Integer.MAX_VALUE, pingsSizeLimit = Integer.MAX_VALUE;
 
-    public static void tick() {
-        //limits
-        uploadRate.tick();
-        downloadRate.tick();
+	public static void tick() {
+		//limits
+		uploadRate.tick();
+		downloadRate.tick();
 
-        //auth check
-        authCheck--;
-        if (authCheck <= 0) {
-            authCheck = RECONNECT;
+		//auth check
+		authCheck--;
+		if (authCheck <= 0) {
+			authCheck = RECONNECT;
 
-            if (!isConnected())
-                reAuth();
-            else if (!checkWS())
-                reAuth();
-            else
-                checkAPI();
-        }
+			if (!isConnected())
+				reAuth();
+			else if (!checkWS())
+				reAuth();
+			else
+				checkAPI();
+		}
 
-        tickSubscriptions();
+		tickSubscriptions();
 
-        //process requests
-        if (isConnected())
-            processRequests();
+		//process requests
+		if (isConnected())
+			processRequests();
 
-        //pings counter
-        if (lastPing > 0 && FiguraMod.ticks - lastPing >= 20)
-            lastPing = pingsSent = pingsReceived = 0;
-    }
+		//pings counter
+		if (lastPing > 0 && FiguraMod.ticks - lastPing >= 20)
+			lastPing = pingsSent = pingsReceived = 0;
+	}
 
-    private static void tickSubscriptions() {
-        ClientPacketListener connection = Minecraft.getInstance().getConnection();
-        if (connection == null) {
-            unsubscribeAll();
-            return;
-        }
+	private static void tickSubscriptions() {
+		ClientPacketListener connection = Minecraft.getInstance().getConnection();
+		if (connection == null) {
+			unsubscribeAll();
+			return;
+		}
 
-        List<UUID> unsub = new ArrayList<>(SUBSCRIPTIONS);
-        for (UUID uuid : connection.getOnlinePlayerIds()) {
-            unsub.remove(uuid);
-            if (!SUBSCRIPTIONS.contains(uuid)) {
-                SUBSCRIPTIONS.add(uuid);
-                subscribe(uuid);
-            }
-        }
+		List<UUID> unsub = new ArrayList<>(SUBSCRIPTIONS);
+		for (UUID uuid : connection.getOnlinePlayerIds()) {
+			unsub.remove(uuid);
+			if (!SUBSCRIPTIONS.contains(uuid)) {
+				SUBSCRIPTIONS.add(uuid);
+				subscribe(uuid);
+			}
+		}
 
-        for (UUID uuid : unsub) {
-            SUBSCRIPTIONS.remove(uuid);
-            unsubscribe(uuid);
-        }
-    }
+		for (UUID uuid : unsub) {
+			SUBSCRIPTIONS.remove(uuid);
+			unsubscribe(uuid);
+		}
+	}
 
-    private static void processRequests() {
-        if (!API_REQUESTS.isEmpty()) {
-            Request<HttpAPI> request;
-            while ((request = API_REQUESTS.poll()) != null) {
-                Request<HttpAPI> finalRequest = request;
-                async(() -> finalRequest.consumer.accept(api));
-            }
-        }
+	private static void processRequests() {
+		if (!API_REQUESTS.isEmpty()) {
+			Request<HttpAPI> request;
+			while ((request = API_REQUESTS.poll()) != null) {
+				Request<HttpAPI> finalRequest = request;
+				async(() -> finalRequest.consumer.accept(api));
+			}
+		}
 
-        if (!WS_REQUESTS.isEmpty()) {
-            Request<WebSocket> request;
-            while ((request = WS_REQUESTS.poll()) != null) {
-                Request<WebSocket> finalRequest = request;
-                async(() -> finalRequest.consumer.accept(ws));
-            }
-        }
-    }
+		if (!WS_REQUESTS.isEmpty()) {
+			Request<WebSocket> request;
+			while ((request = WS_REQUESTS.poll()) != null) {
+				Request<WebSocket> finalRequest = request;
+				async(() -> finalRequest.consumer.accept(ws));
+			}
+		}
+	}
 
-    protected static void async(Runnable toRun) {
-        if (tasks == null || tasks.isDone()) {
-            tasks = CompletableFuture.runAsync(toRun);
-        } else {
-            tasks.thenRun(toRun);
-        }
-    }
+	protected static void async(Runnable toRun) {
+		if (tasks == null || tasks.isDone()) {
+			tasks = CompletableFuture.runAsync(toRun);
+		} else {
+			tasks.thenRun(toRun);
+		}
+	}
 
-    private static boolean checkUUID(UUID id) {
-        if (id.version() != 4) {
-            FiguraMod.debug("Voiding request for non v4 UUID \"" + id + "\" (v" + id.version() + ")");
-            return true;
-        }
-        return false;
-    }
-
-
-    // -- token -- //
+	private static boolean checkUUID(UUID id) {
+		if (id.version() != 4) {
+			FiguraMod.debug("Voiding request for non v4 UUID \"" + id + "\" (v" + id.version() + ")");
+			return true;
+		}
+		return false;
+	}
 
 
-    public static void auth() {
-        authCheck = RECONNECT;
-        AuthHandler.auth(false);
-        fetchMOTD();
-    }
-
-    public static void reAuth() {
-        authCheck = RECONNECT;
-        AuthHandler.auth(true);
-        fetchMOTD();
-    }
-
-    protected static void authSuccess(String token) {
-        FiguraMod.LOGGER.info("Successfully authed with the " + FiguraMod.MOD_NAME + " auth server!");
-        disconnectedReason = null;
-        connect(token);
-    }
-
-    protected static void authFail(String reason) {
-        FiguraMod.LOGGER.warn("Failed to auth with the " + FiguraMod.MOD_NAME + " auth server! {}", reason == null ? "" : reason);
-        disconnect(reason);
-    }
+	// -- token -- //
 
 
-    // -- connection -- //
+	public static void auth() {
+		authCheck = RECONNECT;
+		AuthHandler.auth(false);
+		fetchMOTD();
+	}
+
+	public static void reAuth() {
+		authCheck = RECONNECT;
+		AuthHandler.auth(true);
+		fetchMOTD();
+	}
+
+	protected static void authSuccess(String token) {
+		FiguraMod.LOGGER.info("Successfully authed with the " + FiguraMod.MOD_NAME + " auth server!");
+		disconnectedReason = null;
+		connect(token);
+	}
+
+	protected static void authFail(String reason) {
+		FiguraMod.LOGGER.warn("Failed to auth with the " + FiguraMod.MOD_NAME + " auth server! {}", reason == null ? "" : reason);
+		disconnect(reason);
+	}
 
 
-    public static void connect(String token) {
-        if (isConnected())
-            disconnect(null);
+	// -- connection -- //
+
+
+	public static void connect(String token) {
+		if (isConnected())
+			disconnect(null);
 		if(Configs.BLOCK_CLOUD.value){
 			backendStatus = 1;
 			disconnectedReason = "Cloud disabled";
 			return;
 		}
 
-        backendStatus = 2;
-        connectAPI(token);
-        connectWS(token);
-    }
+		backendStatus = 2;
+		connectAPI(token);
+		connectWS(token);
+	}
 
-    private static void fetchMOTD() {
-        queueString(Util.NIL_UUID, HttpAPI::getMotd, (code, data) -> {
-            responseDebug("motd", code, data);
-            if (data != null) motd = Emojis.applyEmojis(TextUtils.tryParseJson(data));
-        });
-    }
+	private static void fetchMOTD() {
+		queueString(Util.NIL_UUID, HttpAPI::getMotd, (code, data) -> {
+			responseDebug("motd", code, data);
+			if (data != null) motd = Emojis.applyEmojis(TextUtils.tryParseJson(data));
+		});
+	}
 
-    public static void disconnect(String reason) {
-        if (tasks != null) tasks.cancel(true);
-        backendStatus = 1;
-        disconnectedReason = reason;
-        disconnectAPI();
-        disconnectWS();
-    }
-
-
-    // -- api stuff -- //
+	public static void disconnect(String reason) {
+		if (tasks != null) tasks.cancel(true);
+		backendStatus = 1;
+		disconnectedReason = reason;
+		disconnectAPI();
+		disconnectWS();
+	}
 
 
-    private static void queueString(UUID owner, Function<HttpAPI, HttpRequest> request, BiConsumer<Integer, String> consumer) {
-        API_REQUESTS.add(new Request<>(owner, api -> HttpAPI.runString(request.apply(api), consumer)));
-    }
+	// -- api stuff -- //
 
-    private static void queueStream(UUID owner, Function<HttpAPI, HttpRequest> request, BiConsumer<Integer, InputStream> consumer) {
-        API_REQUESTS.add(new Request<>(owner, api -> HttpAPI.runStream(request.apply(api), consumer)));
-    }
 
-    public static void clear(UUID requestOwner) {
-        API_REQUESTS.removeIf(request -> request.owner.equals(requestOwner));
-    }
+	private static void queueString(UUID owner, Function<HttpAPI, HttpRequest> request, BiConsumer<Integer, String> consumer) {
+		API_REQUESTS.add(new Request<>(owner, api -> HttpAPI.runString(request.apply(api), consumer)));
+	}
 
-    private static void responseDebug(String src, int code, String data) {
-        if (debug) FiguraMod.debug("Got response of \"" + src + "\" with code " + code + ":\n\t" + data);
-    }
+	private static void queueStream(UUID owner, Function<HttpAPI, HttpRequest> request, BiConsumer<Integer, InputStream> consumer) {
+		API_REQUESTS.add(new Request<>(owner, api -> HttpAPI.runStream(request.apply(api), consumer)));
+	}
 
-    private static void connectAPI(String token) {
+	public static void clear(UUID requestOwner) {
+		API_REQUESTS.removeIf(request -> request.owner.equals(requestOwner));
+	}
+
+	private static void responseDebug(String src, int code, String data) {
+		if (debug) FiguraMod.debug("Got response of \"" + src + "\" with code " + code + ":\n\t" + data);
+	}
+
+	private static void connectAPI(String token) {
 		if(Configs.BLOCK_CLOUD.value) return;
-        api = new HttpAPI(token);
-        checkVersion();
-        setLimits();
-    }
+		api = new HttpAPI(token);
+		checkVersion();
+		setLimits();
+	}
 
-    private static void disconnectAPI() {
-        api = null;
-        clear(Util.NIL_UUID);
-    }
+	private static void disconnectAPI() {
+		api = null;
+		clear(Util.NIL_UUID);
+	}
 
-    private static void checkAPI() {
+	private static void checkAPI() {
 		if(Configs.BLOCK_CLOUD.value) return;
-        async(() -> {
-            if (api == null) {
-                reAuth();
-                return;
-            }
+		async(() -> {
+			if (api == null) {
+				reAuth();
+				return;
+			}
 
-            HttpAPI.runString(api.checkAuth(), (code, data) -> {
-                if (code != 200)
-                    reAuth();
-            });
-        });
-    }
+			HttpAPI.runString(api.checkAuth(), (code, data) -> {
+				if (code != 200)
+					reAuth();
+			});
+		});
+	}
 
-    public static void checkVersion() {
-        queueString(Util.NIL_UUID, HttpAPI::getVersion, (code, data) -> {
-            responseDebug("checkVersion", code, data);
-            JsonObject json = JsonParser.parseString(data).getAsJsonObject();
-            int config = Configs.UPDATE_CHANNEL.value;
-            latestVersion = new Version(json.get(config <= 1 ? "release" : "prerelease").getAsString());
-            if (config == 0)
-                return;
-            if (latestVersion.compareTo(FiguraMod.VERSION) > 0)
-                FiguraToast.sendToast(FiguraText.of("toast.new_version"), latestVersion);
-        });
-    }
+	public static void checkVersion() {
+		queueString(Util.NIL_UUID, HttpAPI::getVersion, (code, data) -> {
+			responseDebug("checkVersion", code, data);
+			JsonObject json = JsonParser.parseString(data).getAsJsonObject();
+			int config = Configs.UPDATE_CHANNEL.value;
+			latestVersion = new Version(json.get(config <= 1 ? "release" : "prerelease").getAsString());
+			if (config == 0)
+				return;
+			if (latestVersion.compareTo(FiguraMod.VERSION) > 0)
+				FiguraToast.sendToast(FiguraText.of("toast.new_version"), latestVersion);
+		});
+	}
 
-    public static void setLimits() {
-        queueString(Util.NIL_UUID, HttpAPI::getLimits, (code, data) -> {
-            responseDebug("setLimits", code, data);
-            JsonObject json = JsonParser.parseString(data).getAsJsonObject();
+	public static void setLimits() {
+		queueString(Util.NIL_UUID, HttpAPI::getLimits, (code, data) -> {
+			responseDebug("setLimits", code, data);
+			JsonObject json = JsonParser.parseString(data).getAsJsonObject();
 
-            JsonObject rate = json.getAsJsonObject("rate");
-            uploadRate.set(rate.get("upload").getAsInt() * 0.95);
-            downloadRate.set(rate.get("download").getAsInt() * 0.95);
+			JsonObject rate = json.getAsJsonObject("rate");
+			uploadRate.set(rate.get("upload").getAsInt() * 0.95);
+			downloadRate.set(rate.get("download").getAsInt() * 0.95);
 
-            JsonObject limits = json.getAsJsonObject("limits");
-            maxAvatarSize = limits.get("maxAvatarSize").getAsInt();
+			JsonObject limits = json.getAsJsonObject("limits");
+			maxAvatarSize = limits.get("maxAvatarSize").getAsInt();
 
-            try {
-                pingsRateLimit = rate.get("pingRate").getAsInt();
-                pingsSizeLimit = rate.get("pingSize").getAsInt();
-            }
-            catch (Exception e) {
-                pingsRateLimit = 32;
-                pingsSizeLimit = 1024;
-            }
-        });
-    }
+			try {
+				pingsRateLimit = rate.get("pingRate").getAsInt();
+				pingsSizeLimit = rate.get("pingSize").getAsInt();
+			}
+			catch (Exception e) {
+				pingsRateLimit = 32;
+				pingsSizeLimit = 1024;
+			}
+		});
+	}
 
-    public static int pingsRateLimit() {
-        return fsb().connected() ? fsb().handshake().pingsRateLimit() : pingsRateLimit;
-    }
+	public static int pingsRateLimit() {
+		return fsb().connected() ? fsb().handshake().pingsRateLimit() : pingsRateLimit;
+	}
 
-    public static int pingsSizeLimit() {
-        return fsb().connected() ? fsb().handshake().pingsSizeLimit() : pingsSizeLimit;
-    }
+	public static int pingsSizeLimit() {
+		return fsb().connected() ? fsb().handshake().pingsSizeLimit() : pingsSizeLimit;
+	}
 
-    public static void getUser(UserData user) {
-        boolean fetchUser = fsb().isPlayerConnected(user.id) || FiguraMod.isOffline(user.id);
-        if (fsb().connected() && fetchUser) {
-            fsb().getUserAndApply(user);
-            return;
-        }
+	public static void getUser(UserData user) {
+		boolean fetchUser = fsb().isPlayerConnected(user.id) || FiguraMod.isOffline(user.id);
+		user.fromFSB = false;
+		user.fromBackend = false;
+		if (fsb().connected() && fetchUser) {
+			fsb().getUserAndApply(user);
+			return;
+		}
 
-        getUserFromBackend(user);
-    }
+		getUserFromBackend(user);
+	}
 
-    public static void getUserFromBackend(UserData user) {
-        if (checkUUID(user.id)) {
-            return;
-        }
+	public static void getUserFromBackend(UserData user) {
+		if (checkUUID(user.id)) {
+			return;
+		}
 
-        queueString(user.id, api -> api.getUser(user.id), (code, data) -> {
-            //debug
-            responseDebug("getUser", code, data);
+		queueString(user.id, api -> api.getUser(user.id), (code, data) -> {
+			//debug
+			responseDebug("getUser", code, data);
 
-            //error
-            if (code != 200) {
+			//error
+			if (code != 200) {
 				if(Configs.CONNECTION_TOASTS.value){
 
 					if (code == 404)
@@ -347,305 +350,318 @@ public class NetworkStuff {
 					else
 						FiguraToast.sendToast(FiguraText.of("backend.user_not_found"),code.toString(), FiguraToast.ToastType.ERROR);
 				}
-                return;
-            }
+				return;
+			}
 
-            //success
+			//success
 
-            JsonObject json = JsonParser.parseString(data).getAsJsonObject();
+			JsonObject json = JsonParser.parseString(data).getAsJsonObject();
 
-            //avatars
-            ArrayList<Pair<String, Pair<String, UUID>>> avatars = new ArrayList<>();
+			//avatars
+			ArrayList<Pair<String, Pair<String, UUID>>> avatars = new ArrayList<>();
 
-            JsonArray equippedAvatars = json.getAsJsonArray("equipped");
-            for (JsonElement element : equippedAvatars) {
-                JsonObject entry = element.getAsJsonObject();
-                UUID owner = UUID.fromString(entry.get("owner").getAsString());
-                avatars.add(Pair.of(entry.get("hash").getAsString(), Pair.of(entry.get("id").getAsString(), owner)));
-            }
+			JsonArray equippedAvatars = json.getAsJsonArray("equipped");
+			for (JsonElement element : equippedAvatars) {
+				JsonObject entry = element.getAsJsonObject();
+				UUID owner = UUID.fromString(entry.get("owner").getAsString());
+				avatars.add(Pair.of(entry.get("hash").getAsString(), Pair.of(entry.get("id").getAsString(), owner)));
+			}
 
-            //badges
-            JsonObject badges = json.getAsJsonObject("equippedBadges");
-            Pair<BitSet, BitSet> badgesPair = Badges.emptyBadges();
+			//badges
+			JsonObject badges = json.getAsJsonObject("equippedBadges");
+			Pair<BitSet, BitSet> badgesPair = Badges.emptyBadges();
 
-            JsonArray pride = badges.getAsJsonArray("pride");
-            BitSet prideSet = badgesPair.getFirst();
-            for (int i = 0; i < pride.size(); i++)
-                prideSet.set(i, pride.get(i).getAsInt() >= 1);
+			JsonArray pride = badges.getAsJsonArray("pride");
+			BitSet prideSet = badgesPair.getFirst();
+			for (int i = 0; i < pride.size(); i++)
+				prideSet.set(i, pride.get(i).getAsInt() >= 1);
 
-            JsonArray special = badges.getAsJsonArray("special");
-            BitSet specialSet = badgesPair.getSecond();
-            for (int i = 0; i < special.size(); i++)
-                specialSet.set(i, special.get(i).getAsInt() >= 1);
+			JsonArray special = badges.getAsJsonArray("special");
+			BitSet specialSet = badgesPair.getSecond();
+			for (int i = 0; i < special.size(); i++)
+				specialSet.set(i, special.get(i).getAsInt() >= 1);
 
-            //default permission
-            JsonElement trust = json.get("trust");
-            if (trust != null) {
-                Permissions.Category cat = Permissions.Category.indexOf(trust.getAsInt());
-                if (cat != null) PermissionManager.setDefaultFor(user.id, cat);
-            }
+			//default permission
+			JsonElement trust = json.get("trust");
+			if (trust != null) {
+				Permissions.Category cat = Permissions.Category.indexOf(trust.getAsInt());
+				if (cat != null) PermissionManager.setDefaultFor(user.id, cat);
+			}
 
-            user.loadData(avatars, badgesPair);
-        });
-    }
+			user.loadData(avatars, badgesPair);
+			
+			user.fromBackend = true;
+		});
+	}
 
-    // TODO: multiple modes of upload (Backend, FSB, Backend + FSB)
-    public static void uploadAvatar(Avatar avatar, Destination destination) {
-        if (avatar == null || avatar.nbt == null)
-            return;
+	// TODO: multiple modes of upload (Backend, FSB, Backend + FSB)
+	public static void uploadAvatar(Avatar avatar, Destination destination) {
+		if (avatar == null || avatar.nbt == null)
+			return;
 
-        String id = avatar.id == null || true ? "avatar" : avatar.id; //TODO - profile screen
-
-
-
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            NbtIo.writeCompressed(avatar.nbt, baos);
-
-            if (destination.allowFSB()) {
-                fsb().uploadAvatar(id, baos.toByteArray());
-            }
-
-            if (destination.allowBackend()) {
-                queueString(Util.NIL_UUID, api -> api.uploadAvatar(id, baos.toByteArray()), (code, data) -> {
-                    responseDebug("uploadAvatar", code, data);
-
-                    if (code == 200) {
-                        //TODO - profile screen
-                        if (fsb().connected()) fsb().equipAvatar(List.of(Pair.of(id, getHash(baos.toByteArray()))));
-                        else equipAvatar(List.of(Pair.of(avatar.owner, id)));
-                        AvatarManager.localUploaded = true;
-                    }
-
-                    //feedback
-                    switch (code) {
-                        case 200 -> FiguraToast.sendToast(FiguraText.of("backend.upload_success"));
-                        case 413 -> FiguraToast.sendToast(FiguraText.of("backend.upload_too_big"), FiguraToast.ToastType.ERROR);
-                        case 507 -> FiguraToast.sendToast(FiguraText.of("backend.upload_too_many"), FiguraToast.ToastType.ERROR);
-                        default -> FiguraToast.sendToast(FiguraText.of("backend.upload_error"), FiguraToast.ToastType.ERROR);
-                    }
-                });
-                uploadRate.use();
-            }
-            baos.close();
-        } catch (Exception e) {
-            FiguraMod.LOGGER.error("", e);
-        }
-    }
-
-    public static void uploadAvatar(Avatar avatar) {
-        uploadAvatar(avatar, Destination.FSB_OR_BACKEND);
-    }
-
-    public static void deleteAvatar(String avatar, Destination destination) {
-        String id = avatar == null || true ? "avatar" : avatar; //TODO - profile screen
-
-        if (destination.allowFSB()) {
-            fsb().deleteAvatar(id);
-        }
-
-        if (destination.allowBackend()) {
-            queueString(Util.NIL_UUID, api -> api.deleteAvatar(id), (code, data) -> {
-                responseDebug("deleteAvatar", code, data);
-
-                switch (code) {
-                    case 200 -> FiguraToast.sendToast(FiguraText.of("backend.delete_success"));
-                    case 404 -> FiguraToast.sendToast(FiguraText.of("backend.avatar_not_found"), FiguraToast.ToastType.ERROR);
-                    default -> FiguraToast.sendToast(FiguraText.of("backend.delete_error"), FiguraToast.ToastType.ERROR);
-                }
-            });
-        }
-    }
-
-    public static void deleteAvatar(String avatar) {
-        deleteAvatar(avatar, Destination.FSB_OR_BACKEND);
-    }
-
-    public static void equipAvatar(List<Pair<UUID, String>> avatars) {
-        JsonArray json = new JsonArray();
-
-        for (Pair<UUID, String> avatar : avatars) {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("owner", avatar.getFirst().toString());
-            obj.addProperty("id", avatar.getSecond());
-            json.add(obj);
-        }
-
-        queueString(Util.NIL_UUID, api -> api.setEquipped(GSON.toJson(json)), (code, data) -> {
-            responseDebug("equipAvatar", code, data);
-            if (code != 200 && Configs.CONNECTION_TOASTS.value)
-                FiguraToast.sendToast(FiguraText.of("backend.equip_error"), FiguraToast.ToastType.ERROR);
-        });
-    }
-
-    public static void getAvatar(UserData target, UUID owner, String id, String hash) {
-        if (target.fromFSB()) {
-            fsb().getAvatar(target, hash);
-            return;
-        }
-
-        if (checkUUID(target.id)) {
-            return;
-        }
-
-        queueStream(target.id, api -> api.getAvatar(owner, id), (code, stream) -> {
-            String s;
-            try {
-                s = code == 200 ? "<avatar data>" : new String(stream.readAllBytes());
-            } catch (Exception e) {
-                s = e.getMessage();
-            }
-            responseDebug("getAvatar", code, s);
-
-            //on error
-            if (code != 200)
-                return;
-
-            try {
-                CompoundTag nbt = NbtIo.readCompressed(stream);
-                CacheAvatarLoader.save(hash, nbt);
-                target.loadAvatar(nbt);
-            } catch (Exception e) {
-                FiguraMod.LOGGER.error("Failed to load avatar for " + target.id, e);
-            }
-        });
-        downloadRate.use();
-    }
-
-    public static void setBadge(int badgeId) {
-        queueString(Util.NIL_UUID, api -> api.setBadge(badgeId), (code, data) -> {
-            // On error
-            if (code != 200) {
-                FiguraToast.sendToast(FiguraText.of("backend.badge_set_error"), FiguraToast.ToastType.ERROR);
-                return;
-            }
-
-            FiguraToast.sendToast(FiguraText.of("backend.badge_set"));
-        });
-    }
-
-    public static void clearBadge() {
-        queueString(Util.NIL_UUID, HttpAPI::clearBadge, (code, data) -> {
-            // On error
-            if (code != 200) {
-                FiguraToast.sendToast(FiguraText.of("backend.badge_clear_error"), FiguraToast.ToastType.ERROR);
-                return;
-            }
-
-            FiguraToast.sendToast(FiguraText.of("backend.badge_clear"));
-        });
-    }
+		String id = avatar.id == null || true ? "avatar" : avatar.id; //TODO - profile screen
 
 
-    // -- ws stuff -- //
+
+		try {
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			NbtIo.writeCompressed(avatar.nbt, baos);
+			// var meta = avatar.nbt.getCompound("metadata");
+			// meta.putBoolean("is_fsb",destination.allowFSB());
+			// meta.putBoolean("is_backend",destination.allowFSB());
+			avatar.uploadedTo = Destination.fromBool(destination.allowBackend(),destination.allowFSB());
+			if (destination.allowFSB()) {
+
+				fsb().uploadAvatar(id, baos.toByteArray());
+			}
+
+			if (destination.allowBackend()) {
+				queueString(Util.NIL_UUID, api -> api.uploadAvatar(id, baos.toByteArray()), (code, data) -> {
+					responseDebug("uploadAvatar", code, data);
+
+					if (code == 200) {
+						//TODO - profile screen
+						if (destination.allowFSB()) fsb().equipAvatar(List.of(Pair.of(id, getHash(baos.toByteArray()))));
+						else equipAvatar(List.of(Pair.of(avatar.owner, id)));
 
 
-    private static void connectWS(String token) {
-        if (ws != null) ws.disconnect();
+						AvatarManager.localUploaded = true;
+					}
+
+
+					//feedback
+					switch (code) {
+						case 200 -> FiguraToast.sendToast(FiguraText.of("backend.upload_success"));
+						case 413 -> FiguraToast.sendToast(FiguraText.of("backend.upload_too_big"), FiguraToast.ToastType.ERROR);
+						case 507 -> FiguraToast.sendToast(FiguraText.of("backend.upload_too_many"), FiguraToast.ToastType.ERROR);
+						default -> FiguraToast.sendToast(FiguraText.of("backend.upload_error"), FiguraToast.ToastType.ERROR);
+					}
+				});
+				uploadRate.use();
+			}
+			baos.close();
+		} catch (Exception e) {
+			FiguraMod.LOGGER.error("", e);
+		}
+	}
+
+	public static void uploadAvatar(Avatar avatar) {
+		uploadAvatar(avatar, Destination.FSB_OR_BACKEND);
+	}
+
+	public static void deleteAvatar(String avatar, Destination destination) {
+		String id = avatar == null || true ? "avatar" : avatar; //TODO - profile screen
+
+		if (destination.allowFSB()) {
+			fsb().deleteAvatar(id);
+		}
+
+		if (destination.allowBackend()) {
+			queueString(Util.NIL_UUID, api -> api.deleteAvatar(id), (code, data) -> {
+				responseDebug("deleteAvatar", code, data);
+
+				switch (code) {
+					case 200 -> FiguraToast.sendToast(FiguraText.of("backend.delete_success"));
+					case 404 -> FiguraToast.sendToast(FiguraText.of("backend.avatar_not_found"), FiguraToast.ToastType.ERROR);
+					default -> FiguraToast.sendToast(FiguraText.of("backend.delete_error"), FiguraToast.ToastType.ERROR);
+				}
+			});
+		}
+	}
+
+	public static void deleteAvatar(String avatar) {
+		deleteAvatar(avatar, Destination.FSB_OR_BACKEND);
+	}
+
+	public static void equipAvatar(List<Pair<UUID, String>> avatars) {
+		JsonArray json = new JsonArray();
+
+		for (Pair<UUID, String> avatar : avatars) {
+			JsonObject obj = new JsonObject();
+			obj.addProperty("owner", avatar.getFirst().toString());
+			obj.addProperty("id", avatar.getSecond());
+			json.add(obj);
+		}
+
+		queueString(Util.NIL_UUID, api -> api.setEquipped(GSON.toJson(json)), (code, data) -> {
+			responseDebug("equipAvatar", code, data);
+			if (code != 200 && Configs.CONNECTION_TOASTS.value)
+				FiguraToast.sendToast(FiguraText.of("backend.equip_error"), FiguraToast.ToastType.ERROR);
+		});
+	}
+
+	public static void getAvatar(UserData target, UUID owner, String id, String hash) {
+		if (target.fromFSB()) {
+			fsb().getAvatar(target, hash);
+			return;
+		}
+
+		if (checkUUID(target.id)) {
+			return;
+		}
+
+		queueStream(target.id, api -> api.getAvatar(owner, id), (code, stream) -> {
+			String s;
+			try {
+				s = code == 200 ? "<avatar data>" : new String(stream.readAllBytes());
+			} catch (Exception e) {
+				s = e.getMessage();
+			}
+			responseDebug("getAvatar", code, s);
+
+			//on error
+			if (code != 200)
+				return;
+
+			try {
+				CompoundTag nbt = NbtIo.readCompressed(stream);
+				CacheAvatarLoader.save(hash, nbt);
+				target.loadAvatar(nbt);
+			} catch (Exception e) {
+				FiguraMod.LOGGER.error("Failed to load avatar for " + target.id, e);
+			}
+		});
+		downloadRate.use();
+	}
+
+	public static void setBadge(int badgeId) {
+		queueString(Util.NIL_UUID, api -> api.setBadge(badgeId), (code, data) -> {
+			// On error
+			if (code != 200) {
+				FiguraToast.sendToast(FiguraText.of("backend.badge_set_error"), FiguraToast.ToastType.ERROR);
+				return;
+			}
+
+			FiguraToast.sendToast(FiguraText.of("backend.badge_set"));
+		});
+	}
+
+	public static void clearBadge() {
+		queueString(Util.NIL_UUID, HttpAPI::clearBadge, (code, data) -> {
+			// On error
+			if (code != 200) {
+				FiguraToast.sendToast(FiguraText.of("backend.badge_clear_error"), FiguraToast.ToastType.ERROR);
+				return;
+			}
+
+			FiguraToast.sendToast(FiguraText.of("backend.badge_clear"));
+		});
+	}
+
+
+	// -- ws stuff -- //
+
+
+	private static void connectWS(String token) {
+		if (ws != null) ws.disconnect();
 		if(Configs.BLOCK_CLOUD.value) return;
-        try {
-            ws = KeyStoreHelper.websocketWithBackendCertificates(token);
-            ws.connect();
-        } catch (WebSocketException e) {
-            FiguraMod.LOGGER.error(e.getMessage());
-        }
-    }
+		try {
+			ws = KeyStoreHelper.websocketWithBackendCertificates(token);
+			ws.connect();
+		} catch (WebSocketException e) {
+			FiguraMod.LOGGER.error(e.getMessage());
+		}
+	}
 
-    private static void disconnectWS() {
-        if (ws != null) ws.disconnect();
-        ws = null;
-    }
+	private static void disconnectWS() {
+		if (ws != null) ws.disconnect();
+		ws = null;
+	}
 
-    private static boolean checkWS() {
-        return ws != null && ws.isOpen() && backendStatus == 3;
-    }
+	private static boolean checkWS() {
+		return ws != null && ws.isOpen() && backendStatus == 3;
+	}
 
-    public static void sendPing(int id, boolean sync, byte[] data) {
-        if (!AvatarManager.localUploaded || !isConnected())
-            return;
+	public static void sendPing(int id, boolean sync, byte[] data) {
+		if (!AvatarManager.localUploaded || !connectedToAnyBackend())
+			return;
 
-        try {
-            if (!fsb().connected()) {
-                ByteBuffer buffer = C2SMessageHandler.ping(id, sync, data);
-                ws.sendBinary(buffer.array());
-            }
-            else fsb().sendPacket(new C2SPingPacket(id, sync, data));
+		try {
+			Avatar ava =AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+			if (ava.uploadedTo.allowFSB() && fsb().connected()) {
+				fsb().sendPacket(new C2SPingPacket(id, sync, data));
+			}
+			if(ava.uploadedTo.allowBackend()){
+				ByteBuffer buffer = C2SMessageHandler.ping(id, sync, data);
+				ws.sendBinary(buffer.array());
+			}
 
-            pingsSent++;
-            if (lastPing == 0) lastPing = FiguraMod.ticks;
-        } catch (Exception e) {
-            FiguraMod.LOGGER.error("Failed to send ping", e);
-        }
-    }
+			pingsSent++;
+			if (lastPing == 0) lastPing = FiguraMod.ticks;
+		} catch (Exception e) {
+			FiguraMod.LOGGER.error("Failed to send ping", e);
+		}
+	}
 
-    private static void subscribe(UUID id) {
-        if (checkUUID(id) || !checkWS())
-            return;
+	private static void subscribe(UUID id) {
+		if (checkUUID(id) || !checkWS())
+			return;
 
-        WS_REQUESTS.add(new Request<>(Util.NIL_UUID, client -> {
-            try {
-                ByteBuffer buffer = C2SMessageHandler.sub(id);
-                client.sendBinary(buffer.array());
-                if (debug) FiguraMod.debug("Subbed to " + id);
-            } catch (Exception e) {
-                FiguraMod.LOGGER.error("Failed to subscribe to " + id, e);
-            }
-        }));
-    }
+		WS_REQUESTS.add(new Request<>(Util.NIL_UUID, client -> {
+			try {
+				ByteBuffer buffer = C2SMessageHandler.sub(id);
+				client.sendBinary(buffer.array());
+				if (debug) FiguraMod.debug("Subbed to " + id);
+			} catch (Exception e) {
+				FiguraMod.LOGGER.error("Failed to subscribe to " + id, e);
+			}
+		}));
+	}
 
-    private static void unsubscribe(UUID id) {
-        if (checkUUID(id) || !checkWS())
-            return;
+	private static void unsubscribe(UUID id) {
+		if (checkUUID(id) || !checkWS())
+			return;
 
-        WS_REQUESTS.add(new Request<>(Util.NIL_UUID, client -> {
-            try {
-                ByteBuffer buffer = C2SMessageHandler.unsub(id);
-                client.sendBinary(buffer.array());
-                if (debug) FiguraMod.debug("Unsubbed to " + id);
-            } catch (Exception e) {
-                FiguraMod.LOGGER.error("Failed to unsubscribe to " + id, e);
-            }
-        }));
-    }
+		WS_REQUESTS.add(new Request<>(Util.NIL_UUID, client -> {
+			try {
+				ByteBuffer buffer = C2SMessageHandler.unsub(id);
+				client.sendBinary(buffer.array());
+				if (debug) FiguraMod.debug("Unsubbed to " + id);
+			} catch (Exception e) {
+				FiguraMod.LOGGER.error("Failed to unsubscribe to " + id, e);
+			}
+		}));
+	}
 
-    public static void subscribeAll() {
-        for (UUID uuid : SUBSCRIPTIONS)
-            subscribe(uuid);
-    }
+	public static void subscribeAll() {
+		for (UUID uuid : SUBSCRIPTIONS)
+			subscribe(uuid);
+	}
 
-    public static void unsubscribeAll() {
-        for (UUID uuid : SUBSCRIPTIONS)
-            unsubscribe(uuid);
-        SUBSCRIPTIONS.clear();
-    }
+	public static void unsubscribeAll() {
+		for (UUID uuid : SUBSCRIPTIONS)
+			unsubscribe(uuid);
+		SUBSCRIPTIONS.clear();
+	}
 
-    private static FSB fsb() {
-        return FSB.instance();
-    }
+	private static FSB fsb() {
+		return FSB.instance();
+	}
 
-    // -- resources stuff -- //
-
-
-    private static InputStream request(HttpRequest request) throws Exception {
-        HttpResponse<InputStream> response = NetworkStuff.client.send(request, HttpResponse.BodyHandlers.ofInputStream());
-        return response.body();
-    }
-
-    public static InputStream getResourcesHashes(String version) throws Exception {
-        return request(HttpRequest.newBuilder(HttpAPI.getUri("/assets/" + version)).timeout(Duration.ofSeconds(15)).build());
-    }
-
-    public static InputStream getResource(String version, String resource) throws Exception {
-        return request(HttpRequest.newBuilder(HttpAPI.getUri("/assets/" + version + "/" + resource)).build());
-    }
+	// -- resources stuff -- //
 
 
-    // -- global functions -- //
+	private static InputStream request(HttpRequest request) throws Exception {
+		HttpResponse<InputStream> response = NetworkStuff.client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+		return response.body();
+	}
+
+	public static InputStream getResourcesHashes(String version) throws Exception {
+		return request(HttpRequest.newBuilder(HttpAPI.getUri("/assets/" + version)).timeout(Duration.ofSeconds(15)).build());
+	}
+
+	public static InputStream getResource(String version, String resource) throws Exception {
+		return request(HttpRequest.newBuilder(HttpAPI.getUri("/assets/" + version + "/" + resource)).build());
+	}
 
 
-    public static boolean isConnected() {
-        return api != null && checkWS();
-    }
+	// -- global functions -- //
+
+
+	public static boolean isConnected() {
+		return api != null && checkWS();
+	}
 	public static boolean connectedToAnyBackend() {
 		return fsb().connected() || (api != null && checkWS());
 	}
@@ -654,42 +670,21 @@ public class NetworkStuff {
 		return connectedToAnyBackend() && uploadRate.check();
 	}
 
-    public static int getSizeLimit() {
-        return fsb().connected() ? fsb().handshake().maxAvatarSize() : isConnected() ? maxAvatarSize : Integer.MAX_VALUE;
-    }
+	public static int getSizeLimit() {
+		return fsb().connected() ? fsb().handshake().maxAvatarSize() : isConnected() ? maxAvatarSize : Integer.MAX_VALUE;
+	}
 
 
-    // -- request subclass -- //
+	// -- request subclass -- //
 
 
-    private record Request<T>(UUID owner, Consumer<T> consumer) {
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            return o instanceof Request request && owner.equals(request.owner);
-        }
-    }
+	private record Request<T>(UUID owner, Consumer<T> consumer) {
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			return o instanceof Request request && owner.equals(request.owner);
+		}
+	}
 
-    public enum Destination {
-        BACKEND,
-        FSB,
-        BOTH,
-        FSB_OR_BACKEND;
 
-        public boolean allowBackend() {
-            return switch (this) {
-                case BACKEND, BOTH -> true;
-                case FSB -> false;
-                case FSB_OR_BACKEND -> !org.figuramc.figura.backend2.FSB.instance().connected();
-            };
-        }
-
-        public boolean allowFSB() {
-            return switch (this) {
-                case FSB, BOTH -> true;
-                case BACKEND -> false;
-                case FSB_OR_BACKEND -> org.figuramc.figura.backend2.FSB.instance().connected();
-            };
-        }
-    }
 }

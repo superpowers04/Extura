@@ -136,7 +136,10 @@
     "figura.backend.delete_success_fsb": "Avatar deleted from server!",
     "figura.gui.wardrobe.upload_both.tooltip": "Upload avatar to both FSB and Cloud\n* Only FSB users will see pings, both FSB and Cloud users will see your uploaded avatar",
     "figura.gui.wardrobe.upload_fsb.tooltip": "Upload avatar to FSB\n* Non-FSB users will see your Cloud avatar\n* FSB users will see your uploaded avatar",
-    "figura.gui.wardrobe.upload_cloud.tooltip": "Upload avatar to Cloud\n* Non-FSB users will see uploaded avatar",
+    "figura.gui.wardrobe.upload_backend.tooltip": "Upload avatar to Cloud\n* Non-FSB users will see uploaded avatar",
+    "figura.gui.wardrobe.upload_both": "Upload avatar to both FSB and Cloud",
+    "figura.gui.wardrobe.upload_fsb": "Upload avatar to FSB",
+    "figura.gui.wardrobe.upload_backend": "Upload avatar to Cloud",
 
     "figura.tab": "  ",
     "figura.ellipsis": "…",

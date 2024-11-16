@@ -17,7 +17,8 @@ public class UserData {
     public final UUID id;
     private final Queue<Avatar> avatars = new ConcurrentLinkedQueue<>();
     private Pair<BitSet, BitSet> badges;
-    private boolean fromFSB;
+    public boolean fromFSB;
+    public boolean fromBackend;
 
     public UserData(UUID id) {
         this.id = id;
@@ -69,5 +70,12 @@ public class UserData {
 
     public boolean fromFSB() {
         return fromFSB;
+    }
+    public void fromBackend(boolean state) {
+        fromBackend = state;
+    }
+
+    public boolean fromBackend() {
+        return fromBackend;
     }
 }

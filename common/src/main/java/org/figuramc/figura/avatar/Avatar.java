@@ -32,6 +32,7 @@ import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.animation.Animation;
 import org.figuramc.figura.animation.AnimationPlayer;
 import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.backend2.Destination;
 import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.lua.FiguraLuaPrinter;
 import org.figuramc.figura.lua.FiguraLuaRuntime;
@@ -78,6 +79,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
+
 // the avatar class
 // contains all things related to the avatar
 // and also related to the owner, like its permissions
@@ -101,8 +103,7 @@ public class Avatar {
     public String id;
     public int fileSize;
     public String color;
-    public boolean isFSB = false;
-    public boolean isBackend = false;
+    public Destination uploadedTo = Destination.NONE;
     public Map<String, String> badgeToColor = new HashMap<>();
     public Map<String, byte[]> resources = new HashMap<>();
 
@@ -202,8 +203,9 @@ public class Avatar {
                         badgeToColor.put(key.replace("badge_color_", ""), metadata.getString(key));
                     }
                 }
-                if(metadata.contains("isFSB"))
-                	isFSB = metadata.getBoolean("isFSB");
+                uploadedTo.setFSB(metadata.contains("is_fsb") && metadata.getBoolean("is_fsb") || metadata.contains("isFSB") && metadata.getBoolean("isFSB"));
+                uploadedTo.setFSB(metadata.contains("is_backend") && metadata.getBoolean("is_backend"));
+ 
                 fileSize = getFileSize();
                 versionStatus = getVersionStatus();
                 if (entityName.isBlank())

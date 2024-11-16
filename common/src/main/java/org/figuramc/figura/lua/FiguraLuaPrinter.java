@@ -380,7 +380,7 @@ public class FiguraLuaPrinter {
 
     private static Style getTypeColor(LuaValue value) {
         return switch (value.type()) {
-            case LuaValue.TTABLE -> ColorUtils.Colors.PURPLE.style;
+            case LuaValue.TTABLE -> ColorUtils.Colors.AWESOME_BLUE.style;
             case LuaValue.TNIL -> ColorUtils.Colors.LUA_ERROR.style;
             case LuaValue.TBOOLEAN -> ColorUtils.Colors.LUA_PING.style;
             case LuaValue.TNUMBER -> ColorUtils.Colors.BLUE.style;

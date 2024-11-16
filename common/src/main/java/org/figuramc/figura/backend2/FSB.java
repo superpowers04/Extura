@@ -330,6 +330,7 @@ public abstract class FSB {
                     ByteArrayInputStream bais = new ByteArrayInputStream(avatarData);
                     CompoundTag tag = NbtIo.readCompressed(bais);
                     CacheAvatarLoader.save(hash.toString(), tag);
+                    target.fromFSB = true;
                     target.loadAvatar(tag);
                 }
                 catch (Exception e) {
@@ -388,6 +389,7 @@ public abstract class FSB {
                 case FINISHED, ALREADY_EXISTS -> {
                     FiguraToast.sendToast(FiguraText.of("backend.upload_success"));
                     parent.equipAvatar(List.of(Pair.of(avatarId, Utils.getHash(data))));
+
                     AvatarManager.localUploaded = true;
                 }
                 case MAX_AVATAR_SIZE_EXCEEDED -> {

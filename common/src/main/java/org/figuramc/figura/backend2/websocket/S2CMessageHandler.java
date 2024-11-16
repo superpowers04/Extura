@@ -54,11 +54,11 @@ public class S2CMessageHandler {
 
     private static void ping(ByteBuffer bytes) {
         UUID uuid = new UUID(bytes.getLong(), bytes.getLong());
-        if (FSB.instance().isPlayerConnected(uuid)) return;
 
         Avatar avatar = AvatarManager.getLoadedAvatar(uuid);
         if (avatar == null)
             return;
+        if (avatar.uploadedTo.allowBackend() && !avatar.uploadedTo.allowFSB()) return;
 
         int id = bytes.getInt();
         bytes.get(); // sync value is ignored
