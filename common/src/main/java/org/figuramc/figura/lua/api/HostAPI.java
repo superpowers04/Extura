@@ -625,14 +625,13 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.upload_avatar_to")
 	public boolean uploadAvatarTo(boolean backend,boolean fsb) {
-		if(!backend && !fsb) return false;
 		if(!this.isHost) return false;
 		Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
 		if(avatar == null) throw new LuaError("Cannot upload a null avatar!");
 		try {
 			LocalAvatarLoader.loadAvatar(null, null);
 		} catch (Exception ignored) {}
-		NetworkStuff.uploadAvatar(avatar,Destination.fromBools(backend,fsb));
+		NetworkStuff.uploadAvatar(avatar,(!backend && !fsb) ? Destination.FSB_OR_BACKEND : Destination.fromBools(backend,fsb));
 		AvatarList.selectedEntry = null;
 		return true;
 	}
