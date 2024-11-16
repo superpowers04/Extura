@@ -57,6 +57,7 @@ import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.LuaError;
 import org.figuramc.figura.avatar.local.LocalAvatarLoader;
 import org.figuramc.figura.gui.widgets.lists.AvatarList;
+import org.figuramc.figura.backend2.Destination;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.backend2.FSB;
 
@@ -618,6 +619,20 @@ public class HostAPI {
 			LocalAvatarLoader.loadAvatar(null, null);
 		} catch (Exception ignored) {}
 		NetworkStuff.uploadAvatar(avatar);
+		AvatarList.selectedEntry = null;
+		return true;
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("host.upload_avatar_to")
+	public boolean uploadAvatarTo(boolean backend,boolean fsb) {
+		if(!backend && !fsb) return false;
+		if(!this.isHost) return false;
+		Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+		if(avatar == null) throw new LuaError("Cannot upload a null avatar!");
+		try {
+			LocalAvatarLoader.loadAvatar(null, null);
+		} catch (Exception ignored) {}
+		NetworkStuff.uploadAvatar(avatar,Destination.fromBools(backend,fsb));
 		AvatarList.selectedEntry = null;
 		return true;
 	}

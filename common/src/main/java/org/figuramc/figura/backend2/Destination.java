@@ -61,4 +61,13 @@ public enum Destination {
 			NONE
 		);
 	}
+	public static Destination fromBool(boolean b,boolean f,boolean either){
+		return (
+			e ? FSB_OR_BACKEND :
+			b && f ? BOTH :
+			b ? BACKEND :
+			f ? FSB :
+			NONE
+		);
+	}
 }
