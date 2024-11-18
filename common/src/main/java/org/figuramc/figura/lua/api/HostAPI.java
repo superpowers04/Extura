@@ -631,7 +631,7 @@ public class HostAPI {
 		try {
 			LocalAvatarLoader.loadAvatar(null, null);
 		} catch (Exception ignored) {}
-		NetworkStuff.uploadAvatar(avatar,(!backend && !fsb) ? Destination.FSB_OR_BACKEND : Destination.fromBools(backend,fsb));
+		NetworkStuff.uploadAvatar(avatar,(!backend && !fsb) ? Destination.FSB_OR_BACKEND : Destination.fromBool(backend,fsb));
 		AvatarList.selectedEntry = null;
 		return true;
 	}

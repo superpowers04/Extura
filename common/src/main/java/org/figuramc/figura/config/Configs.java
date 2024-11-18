@@ -267,6 +267,12 @@ public class Configs {
 	// 		this.tooltip = FiguraText.of("config.allow_both_pings.tooltip");
 	// 	}
 	// };
+	public static final ConfigType.BoolConfig USE_BACKEND_HEADS = new ConfigType.BoolConfig("use_backend_heads", MISC, false) {
+		{
+			this.name = this.name.copy().withStyle(ChatFormatting.AQUA);
+			this.tooltip = FiguraText.of("config.use_backend_heads.tooltip");
+		}
+	};
 
 	// -- DEV -- //
 	public static final ConfigType.BoolConfig DEBUG_MODE = new ConfigType.BoolConfig("debug_mode", DEV, false, false);

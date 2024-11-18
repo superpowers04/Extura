@@ -8,7 +8,7 @@
 
 
 	"figura.docs.globals.extura": "The Extura object that contains some random stuff. Only visible if it's enabled in the settings.",
-	"figura.docs.globals.add_script": "(Extura) Allows you to add, edit or remove scripts from your avatar.\nAccepts 2 strings, if the second string is nil, the script is unloaded. Note this will NOT remove events",
+	"figura.docs.globals.add_script": "(Extura) Allows you to add, edit or remove scripts from your avatar.\nAccepts 2 strings, if the second string is nil, the script is unloaded. If true is provided as a third argument, an error will be thrown if the script path doesn't already exist. Note this will NOT remove events",
 	"figura.docs.globals.get_scripts": "(Extura) Returns a table of script names.",
 	"figura.docs.globals.get_script": "(Extura) Returns the contents of a script or nil if the script doesn't exist.",
 

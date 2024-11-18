@@ -243,11 +243,15 @@ public class FiguraLuaRuntime {
 		});
 	}
 
-	private final TwoArgFunction addScript = new TwoArgFunction() {
+	private final ThreeArgFunction addScript = new ThreeArgFunction() {
 		@Override
-		public LuaValue call(LuaValue arg,LuaValue contents) {
-			String scriptName = arg.checkjstring();
-			
+		public LuaValue call(LuaValue arg,LuaValue contents,LuaValue replacing) {
+			Path path = PathUtils.getPath(arg.checkjstring());
+			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
+			String scriptName = PathUtils.computeSafeString(PathUtils.getPath(PathUtils.computeSafeString(
+				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
+			)));
+			String scriptNameNbt = scriptName.replace('/','.');
 			loadedScripts.remove(scriptName);
 			if(contents.isnil()){
 				owner.nbt.getCompound("scripts").remove(scriptName);
@@ -255,11 +259,22 @@ public class FiguraLuaRuntime {
 				return LuaValue.NIL;
 			}
 			String scriptContent = contents.checkjstring();
+			var scriptNbt = owner.nbt.getCompound("scripts");
+			if(replacing.toboolean()){
+				if(!scripts.containsKey(scriptName)){
+					throw new LuaError("Script " + scriptName + " doesn't exist!");
+				}
+				if(!scriptNbt.contains(scriptNameNbt)){
+					throw new LuaError("Script " + scriptNameNbt + " doesn't exist in the NBT!");
+
+				}
+			}
 			scripts.put(scriptName,scriptContent);
 			// if (loadingScripts.contains(scriptNauiime))
 			// 	throw new LuaError("Detected circular dependency in script " + loadingScripts.peek());
 
-			owner.nbt.getCompound("scripts").put(scriptName,new ByteArrayTag(scriptContent.getBytes(StandardCharsets.UTF_8)));
+			scriptNbt.put(scriptNameNbt,new ByteArrayTag(scriptContent.getBytes(StandardCharsets.UTF_8)));
+			// owner.nbt.put("scripts",scriptNbt);
 			return LuaValue.NIL;
 		}
 		@Override

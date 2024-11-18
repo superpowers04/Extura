@@ -52,6 +52,7 @@ public class AvatarAPI {
 	}
 
 	/* TODO: TYPE AUTO-DETECT AND MORE TYPES*/
+
 	@LuaWhitelist
 	@LuaMethodDoc("avatar.set_nbt")
 	public void setNBT(@LuaNotNil String path, Object value, String valueType) {
