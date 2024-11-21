@@ -360,7 +360,8 @@ public class Avatar {
         if (args == null)
             return false;
         int l = args.narg();
-        for (int i = 1; i <= l; i++) {
+        int i = 0;
+        while (i++ <= l) {
             if (args.arg(i).isboolean() && args.arg(i).checkboolean())
                 return true;
         }
@@ -430,6 +431,9 @@ public class Avatar {
         return isCancelled(loaded ? run("ON_PLAY_SOUND", tick, id, pos, vol, pitch, loop, category, file) : null);
     }
 
+    public boolean uploadEvent(String type, boolean backend, boolean fsb) {
+    	return isCancelled(loaded ? run("UPLOAD", tick,type,backend,fsb) : null);
+    }
     public void resourceReloadEvent() {
         if (loaded) run("RESOURCE_RELOAD", tick);
     }

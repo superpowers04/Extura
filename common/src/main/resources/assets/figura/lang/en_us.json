@@ -25,7 +25,7 @@
 
 	"figura.docs.world.linetraceBlock": "(Extura) Returns the block, side, and pos of a linetrace",
 	"figura.docs.world.linetraceEntity": "(Extura) Returns the entity and pos of a linetrace",
-
+	"figura.docs.events.upload": "The UPLOAD event runs before your avatar is uploaded(Note it's run 3 times)\nArgument 1 is where it's currently uploading to as a string. \"BOTH\", \"FSB\" second then \"BACKEND\"\nArgument 2 is true if uploading to backend\nArgument 2 is true if uploading to fsb\nReturn true to cancel uploading to whatever is currently being uploaded to",
 
 	"figura.config.vanilla_cloud": "(Extura) Use Vanilla Figura Backend",
 	"figura.config.vanilla_cloud.tooltip": "Forces the backend to use %s",
@@ -44,7 +44,6 @@
 	"figura.config.expose_http.tooltip": "Exposes extura.getHttp to *ALL* Figura avatars",
 	"figura.config.expose_sensitive_libraries": "Enable hacking you",
 	"figura.config.expose_sensitive_libraries.tooltip": "Exposes io, os, debug and extura.getHttp to *YOUR* Figura avatar. If you do not know what this means DO NOT ENABLE THIS. This will allow any equipped avatars to run ANY program on your computer and edit ANY file on your computer",
-
 	"figura.config.get_blocks_limit": "Unlimited world.getBlocks",
 	"figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
 

@@ -404,18 +404,23 @@ public class NetworkStuff {
 
 		try {
 
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			NbtIo.writeCompressed(avatar.nbt, baos);
 			// var meta = avatar.nbt.getCompound("metadata");
 			// meta.putBoolean("is_fsb",destination.allowFSB());
 			// meta.putBoolean("is_backend",destination.allowFSB());
 			avatar.uploadedTo = Destination.fromBool(destination.allowBackend(),destination.allowFSB());
-			if (destination.allowFSB()) {
+			avatar.uploadEvent("BOTH",destination.allowBackend(),destination.allowFSB());
+			if (destination.allowFSB() && !avatar.uploadEvent("FSB",destination.allowBackend(),destination.allowFSB())) {
+				// avatar.uploadEvent("FSB",destination.allowBackend(),destination.allowFSB());
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				NbtIo.writeCompressed(avatar.nbt, baos);
 
 				fsb().uploadAvatar(id, baos.toByteArray());
+				baos.close();
 			}
 
-			if (destination.allowBackend()) {
+			if (destination.allowBackend() && !avatar.uploadEvent("BACKEND",destination.allowBackend(),destination.allowFSB())) {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				NbtIo.writeCompressed(avatar.nbt, baos);
 				queueString(Util.NIL_UUID, api -> api.uploadAvatar(id, baos.toByteArray()), (code, data) -> {
 					responseDebug("uploadAvatar", code, data);
 
@@ -437,9 +442,10 @@ public class NetworkStuff {
 						default -> FiguraToast.sendToast(FiguraText.of("backend.upload_error"), FiguraToast.ToastType.ERROR);
 					}
 				});
+
+				baos.close();
 				uploadRate.use();
 			}
-			baos.close();
 		} catch (Exception e) {
 			FiguraMod.LOGGER.error("", e);
 		}
