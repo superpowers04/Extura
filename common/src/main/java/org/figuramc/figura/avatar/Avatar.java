@@ -95,6 +95,7 @@ public class Avatar {
     public boolean loaded = true;
     public int loadedFrom = 0;
     public final boolean isHost;
+    public Destination forcePings = Destination.NONE;
 
     //metadata
     public String name, entityName;
@@ -133,6 +134,7 @@ public class Avatar {
     public int animationComplexity;
     public final Instructions complexity;
     public final Instructions init, render, worldRender, tick, worldTick, animation;
+    public final Map<String, Instructions> customInstructions = new HashMap<>();
     public final RefilledNumber particlesRemaining, soundsRemaining;
     private Avatar(UUID owner, EntityType<?> type, String name) {
         this.owner = owner;
@@ -149,6 +151,12 @@ public class Avatar {
         this.particlesRemaining = new RefilledNumber(permissions.get(Permissions.PARTICLES));
         this.soundsRemaining = new RefilledNumber(permissions.get(Permissions.SOUNDS));
         this.entityName = name == null ? "" : name;
+
+        for (Collection<Permissions> pluginPermissions : PermissionManager.CUSTOM_PERMISSIONS.values()) {
+            for (Permissions customPermission : pluginPermissions) {
+                customInstructions.putIfAbsent(customPermission.name, new Instructions(permissions.get(customPermission)));
+            }
+        }
     }
 
     public Avatar(UUID owner) {

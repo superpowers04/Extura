@@ -22,6 +22,7 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
 import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.backend2.Destination;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -115,6 +116,13 @@ public class AvatarAPI {
 		return;
 	}
 
+
+	@LuaWhitelist
+	@LuaMethodDoc("avatar.forcePings")
+	public AvatarAPI forcePings(boolean backend,boolean fsb) {
+		avatar.forcePings = Destination.fromBool(backend,fsb);
+		return this;
+	}
 
 	@LuaWhitelist
 	@LuaMethodDoc(

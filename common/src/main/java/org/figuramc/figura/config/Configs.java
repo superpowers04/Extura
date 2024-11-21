@@ -18,6 +18,7 @@ import org.figuramc.figura.permissions.Permissions;
 import org.figuramc.figura.resources.FiguraRuntimeResources;
 import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.FiguraText;
+import org.figuramc.figura.entries.EntryPointManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -301,6 +302,7 @@ public class Configs {
 			super.onChange();
 			PermissionManager.reinit();
 			LocalAvatarFetcher.reinit();
+			EntryPointManager.reinit();
 		}
 	};
 	public static final ConfigType.IPConfig SERVER_IP = new ConfigType.IPConfig("server_ip", DEV, "figura.moonlight-devs.org") {

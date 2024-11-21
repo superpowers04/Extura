@@ -321,10 +321,9 @@ public class NetworkStuff {
 	}
 
 	public static void getUser(UserData user) {
-		boolean fetchUser = fsb().isPlayerConnected(user.id) || FiguraMod.isOffline(user.id);
 		user.fromFSB = false;
 		user.fromBackend = false;
-		if (fsb().connected() && fetchUser) {
+		if (fsb().connected() && (fsb().isPlayerConnected(user.id) || (FiguraMod.isOffline(user.id) && !Configs.USE_BACKEND_HEADS.value))) {
 			fsb().getUserAndApply(user);
 			return;
 		}
@@ -382,11 +381,11 @@ public class NetworkStuff {
 				specialSet.set(i, special.get(i).getAsInt() >= 1);
 
 			//default permission
-			JsonElement trust = json.get("trust");
-			if (trust != null) {
-				Permissions.Category cat = Permissions.Category.indexOf(trust.getAsInt());
-				if (cat != null) PermissionManager.setDefaultFor(user.id, cat);
-			}
+			// JsonElement trust = json.get("trust");
+			// if (trust != null) {
+			// 	Permissions.Category cat = Permissions.Category.indexOf(trust.getAsInt());
+			// 	if (cat != null) PermissionManager.setDefaultFor(user.id, cat);
+			// }
 
 			user.loadData(avatars, badgesPair);
 			
@@ -574,15 +573,15 @@ public class NetworkStuff {
 	}
 
 	public static void sendPing(int id, boolean sync, byte[] data) {
-		if (!AvatarManager.localUploaded || !connectedToAnyBackend())
+		Avatar ava =AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+		if (ava == null || (!AvatarManager.localUploaded && ava.forcePings == Destination.NONE) || !connectedToAnyBackend())
 			return;
 
 		try {
-			Avatar ava =AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
-			if (ava.uploadedTo.allowFSB() && fsb().connected()) {
+			if ((ava.uploadedTo.allowFSB() || ava.forcePings.allowFSB()) && fsb().connected()) {
 				fsb().sendPacket(new C2SPingPacket(id, sync, data));
 			}
-			if(ava.uploadedTo.allowBackend()){
+			if(ava.uploadedTo.allowBackend() || ava.forcePings.allowBackend()){
 				ByteBuffer buffer = C2SMessageHandler.ping(id, sync, data);
 				ws.sendBinary(buffer.array());
 			}

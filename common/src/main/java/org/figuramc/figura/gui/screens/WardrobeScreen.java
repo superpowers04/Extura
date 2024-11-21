@@ -23,6 +23,8 @@ import org.figuramc.figura.utils.TextUtils;
 import org.figuramc.figura.utils.ui.UIHelper;
 import org.figuramc.figura.backend2.Destination;
 
+import java.util.Date;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -54,8 +56,8 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		super.init();
 
 		// screen
-		Minecraft minecraft = Minecraft.getInstance();
-		int middle = width / 2;
+		final Minecraft minecraft = Minecraft.getInstance();
+		final int middle = width / 2;
 		int panels = getPanels();
 
 		int modelBgSize = Math.min(width - panels * 2 - 16, height - 96);
@@ -115,8 +117,11 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		// -- bottom -- // 
 
 		// version
-		MutableComponent versionText = FiguraText.of().append(" " + FiguraMod.VERSION.noBuildString()).withStyle(ChatFormatting.ITALIC);
-		int versionStatus = NetworkStuff.latestVersion != null ? NetworkStuff.latestVersion.compareTo(FiguraMod.VERSION) : 0;
+		final String buildString = FiguraMod.VERSION.noBuildString();
+		final String buildVersion = buildString.substring(0,buildString.lastIndexOf('-'));
+		final String dateBuilt = new Date(new Long(FiguraMod.VERSION.noBuildString().substring(buildVersion.length()+1))).toString();
+		MutableComponent versionText = FiguraText.of().append(" " + buildVersion + ", Built on " + dateBuilt).withStyle(ChatFormatting.ITALIC);
+		final int versionStatus = NetworkStuff.latestVersion != null ? NetworkStuff.latestVersion.compareTo(FiguraMod.VERSION) : 0;
 		boolean oldVersion = versionStatus > 0;
 		if (oldVersion) {
 			versionText

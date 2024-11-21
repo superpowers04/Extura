@@ -33,7 +33,7 @@ public class RefilledNumber {
 
     // update the current value
     public void tick() {
-        current = Math.min(current + add, Math.ceil(max));
+    	current = Math.min(current + add, Math.ceil(max));
     }
 
     // checks if the current value can be consumed and then consumes it if it can
