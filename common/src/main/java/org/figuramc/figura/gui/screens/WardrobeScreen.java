@@ -80,10 +80,11 @@ public class WardrobeScreen extends AbstractPanelScreen {
 
 		int buttX = entity.getX() + entity.getWidth() / 2;
 		int buttY = entity.getY() + entity.getHeight() + 4;
-
+		boolean fsbOnly = FSB.instance().connected() && !NetworkStuff.isConnected();
 		// upload
-		addRenderableWidget(upload = new Button(buttX - 48, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/upload.png"), 72, 24, FiguraText.of("gui.wardrobe.upload.tooltip"), button -> {
-			if (FSB.instance().connected()) showUploadContext();
+		addRenderableWidget(upload = new Button(buttX - 48, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier(fsbOnly ? "textures/gui/upload_fsb.png" : "textures/gui/upload.png"), 72, 24, FiguraText.of(fsbOnly ? "gui.wardrobe.upload_fsb.tooltip" : "gui.wardrobe.upload.tooltip"), button -> {
+			if(fsbOnly) uploadAvatar(Destination.FSB);
+			else if (FSB.instance().connected()) showUploadContext();
 			else uploadAvatar(Destination.FSB_OR_BACKEND);
 		}));
 		upload.setActive(false);
@@ -101,8 +102,9 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		}));
 
 		// delete
-		addRenderableWidget(delete = new Button(buttX + 24, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/delete.png"), 72, 24, FiguraText.of("gui.wardrobe.delete.tooltip"), button -> {
-			if (FSB.instance().connected()) showDeleteContext();
+		addRenderableWidget(delete = new Button(buttX + 24, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier(fsbOnly ? "textures/gui/delete_fsb.png" : "textures/gui/delete.png"), 72, 24, FiguraText.of(fsbOnly ? "gui.wardrobe.delete_fsb.tooltip" : "gui.wardrobe.delete.tooltip"), button -> {
+			if(fsbOnly) deleteAvatar(Destination.FSB);
+			else if (FSB.instance().connected()) showDeleteContext();
 			else deleteAvatar(Destination.FSB_OR_BACKEND);
 		}));
 		delete.setActive(false);
@@ -245,11 +247,6 @@ public class WardrobeScreen extends AbstractPanelScreen {
 
 	private void generateUploadContext() {
 		uploadContext = new ContextMenu(upload);
-		if(NetworkStuff.isConnected()){
-			uploadContext.addAction(FiguraText.of("gui.wardrobe.upload_backend"), FiguraText.of("gui.wardrobe.upload_backend.tooltip"), button -> {
-				uploadAvatar(Destination.BACKEND);
-			});
-		}
 
 		uploadContext.addAction(FiguraText.of("gui.wardrobe.upload_fsb"), FiguraText.of("gui.wardrobe.upload_fsb.tooltip"), button -> {
 			uploadAvatar(Destination.FSB);
@@ -259,16 +256,14 @@ public class WardrobeScreen extends AbstractPanelScreen {
 			uploadContext.addAction(FiguraText.of("gui.wardrobe.upload_both"), FiguraText.of("gui.wardrobe.upload_both.tooltip"), button -> {
 				uploadAvatar(Destination.BOTH);
 			});
+			uploadContext.addAction(FiguraText.of("gui.wardrobe.upload_backend"), FiguraText.of("gui.wardrobe.upload_backend.tooltip"), button -> {
+				uploadAvatar(Destination.BACKEND);
+			});
 		}
 	}
 
 	private void generateDeleteContext() {
 		deleteContext = new ContextMenu(delete);
-		if(NetworkStuff.isConnected()){
-			deleteContext.addAction(FiguraText.of("gui.wardrobe.delete_backend"), FiguraText.of("gui.wardrobe.delete_backend.tooltip"), button -> {
-				deleteAvatar(Destination.BACKEND);
-			});
-		}
 
 		deleteContext.addAction(FiguraText.of("gui.wardrobe.delete_fsb"), FiguraText.of("gui.wardrobe.delete_fsb.tooltip"), button -> {
 			deleteAvatar(Destination.FSB);
@@ -277,6 +272,9 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		if(NetworkStuff.isConnected()){
 			deleteContext.addAction(FiguraText.of("gui.wardrobe.delete_both"), FiguraText.of("gui.wardrobe.delete_both.tooltip"), button -> {
 				deleteAvatar(Destination.BOTH);
+			});
+			deleteContext.addAction(FiguraText.of("gui.wardrobe.delete_backend"), FiguraText.of("gui.wardrobe.delete_backend.tooltip"), button -> {
+				deleteAvatar(Destination.BACKEND);
 			});
 		}
 	}

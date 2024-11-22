@@ -25,8 +25,7 @@
 
 	"figura.docs.world.linetraceBlock": "(Extura) Returns the block, side, and pos of a linetrace",
 	"figura.docs.world.linetraceEntity": "(Extura) Returns the entity and pos of a linetrace",
-	"figura.docs.events.upload": "The UPLOAD event runs before your avatar is uploaded(Note it's run 3 times)\nArgument 1 is where it's currently uploading to as a string. \"BOTH\", \"FSB\" second then \"BACKEND\"\nArgument 2 is true if uploading to backend\nArgument 2 is true if uploading to fsb\nReturn true to cancel uploading to whatever is currently being uploaded to",
-
+	
 	"figura.config.vanilla_cloud": "(Extura) Use Vanilla Figura Backend",
 	"figura.config.vanilla_cloud.tooltip": "Forces the backend to use %s",
 	"figura.config.extura": "Extura - Advanced",

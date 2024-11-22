@@ -387,7 +387,7 @@ public abstract class FSB {
         private void close(StatusCode code) {
             switch (code) {
                 case FINISHED, ALREADY_EXISTS -> {
-                    FiguraToast.sendToast(FiguraText.of("backend.upload_success"));
+                    FiguraToast.sendToast(FiguraText.of("backend.upload_success_fsb"));
                     parent.equipAvatar(List.of(Pair.of(avatarId, Utils.getHash(data))));
 
                     AvatarManager.localUploaded = true;

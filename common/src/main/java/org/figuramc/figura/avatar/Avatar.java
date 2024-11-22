@@ -360,8 +360,7 @@ public class Avatar {
         if (args == null)
             return false;
         int l = args.narg();
-        int i = 0;
-        while (i++ <= l) {
+        for (int i = 1; i <= l; i++) {
             if (args.arg(i).isboolean() && args.arg(i).checkboolean())
                 return true;
         }
