@@ -90,6 +90,7 @@
 	"figura.docs.client.is_backend_connected": "(Extura) Returns true if using backend is connected. Will NOT be effected by FSB",
     "figura.docs.client.get_current_backend": "(Extura) Returns the current IP being used for the backend, the ip to the server if using FSB or an empty string if not connected at all.\n* if true, ignores FSB",
     "figura.docs.client.is_integrated_server": "(Extura) Returns if the client is on it's integrated server",
+    "figura.docs.client.get_bossbars": "(Extura) Returns a table of bossbars.\nIndexed by the bar's UUID, and contains the bossbar's name (JSON formatted), (lerped) progress, color, style, and whether the bar causes fog, darkens the screen, and causes music",
     "figura.docs.client.first_person_model_enabled": "(Extura) Gets whether First Person Model is currently enabled",
     "figura.docs.client.first_person_model_is_rendering_player": "(Extura) Gets whether First Person Model is currently rendering - only useful in a RENDER event",
     "figura.docs.client.regex_find": "(Extura) Checks a string against a (Java flavor) Regular Expression and returns true if any matches are found",
