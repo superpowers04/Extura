@@ -404,24 +404,22 @@ public class NetworkStuff {
 
 		try {
 
+			if(avatar.uploadEvent("BOTH",destination.allowBackend(),destination.allowFSB())) return;
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			NbtIo.writeCompressed(avatar.nbt, baos);
-			// var meta = avatar.nbt.getCompound("metadata");
-			// meta.putBoolean("is_fsb",destination.allowFSB());
-			// meta.putBoolean("is_backend",destination.allowFSB());
 			avatar.uploadedTo = Destination.fromBool(destination.allowBackend(),destination.allowFSB());
-			if (destination.allowFSB()) {
+			if (destination.allowFSB() && !avatar.uploadEvent("FSB",destination.allowBackend(),destination.allowFSB())) {
 
 				fsb().uploadAvatar(id, baos.toByteArray());
 			}
 
-			if (destination.allowBackend()) {
+			if (destination.allowBackend() && !avatar.uploadEvent("BACKEND",destination.allowBackend(),destination.allowFSB())) {
 				queueString(Util.NIL_UUID, api -> api.uploadAvatar(id, baos.toByteArray()), (code, data) -> {
 					responseDebug("uploadAvatar", code, data);
 
 					if (code == 200) {
 						//TODO - profile screen
-						if (destination.allowFSB()) fsb().equipAvatar(List.of(Pair.of(id, getHash(baos.toByteArray()))));
+						if (fsb().connected()) fsb().equipAvatar(List.of(Pair.of(id, getHash(baos.toByteArray()))));
 						else equipAvatar(List.of(Pair.of(avatar.owner, id)));
 
 
@@ -482,7 +480,6 @@ public class NetworkStuff {
 			obj.addProperty("id", avatar.getSecond());
 			json.add(obj);
 		}
-
 		queueString(Util.NIL_UUID, api -> api.setEquipped(GSON.toJson(json)), (code, data) -> {
 			responseDebug("equipAvatar", code, data);
 			if (code != 200 && Configs.CONNECTION_TOASTS.value)
@@ -666,7 +663,7 @@ public class NetworkStuff {
 	}
 
 	public static boolean canUpload() {
-		return connectedToAnyBackend() && uploadRate.check();
+		return fsb().connected() || isConnected() && uploadRate.check();
 	}
 
 	public static int getSizeLimit() {

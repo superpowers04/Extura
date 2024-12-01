@@ -419,9 +419,9 @@ public class Configs {
 				this.name = this.name.copy();
 				this.tooltip = FiguraText.of("config.expose_http.tooltip");
 			}};
-	public static final ConfigType.BoolConfig ANNUAL_CACHE_DELETION = new ConfigType.BoolConfig("annual_cache_deletion", EXTURA, true) {{
+	public static final ConfigType.BoolConfig USE_CACHE = new ConfigType.BoolConfig("use_cache", EXTURA, true) {{
 				this.name = this.name.copy();
-				this.tooltip = FiguraText.of("config.annual_cache_deletion.tooltip");
+				this.tooltip = FiguraText.of("config.use_cache.tooltip");
 			}};
 	public static final ConfigType.BoolConfig HELPER_ERRORS = new ConfigType.BoolConfig("helper_errors", EXTURA, true) {{
 				this.name = this.name.copy();

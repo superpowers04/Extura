@@ -228,6 +228,7 @@ public abstract class FSB {
     }
 
     void applyUserData(UserData user, S2CUserdataPacket packet) {
+    	user.fromFSB(true);
         boolean isHost = FiguraMod.isLocal(user.id);
         ArrayList<Pair<String, Pair<String, UUID>>> list = new ArrayList<>();
         org.figuramc.figura.server.utils.Pair<String, EHashPair> avatar = packet.avatar();
@@ -239,9 +240,8 @@ public abstract class FSB {
         }
         user.loadData(list, new Pair<>(packet.prideBadges(), new BitSet()));
 		if(list.size() == 0 && Configs.DEFAULT_TO_BACKEND.value){
+			user.fromFSB(false);
 			NetworkStuff.getUserFromBackend(user);
-		}else{
-			user.fromFSB(true);
 		}
     }
 
@@ -386,7 +386,11 @@ public abstract class FSB {
 
         private void close(StatusCode code) {
             switch (code) {
-                case FINISHED, ALREADY_EXISTS -> {
+                case ALREADY_EXISTS -> {
+                    FiguraToast.sendToast(FiguraText.of("backend.already_exists"));
+                    parent.equipAvatar(List.of(Pair.of(avatarId, Utils.getHash(data))));
+                    AvatarManager.localUploaded = true;
+                }case FINISHED -> {
                     FiguraToast.sendToast(FiguraText.of("backend.upload_success_fsb"));
                     parent.equipAvatar(List.of(Pair.of(avatarId, Utils.getHash(data))));
 

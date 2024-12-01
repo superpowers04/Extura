@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 public class CacheAvatarLoader {
 
     public static void init() {
-        if(!Configs.ANNUAL_CACHE_DELETION.value) return;
         LocalAvatarLoader.async(() -> {
             Path file = getAvatarCacheDirectory();
             if (!(Files.exists(file) && Files.isDirectory(file)))
@@ -43,6 +42,7 @@ public class CacheAvatarLoader {
     }
 
     public static boolean checkAndLoad(String hash, UserData target) {
+    	if(target.fromFSB || !Configs.use_cache.value) return false;
         Path p = getAvatarCacheDirectory();
         p = p.resolve(hash + ".nbt");
 
@@ -55,6 +55,7 @@ public class CacheAvatarLoader {
     }
 
     public static void load(String hash, UserData target) {
+    	if(target.fromFSB || !Configs.use_cache.value) return;
         LocalAvatarLoader.async(() -> {
             Path path = getAvatarCacheDirectory().resolve(hash + ".nbt");
             try {
@@ -67,6 +68,7 @@ public class CacheAvatarLoader {
     }
 
     public static void save(String hash, CompoundTag nbt) {
+
         LocalAvatarLoader.async(() -> {
             Path file = getAvatarCacheDirectory().resolve(hash + ".nbt");
             try {

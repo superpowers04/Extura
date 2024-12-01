@@ -107,6 +107,8 @@
     "figura.docs.player.can_be_seen_as_enemy": "(Extura) ???",
     "figura.permissions.value.printing": "(Extura) Allow Printing",
     "figura.permissions.value.printing.tooltip": "Allows this avatar to print to chat if Log Others is enabled",
+	"figura.config.use_cache": "Use cache",
+	"figura.config.use_cache.tooltip": "Prevents Extura from caching avatars.\n* This enforces you'll always have the latest avatar of someone.\n* This might cause issues since Extura is not entirely designed to be used without caching",
 
 	"figura.docs.extura": "The Extura API",
 	"figura.docs.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
@@ -133,9 +135,13 @@
     "figura.backend.upload_error_fsb": "Error on uploading Avatar to server",
     "figura.backend.delete_error_fsb": "Error on deleting Avatar from server",
     "figura.backend.delete_success_fsb": "Avatar deleted from server!",
-    "figura.gui.wardrobe.upload_both.tooltip": "Upload avatar to both FSB and Cloud\n* Only FSB users will see pings, both FSB and Cloud users will see your uploaded avatar",
+    "figura.gui.wardrobe.upload_both.tooltip": "Upload avatar to both FSB and Cloud\n* Both FSB and Cloud users will see your uploaded avatar and pings",
     "figura.gui.wardrobe.upload_fsb.tooltip": "Upload avatar to FSB\n* Non-FSB users will see your Cloud avatar\n* FSB users will see your uploaded avatar",
+    "figura.gui.wardrobe.delete_fsb.tooltip": "Delete avatar from FSB",
+    "figura.gui.wardrobe.delete_fsb": "Delete avatar from FSB",
     "figura.gui.wardrobe.upload_backend.tooltip": "Upload avatar to Cloud\n* Non-FSB users will see uploaded avatar",
+	"figura.docs.events.upload": "The UPLOAD event runs before your avatar is uploaded(Note it's run 3 times).\nArgument 1 is where it's currently uploading to as a string. \"BOTH\", \"FSB\" second then \"BACKEND\"\nArgument 2 is true if uploading to backend\nArgument 2 is true if uploading to fsb\nReturn true to cancel uploading to whatever is currently being uploaded to.\nNo NBT edits after the 'BOTH' event call will be uploaded",
+
     "figura.gui.wardrobe.upload_both": "Upload avatar to both FSB and Cloud",
     "figura.gui.wardrobe.upload_fsb": "Upload avatar to FSB",
     "figura.gui.wardrobe.upload_backend": "Upload avatar to Cloud",
