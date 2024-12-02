@@ -383,7 +383,7 @@ public class FiguraLuaPrinter {
             case LuaValue.TTABLE -> ColorUtils.Colors.AWESOME_BLUE.style;
             case LuaValue.TNIL -> ColorUtils.Colors.LUA_ERROR.style;
             case LuaValue.TBOOLEAN -> ColorUtils.Colors.LUA_PING.style;
-            case LuaValue.TNUMBER -> ColorUtils.Colors.BLUE.style;
+            case LuaValue.TNUMBER -> ColorUtils.Colors.FIGURA_BLUE.style;
             case LuaValue.TSTRING -> Style.EMPTY.withColor(ChatFormatting.WHITE);
             case LuaValue.TUSERDATA -> {
                 final var data = value.checkuserdata();

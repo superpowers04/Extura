@@ -371,7 +371,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 	protected void renderPivot(FiguraModelPart part, PartCustomization customization) {
 		boolean group = part.customization.partType == PartCustomization.PartType.GROUP;
-		FiguraVec3 color = group ? ColorUtils.Colors.BLUE.vec : ColorUtils.Colors.AWESOME_BLUE.vec;
+		FiguraVec3 color = group ? ColorUtils.Colors.FIGURA_BLUE.vec : ColorUtils.Colors.AWESOME_BLUE.vec;
 		double boxSize = group ? 1 / 16d : 1 / 32d;
 		boxSize /= Math.max(Math.cbrt(part.savedPartToWorldMat.det()), 0.02);
 

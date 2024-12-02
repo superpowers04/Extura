@@ -357,7 +357,7 @@ public class Avatar {
 		if (args == null)
 			return false;
 		int l = args.narg();
-		int i = 0
+		int i = 0;
 		while (i++ <= l) {
 			if (args.arg(i).isboolean() && args.arg(i).checkboolean())
 				return true;
