@@ -64,8 +64,9 @@ public class LuaEvent {
         for (LuaFunction function : functions) {
             FiguraMod.pushProfiler(function.name());
             Varargs val = function.invoke(args);
-            for (int i = 0; i < val.narg(); i++)
-                result.insert(0, val.arg(i + 1));
+            int l = val.narg();
+            int i = 0;
+            while (i++ < l) result.insert(0, val.arg(i));
             FiguraMod.popProfiler();
         }
         return result.unpack();

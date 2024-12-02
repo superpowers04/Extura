@@ -93,6 +93,7 @@
     "render.renderers.SignRendererMixin",
     "render.renderers.SkullBlockRendererMixin",
     "render.renderers.TridentRendererMixin",
+    "render.PoseStackAccessor",
     "sound.ChannelHandleMixin",
     "sound.SoundEngineMixin",
     "sound.SoundManagerAccessor",

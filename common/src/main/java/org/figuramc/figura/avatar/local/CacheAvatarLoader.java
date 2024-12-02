@@ -42,9 +42,8 @@ public class CacheAvatarLoader {
     }
 
     public static boolean checkAndLoad(String hash, UserData target) {
-    	if(target.fromFSB || !Configs.use_cache.value) return false;
-        Path p = getAvatarCacheDirectory();
-        p = p.resolve(hash + ".nbt");
+    	if(target.fromFSB || !Configs.USE_CACHE.value) return false;
+        Path p = getAvatarCacheDirectory().resolve(hash + ".nbt");
 
         if (Files.exists(p)) {
             load(hash, target);
@@ -55,7 +54,7 @@ public class CacheAvatarLoader {
     }
 
     public static void load(String hash, UserData target) {
-    	if(target.fromFSB || !Configs.use_cache.value) return;
+    	if(target.fromFSB || !Configs.USE_CACHE.value) return;
         LocalAvatarLoader.async(() -> {
             Path path = getAvatarCacheDirectory().resolve(hash + ".nbt");
             try {
