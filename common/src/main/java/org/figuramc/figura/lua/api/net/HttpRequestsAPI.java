@@ -283,11 +283,11 @@ public class HttpRequestsAPI {
             }
             parent.parent.log(NetworkingAPI.LogSource.HTTP, Component.literal("Sent %s request to %s".formatted(method, uri)));
             HttpRequest req = this.getRequest();
-            FiguraFuture<HttpResponse> future = new FiguraFuture<>();
+            FiguraFuture<HttpResponse> future = new FiguraFuture<>(parent.parent.owner);
             var asyncResponse = parent.httpClient.sendAsync(req, java.net.http.HttpResponse.BodyHandlers.ofInputStream());
             asyncResponse.whenCompleteAsync((response, t) -> {
                 if (t != null) future.error(t);
-                else future.complete(new HttpResponse(new FiguraInputStream(response.body()),
+                else future.complete(new HttpResponse(new FiguraInputStream(response.body(), parent.parent.owner),
                         response.statusCode(), response.headers().map()));
             });
             return future;

@@ -309,12 +309,16 @@ public class Avatar {
 
 			FiguraLuaPrinter.sendPingMessage(this, name, data.length, args);
 			luaRuntime.run(function.func, tick, (Object[]) args);
-		});
+        });
+    }
+
+	public void submit(Runnable r) {
+		events.offer(r);
 	}
 
-	public LuaValue loadScript(String name, String chunk) {
-		return scriptError || luaRuntime == null || !loaded ? null : luaRuntime.load(name, chunk);
-	}
+    public LuaValue loadScript(String name, String chunk) {
+        return scriptError || luaRuntime == null || !loaded ? null : luaRuntime.load(name, chunk);
+    }
 
 	private void flushQueuedEvents() {
 		// run all queued events
@@ -329,6 +333,7 @@ public class Avatar {
 		}
 	}
 
+    @Nullable
 	public Varargs run(Object toRun, Instructions limit, Object... args) {
 		// stuff that was not run yet
 		flushQueuedEvents();
@@ -481,9 +486,6 @@ public class Avatar {
 		if (loaded) run("CHAR_TYPED", tick, chars, modifiers, codePoint);
 	}
 
-//    public void damageEvent(EntityAPI<?> entity, String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect) {
-//        if (loaded) run("DAMAGE", tick, entity, sourceType, sourceCause, sourceDirect);
-//    }
 
 	public void damageEvent(String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect, FiguraVec3 sourcePosition) {
 		if (loaded) run("DAMAGE", tick, sourceType, sourceCause, sourceDirect, sourcePosition);
@@ -963,15 +965,16 @@ public class Avatar {
 		events.clear();
 	}
 
-	public void clearSounds() {
-		SoundAPI.getSoundEngine().figura$stopSound(owner, null);
-		for (SoundBuffer value : customSounds.values())
-			value.releaseAlBuffer();
-	}
+    public void clearSounds() {
+        SoundAPI.getSoundEngine().figura$stopSound(owner, null);
+        if (SoundAPI.getSoundEngine().figura$isEngineActive()) {
+            for (SoundBuffer value : customSounds.values())
+                value.releaseAlBuffer();
+        }
+    }
 
-
-	public void closeBuffers() {
-		for (FiguraBuffer buffer :
+    public void closeBuffers() {
+        for (FiguraBuffer buffer :
 				openBuffers) {
 			if (!buffer.isClosed()) {
 				try {
@@ -1107,16 +1110,20 @@ public class Avatar {
 				FiguraMod.LOGGER.warn("Failed to load custom sound \"" + key + "\"", e);
 			}
 		}
-	}
+    }
 
-	public void loadSound(String name, byte[] data) throws Exception {
-		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data); OggAudioStream oggAudioStream = new OggAudioStream(inputStream)) {
-			SoundBuffer sound = new SoundBuffer(oggAudioStream.readAll(), oggAudioStream.getFormat());
-			this.customSounds.put(name, sound);
-		}
-	}
+    public void loadSound(String name, byte[] data) throws Exception {
+        if (SoundAPI.getSoundEngine().figura$isEngineActive()) {
+            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data); OggAudioStream oggAudioStream = new OggAudioStream(inputStream)) {
+                SoundBuffer sound = new SoundBuffer(oggAudioStream.readAll(), oggAudioStream.getFormat());
+                this.customSounds.put(name, sound);
+            }
+        } else {
+            FiguraMod.LOGGER.error("Sound is not supported or enabled on this system but a custom sound tried to load anyway, scripts may break.");
+        }
+    }
 
-	public FiguraTexture registerTexture(String name, NativeImage image, boolean ignoreSize) {
+    public FiguraTexture registerTexture(String name, NativeImage image, boolean ignoreSize) {
 		int max = permissions.get(Permissions.TEXTURE_SIZE);
 		if (!ignoreSize && (image.getWidth() > max || image.getHeight() > max)) {
 			noPermissions.add(Permissions.TEXTURE_SIZE);

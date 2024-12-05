@@ -236,6 +236,36 @@ public class NetworkingAPI {
         }
     }
 
+    @LuaWhitelist
+    @LuaMethodDoc("net.new_future")
+    public Varargs newFuture(LuaFunction k) {
+        final var fut = new FiguraFuture<LuaValue>(owner);
+        final var mgr = owner.luaRuntime.typeManager;
+        final var ret = mgr.javaToLua(fut).arg1();
+        final var onc = new OneArgFunction() {
+            @Override
+            public LuaValue call(LuaValue val) {
+                fut.complete(val);
+                return ret;
+            }
+        };
+        final var one = new OneArgFunction() {
+            @Override
+            public LuaValue call(LuaValue err) {
+                fut.error(new LuaError(err));
+                return ret;
+            }
+        };
+        if (k != null) {
+            try {
+                k.call(onc, one);
+            } catch (Throwable t) {
+                fut.error(t);
+            }
+        }
+        return LuaValue.varargsOf(new LuaValue[] {ret, onc, one});
+    }
+
     @Override
     public String toString() {
         return "NetworkingAPI";
