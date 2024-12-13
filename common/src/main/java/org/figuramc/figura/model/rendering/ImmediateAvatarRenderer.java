@@ -285,7 +285,6 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
                 int block = l.getBrightness(LightLayer.BLOCK, pos.asBlockPos());
                 int sky = l.getBrightness(LightLayer.SKY, pos.asBlockPos());
                 customizationStack.peek().light = LightTexture.pack(block, sky);
-                pivotOffsetter.light = customizationStack.peek().light;
             }
 
             if (custom.alpha != null)
