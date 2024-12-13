@@ -118,7 +118,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 		int[] remainingComplexity = new int[] {prev};
 
 		// render all model parts
-		if (root.customization.visible == null || root.customization.visible) {
+		if (root.customization.visible) {
 			if (currentFilterScheme.parentType.isSeparate) {
 				List<FiguraModelPart> parts = separatedParts.get(currentFilterScheme.parentType);
 				if (parts != null) {
@@ -205,7 +205,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 		// test the current filter scheme
 		FiguraMod.pushProfiler("predicate");
 		Boolean thisPassedPredicate = currentFilterScheme.test(part.parentType, prevPredicate);
-		if (thisPassedPredicate == null || (custom.visible != null && !custom.visible)) {
+		if (thisPassedPredicate == null || !custom.visible) {
 			if (part.parentType.isRenderLayer)
 				part.savedCustomization = customizationStack.peek();
 			FiguraMod.popProfiler(2);

@@ -850,6 +850,12 @@ public class HostAPI {
 		}
 	}
 	@LuaWhitelist
+	@LuaMethodDoc("host.set_physics")
+	public void setPhysics(Boolean physics) {
+		if(!canExturaCheat()) return;
+		this.minecraft.player.noPhysics = !physics;
+	}
+	@LuaWhitelist
 	@LuaMethodDoc(
 			overloads = {
 					@LuaMethodOverload(

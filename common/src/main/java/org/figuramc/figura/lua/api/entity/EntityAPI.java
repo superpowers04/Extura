@@ -462,6 +462,15 @@ public class EntityAPI<T extends Entity> {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc("entity.get_supporting_block_pos" )
+    public BlockPos getSupportingBlockPos() {
+        checkEntity();
+        try{
+			return entity.mainSupportingBlockPos.get();
+        }catch(Exception ignored){return null;}
+    }
+
+    @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
                     @LuaMethodOverload,

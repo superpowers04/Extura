@@ -21,6 +21,16 @@ public class FiguraInputStream extends InputStream {
     private final boolean asyncOnly;
     private final Avatar avatar;
 
+    public FiguraInputStream(InputStream sourceStream) {
+        this.sourceStream = sourceStream;
+        this.asyncOnly = false;
+        this.avatar = null;
+    }
+    public FiguraInputStream(InputStream sourceStream, boolean asyncOnly) {
+        this.sourceStream = sourceStream;
+        this.asyncOnly = asyncOnly;
+        this.avatar = null;
+    }
     public FiguraInputStream(InputStream sourceStream, Avatar avatar) {
         this(sourceStream, false, avatar);
     }
@@ -48,7 +58,7 @@ public class FiguraInputStream extends InputStream {
     public FiguraFuture<LuaString> readAsync(Integer limit) {
         final int finalLimit = limit != null ? limit : available();
         // Future handle that will be returned
-        FiguraFuture<LuaString> future = new FiguraFuture<>(avatar);
+        FiguraFuture<LuaString> future = avatar == null ? new FiguraFuture<>() : new FiguraFuture<>(avatar);
         // Calling an async read that will be put in a future results
         CompletableFuture.supplyAsync(() -> {
             try {
