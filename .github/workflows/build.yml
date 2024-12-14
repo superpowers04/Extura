@@ -14,10 +14,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
@@ -27,13 +27,13 @@ jobs:
         run: ./gradlew build
 
       - name: Upload Fabric artifacts to GitHub
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Fabric-Artifacts
           path: fabric/build/libs/
 
       - name: Upload Forge artifacts to GitHub
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Forge-Artifacts
           path: forge/build/libs/
