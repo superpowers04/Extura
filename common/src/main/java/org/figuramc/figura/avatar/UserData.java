@@ -39,6 +39,8 @@ public class UserData {
         Avatar avatar = new Avatar(id);
         this.avatars.add(avatar);
         avatar.load(nbt);
+        avatar.uploadedTo.setFSB(fromFSB);
+        avatar.uploadedTo.setBackend(fromBackend);
         FiguraMod.debug("Loaded avatar for " + id);
     }
 

@@ -222,7 +222,7 @@ public abstract class FSB {
 
     public void handlePing(S2CPingPacket packet) {
         Avatar avatar = AvatarManager.getLoadedAvatar(packet.sender());
-        if (avatar == null)
+        if (avatar == null || !avatar.uploadedTo.allowFSB())
             return;
         avatar.runPing(packet.id(), packet.data());
     }

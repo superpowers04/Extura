@@ -504,6 +504,7 @@ public class FiguraLuaRuntime {
 		owner.clearParticles();
 		owner.clearSounds();
 		owner.closeBuffers();
+        owner.closeStreams();
 	}
 
 	public static LuaError parseError(Throwable e) {

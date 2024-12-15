@@ -39,6 +39,17 @@ public class FiguraInputStream extends InputStream {
         this.sourceStream = sourceStream;
         this.asyncOnly = asyncOnly;
         this.avatar = avatar;
+        avatar.openInputStreams.add(this);
+    }
+    public FiguraInputStream(Avatar avatar, InputStream sourceStream) {
+        this(avatar, sourceStream, false);
+    }
+
+    public FiguraInputStream(Avatar avatar, InputStream sourceStream, boolean asyncOnly) {
+        this.sourceStream = sourceStream;
+        this.asyncOnly = asyncOnly;
+        this.avatar = avatar;
+        avatar.openInputStreams.add(this);
     }
 
     @Override
@@ -107,6 +118,8 @@ public class FiguraInputStream extends InputStream {
     @LuaMethodDoc("input_stream.close")
     public void close() throws IOException {
         sourceStream.close();
+        if(avatar != null)
+        	avatar.openInputStreams.remove(this);
     }
 
     @Override

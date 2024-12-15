@@ -38,6 +38,8 @@ import org.figuramc.figura.lua.FiguraLuaPrinter;
 import org.figuramc.figura.lua.FiguraLuaRuntime;
 import org.figuramc.figura.lua.api.TextureAPI;
 import org.figuramc.figura.lua.api.data.FiguraBuffer;
+import org.figuramc.figura.lua.api.data.FiguraInputStream;
+import org.figuramc.figura.lua.api.data.FiguraOutputStream;
 import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.particle.ParticleAPI;
 import org.figuramc.figura.lua.api.ping.PingArg;
@@ -73,6 +75,7 @@ import org.luaj.vm2.Varargs;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -93,7 +96,7 @@ public class Avatar {
 	public final EntityType<?> entityType;
 	public CompoundTag nbt;
 	public boolean loaded = true;
-	public int loadedFrom = 0;
+ 
 	public final boolean isHost;
 	public Destination forcePings = Destination.NONE;
 
@@ -113,6 +116,8 @@ public class Avatar {
 	// Runtime data
 	private final Queue<Runnable> events = new ConcurrentLinkedQueue<>();
 	public final ArrayList<FiguraBuffer> openBuffers = new ArrayList<>();
+    public final ArrayList<FiguraInputStream> openInputStreams = new ArrayList<>();
+    public final ArrayList<FiguraOutputStream> openOutputStreams = new ArrayList<>();
 	public AvatarRenderer renderer;
 	public FiguraLuaRuntime luaRuntime;
 	public EntityRenderMode renderMode = EntityRenderMode.OTHER;
@@ -204,12 +209,11 @@ public class Avatar {
 					}
 				}
 				for (String key : metadata.getAllKeys()) {
-					if (key.contains("badge_color_")) {
-						badgeToColor.put(key.replace("badge_color_", ""), metadata.getString(key));
-					}
+					if (!key.contains("badge_color_")) continue;
+					badgeToColor.put(key.substring(12), metadata.getString(key));
 				}
 				uploadedTo.setFSB(metadata.contains("is_fsb") && metadata.getBoolean("is_fsb") || metadata.contains("isFSB") && metadata.getBoolean("isFSB"));
-				uploadedTo.setFSB(metadata.contains("is_backend") && metadata.getBoolean("is_backend"));
+				uploadedTo.setBackend(metadata.contains("is_backend") && metadata.getBoolean("is_backend") || metadata.contains("isBackend") && metadata.getBoolean("isBackend"));
  
 				fileSize = getFileSize();
 				versionStatus = getVersionStatus();
@@ -961,9 +965,9 @@ public class Avatar {
 		clearParticles();
 		closeBuffers();
 
+        closeStreams();
 		events.clear();
 	}
-
     public void clearSounds() {
     	var SoundEngine = SoundAPI.getSoundEngine();
 	        SoundEngine.figura$stopSound(owner, null);
@@ -983,6 +987,26 @@ public class Avatar {
 		openBuffers.clear();
 	}
 
+
+    public void closeStreams() {
+        for (FiguraInputStream stream :
+                openInputStreams) {
+            try {
+                stream.close();
+            } catch (IOException ignored) {
+            }
+        }
+        openInputStreams.clear();
+
+        for (FiguraOutputStream stream :
+                openOutputStreams) {
+            try {
+                stream.close();
+            } catch (IOException ignored) {
+            }
+        }
+        openOutputStreams.clear();
+    }
 	public void clearParticles() {
 		ParticleAPI.getParticleEngine().figura$clearParticles(owner);
 	}

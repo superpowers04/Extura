@@ -7,6 +7,7 @@ import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaString;
+import org.figuramc.figura.avatar.Avatar;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -14,11 +15,17 @@ import java.io.OutputStream;
 @LuaWhitelist
 @LuaTypeDoc(name = "OutputStream", value = "output_stream")
 public class FiguraOutputStream extends OutputStream {
-
+    private final Avatar parent;
     private final OutputStream destinationStream;
 
     public FiguraOutputStream(OutputStream destinationStream) {
         this.destinationStream = destinationStream;
+        parent=null;
+    }
+    public FiguraOutputStream(Avatar parent, OutputStream destinationStream) {
+        this.destinationStream = destinationStream;
+        this.parent = parent;
+        parent.openOutputStreams.add(this);
     }
 
     @LuaWhitelist
@@ -50,6 +57,8 @@ public class FiguraOutputStream extends OutputStream {
     @LuaMethodDoc("output_stream.close")
     public void close() throws IOException {
         destinationStream.close();
+        if(parent != null)
+	        parent.openOutputStreams.remove(this);
     }
 
     @Override
