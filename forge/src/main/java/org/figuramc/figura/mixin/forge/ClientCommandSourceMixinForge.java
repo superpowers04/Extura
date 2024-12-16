@@ -10,7 +10,7 @@ import org.figuramc.figura.utils.FiguraClientCommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(CommandSourceStack.class)
-abstract class CommandSourceMixinForge implements FiguraClientCommandSource {
+abstract class ClientCommandSourceMixinForge implements FiguraClientCommandSource {
 
     @Override
     public void figura$sendFeedback(Component message) {
