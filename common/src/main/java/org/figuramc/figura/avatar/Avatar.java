@@ -983,7 +983,7 @@ public class Avatar {
 
     public void closeStreams() {
         for (FiguraInputStream stream :
-                openInputStreams) {
+                new ArrayList<>(openInputStreams)) {
             try {
                 stream.close();
             } catch (IOException ignored) {
@@ -992,7 +992,7 @@ public class Avatar {
         openInputStreams.clear();
 
         for (FiguraOutputStream stream :
-                openOutputStreams) {
+                new ArrayList<>(openOutputStreams)) {
             try {
                 stream.close();
             } catch (IOException ignored) {
