@@ -116,8 +116,8 @@ public class Avatar {
 	// Runtime data
 	private final Queue<Runnable> events = new ConcurrentLinkedQueue<>();
 	public final ArrayList<FiguraBuffer> openBuffers = new ArrayList<>();
-    public final ArrayList<FiguraInputStream> openInputStreams = new ArrayList<>();
-    public final ArrayList<FiguraOutputStream> openOutputStreams = new ArrayList<>();
+	public final ArrayList<FiguraInputStream> openInputStreams = new ArrayList<>();
+	public final ArrayList<FiguraOutputStream> openOutputStreams = new ArrayList<>();
 	public AvatarRenderer renderer;
 	public FiguraLuaRuntime luaRuntime;
 	public EntityRenderMode renderMode = EntityRenderMode.OTHER;
@@ -313,16 +313,16 @@ public class Avatar {
 
 			FiguraLuaPrinter.sendPingMessage(this, name, data.length, args);
 			luaRuntime.run(function.func, tick, (Object[]) args);
-        });
-    }
+		});
+	}
 
 	public void submit(Runnable r) {
 		events.offer(r);
 	}
 
-    public LuaValue loadScript(String name, String chunk) {
-        return scriptError || luaRuntime == null || !loaded ? null : luaRuntime.load(name, chunk);
-    }
+	public LuaValue loadScript(String name, String chunk) {
+		return scriptError || luaRuntime == null || !loaded ? null : luaRuntime.load(name, chunk);
+	}
 
 	private void flushQueuedEvents() {
 		// run all queued events
@@ -366,7 +366,7 @@ public class Avatar {
 			return false;
 		int l = args.narg();
 		int i = 0;
-		while (i++ <= l) {
+		while (++i <= l) {
 			if (args.arg(i).isboolean() && args.arg(i).checkboolean())
 				return true;
 		}
@@ -965,19 +965,19 @@ public class Avatar {
 		clearParticles();
 		closeBuffers();
 
-        closeStreams();
+		closeStreams();
+
 		events.clear();
 	}
-    public void clearSounds() {
-    	var SoundEngine = SoundAPI.getSoundEngine();
-	        SoundEngine.figura$stopSound(owner, null);
-            for (SoundBuffer value : customSounds.values())
-                value.releaseAlBuffer();
-    }
+	public void clearSounds() {
+		var SoundEngine = SoundAPI.getSoundEngine();
+			SoundEngine.figura$stopSound(owner, null);
+			for (SoundBuffer value : customSounds.values())
+				value.releaseAlBuffer();
+	}
 
-    public void closeBuffers() {
-        for (FiguraBuffer buffer :
-				openBuffers) {
+	public void closeBuffers() {
+		for (FiguraBuffer buffer : openBuffers) {
 			if (!buffer.isClosed()) {
 				try {
 					buffer.baseClose();
@@ -989,21 +989,17 @@ public class Avatar {
 
 
     public void closeStreams() {
-        for (FiguraInputStream stream :
-                openInputStreams) {
+        for (FiguraInputStream stream : openInputStreams) {
             try {
-                stream.close();
-            } catch (IOException ignored) {
-            }
+                stream.closeWithoutPop();
+            } catch (IOException ignored) {}
         }
         openInputStreams.clear();
 
-        for (FiguraOutputStream stream :
-                openOutputStreams) {
+        for (FiguraOutputStream stream : openOutputStreams) {
             try {
-                stream.close();
-            } catch (IOException ignored) {
-            }
+                stream.closeWithoutPop();
+            } catch (IOException ignored){}
         }
         openOutputStreams.clear();
     }
@@ -1132,16 +1128,16 @@ public class Avatar {
 				FiguraMod.LOGGER.warn("Failed to load custom sound \"" + key + "\"", e);
 			}
 		}
-    }
+	}
 
-    public void loadSound(String name, byte[] data) throws Exception {
-            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data); OggAudioStream oggAudioStream = new OggAudioStream(inputStream)) {
-                SoundBuffer sound = new SoundBuffer(oggAudioStream.readAll(), oggAudioStream.getFormat());
-                this.customSounds.put(name, sound);
-            }
-    }
+	public void loadSound(String name, byte[] data) throws Exception {
+			try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data); OggAudioStream oggAudioStream = new OggAudioStream(inputStream)) {
+				SoundBuffer sound = new SoundBuffer(oggAudioStream.readAll(), oggAudioStream.getFormat());
+				this.customSounds.put(name, sound);
+			}
+	}
 
-    public FiguraTexture registerTexture(String name, NativeImage image, boolean ignoreSize) {
+	public FiguraTexture registerTexture(String name, NativeImage image, boolean ignoreSize) {
 		int max = permissions.get(Permissions.TEXTURE_SIZE);
 		if (!ignoreSize && (image.getWidth() > max || image.getHeight() > max)) {
 			noPermissions.add(Permissions.TEXTURE_SIZE);

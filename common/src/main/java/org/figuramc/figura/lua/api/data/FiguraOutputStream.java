@@ -60,7 +60,9 @@ public class FiguraOutputStream extends OutputStream {
         if(parent != null)
 	        parent.openOutputStreams.remove(this);
     }
-
+    public void closeWithoutPop() throws IOException {
+        destinationStream.close();
+    }
     @Override
     public String toString() {
         return "OutputStream";

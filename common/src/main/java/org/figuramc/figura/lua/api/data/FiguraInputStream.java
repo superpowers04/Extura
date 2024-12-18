@@ -121,6 +121,9 @@ public class FiguraInputStream extends InputStream {
         if(avatar != null)
         	avatar.openInputStreams.remove(this);
     }
+    public void closeWithoutPop() throws IOException {
+        sourceStream.close();
+    }
 
     @Override
     @LuaWhitelist
