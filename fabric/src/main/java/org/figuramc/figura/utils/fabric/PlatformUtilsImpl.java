@@ -27,6 +27,9 @@ public class PlatformUtilsImpl {
         return FabricLoader.getInstance().isModLoaded(modId);
     }
 
+    public static String getModName(String modId) {
+        return FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getName();
+    }
     public static String getModVersion(String modId) {
         return FabricLoader.getInstance().getModContainer(modId).get().getMetadata().getVersion().getFriendlyString();
     }
