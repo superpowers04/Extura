@@ -671,32 +671,6 @@ public class WorldAPI {
         }
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = {
-                    @LuaMethodOverload(
-                            argumentTypes = {BlockStateAPI.class, FiguraVec3.class},
-                            argumentNames = {"block", "pos"}
-                    ),
-                    @LuaMethodOverload(
-                            argumentTypes = {BlockStateAPI.class, Double.class, Double.class, Double.class},
-                            argumentNames = {"block", "x", "y", "z"}
-                    )
-            },
-            value = "world.set_block"
-    )
-    public static Boolean setBlock(@LuaNotNil String string, Object x, Double y, Double z) {
-        BlockPos pos = LuaUtils.parseVec3("setBlock", x, y, z).asBlockPos();
-        try {
-            Level level = getCurrentWorld();
-            BlockState block = BlockStateArgument.block(CommandBuildContext.simple(level.registryAccess(), level.enabledFeatures())).parse(new StringReader(string)).getState();
-
-            level.setBlockAndUpdate(pos,block);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
     // @LuaWhitelist
     // @LuaMethodDoc(
     //         overloads = {

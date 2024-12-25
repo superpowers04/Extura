@@ -1,12 +1,18 @@
 package org.figuramc.figura.lua.api;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.brigadier.StringReader;
 import com.mojang.datafixers.util.Pair;
 import dev.tr7zw.firstperson.api.FirstPersonAPI;
 import net.irisshaders.iris.Iris;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.figuramc.figura.avatar.local.LocalAvatarFetcher;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -16,6 +22,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
+import org.figuramc.figura.lua.api.world.BlockStateAPI;
 import org.figuramc.figura.permissions.Permissions;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
@@ -1079,7 +1086,32 @@ public class HostAPI {
 		player.setDiscardFriction(hasForce != true);
 	}
 
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {
+					@LuaMethodOverload(
+							argumentTypes = {BlockStateAPI.class, FiguraVec3.class},
+							argumentNames = {"block", "pos"}
+					),
+					@LuaMethodOverload(
+							argumentTypes = {BlockStateAPI.class, Double.class, Double.class, Double.class},
+							argumentNames = {"block", "x", "y", "z"}
+					)
+			},
+			value = "host.set_block"
+	)
+	public Boolean setBlock(@LuaNotNil String string, Object x, Double y, Double z) {
+		BlockPos pos = LuaUtils.parseVec3("setBlock", x, y, z).asBlockPos();
+		try {
+			Level level = this.minecraft.level;
+			BlockState block = BlockStateArgument.block(CommandBuildContext.simple(level.registryAccess(), level.enabledFeatures())).parse(new StringReader(string)).getState();
 
+			level.setBlockAndUpdate(pos,block);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
 
 
 	@LuaWhitelist
