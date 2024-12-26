@@ -1,20 +1,18 @@
 package org.figuramc.figura.lua.api;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.datafixers.util.Pair;
 import dev.tr7zw.firstperson.api.FirstPersonAPI;
 import net.irisshaders.iris.Iris;
-import net.minecraft.client.GuiMessage;
-import net.minecraft.client.GuiMessageTag;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.*;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.figuramc.figura.avatar.local.LocalAvatarFetcher;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -23,6 +21,7 @@ import net.minecraft.client.player.Input;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
 import org.figuramc.figura.lua.api.world.BlockStateAPI;
+import org.figuramc.figura.mixin.input.KeyMappingAccessor;
 import org.figuramc.figura.permissions.Permissions;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
@@ -889,7 +888,6 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.drop_item")
 	public void dropItem(boolean dropAll) {
-		if (!canExturaCheat()) return;
 		LocalPlayer player = this.minecraft.player;
 		player.drop(dropAll == true);
 	}
@@ -1110,6 +1108,26 @@ public class HostAPI {
 			return false;
 		}
 	}
+
+	@LuaWhitelist
+	@LuaMethodDoc("host.get_key_mappings")
+	public Set<String> getBinds() {
+		Map<String, KeyMapping> mappings = KeyMappingAccessor.getAll();
+		return mappings.keySet();
+	}
+
+	// borrowed this from vivecraft - jess
+
+	@LuaWhitelist
+	@LuaMethodDoc("host.set_key_mapping_pressed")
+	public void setBindPressed(@LuaNotNil String id, boolean state) {
+		KeyMapping key = KeyMappingAccessor.getAll().get(id);
+		if (key == null)
+			throw new LuaError("Failed to find key: \"" + id + "\"");
+		key.setDown(state);
+		key.clickCount += 1;
+	}
+
 
 
 	@LuaWhitelist
