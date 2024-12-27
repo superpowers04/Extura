@@ -1099,6 +1099,7 @@ public class HostAPI {
 			value = "host.set_block"
 	)
 	public Boolean setBlock(@LuaNotNil String string, Object x, Double y, Double z) {
+		if(!isHost) return false;
 		BlockPos pos = LuaUtils.parseVec3("setBlock", x, y, z).asBlockPos();
 		try {
 			Level level = this.minecraft.level;
