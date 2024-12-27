@@ -795,8 +795,7 @@ public class HostAPI {
 	public int getAir() {
 		if(!this.isHost) return 0;
 		LocalPlayer player = this.minecraft.player;
-		if (player != null) return player.getAirSupply();
-		return 0;
+		return (player == null) ? 0 : player.getAirSupply();
 	}
 
 	@LuaWhitelist
@@ -888,6 +887,7 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.drop_item")
 	public void dropItem(boolean dropAll) {
+		if(!this.isHost) return;
 		LocalPlayer player = this.minecraft.player;
 		player.drop(dropAll == true);
 	}
