@@ -7,8 +7,7 @@ import org.luaj.vm2.Varargs;
 public class ReadOnlyLuaTable extends LuaTable {
     public ReadOnlyLuaTable(LuaValue table) {
         presize(table.length(), 0);
-        for (Varargs n = table.next(LuaValue.NIL); !n.arg1().isnil(); n = table
-                .next(n.arg1())) {
+        for (Varargs n = table.next(LuaValue.NIL); !n.arg1().isnil(); n = table.next(n.arg1())) {
             LuaValue key = n.arg1();
             LuaValue value = n.arg(2);
             super.rawset(key, value.istable() ? value == table ? this : new ReadOnlyLuaTable(value) : value);

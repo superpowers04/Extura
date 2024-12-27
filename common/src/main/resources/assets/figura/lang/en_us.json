@@ -55,7 +55,7 @@
 	"figura.config.use_mc_host_resolver": "(Extura) Use host resolver for Cloud",
 	"figura.config.use_mc_host_resolver.tooltip": "Toggles if Minecraft's host resolver is used. Normal Figura uses this. Disabling this will allow ports and subdirs to be used",
 
-	"figura.docs.avatar.set_nbt": "(Extura) Set nbt of object at the path\n* First argument is the path, if a name contains a dot, use '\\\\.'\n* Second argument is the object to replace with\n* Third argument is the type, use this if you need a specific type\nValid types are: float, int, short, double, string, bool, boolean, bytearray, null, nil",
+	"figura.docs.avatar.set_nbt": "(Extura) Set nbt of object at the path\n* First argument is a table representing the path e.g `{'path','to','meow'}`\n* Second argument is the object to replace with\n* Third argument is the type, use this if you need a specific type\nValid types are: float, int, short, double, string, bool, boolean, bytearray, null, nil",
 	"figura.docs.avatar.get_size_limit": "(Extura) Get the size limit of the avatar from the backend",
 
 	"figura.docs.host.allow_extura_cheats": "(Extura) Returns whether functions like host:setVelocity will work.\n Returns true if on a local server, permission level is above 2 or player has an objective named 'extura_can_cheat'",
@@ -1588,7 +1588,7 @@
     "figura.docs.sprite_task.get_vertices": "Returns a table with all 4 vertices of this sprite\nChanging the values through other functions will reset those vertices",
     "figura.docs.entity_task": "A task for rendering an Entity",
     "figura.docs.entity_task.as_entity": "Returns the entity associated with this task, or nil if the entity could not exist for any reason.\nDue to the special circumstances some readings of the subsequent value may be completely useless",
-    "figura.docs.entity_task.set_nbt": "Sets [the nbt of] the entity",
+    "figura.docs.entity_task.set_nbt": "Sets the nbt of the entity",
     "figura.docs.entity_task.update_walking_distance": "Updates the walking animations given the new information, if applicable. For an expected result it should be called every tick with the appropriate value",
     "figura.docs.entity_task.set_head_rotation": "Updates the head rotation of the entity, if applicable",
     "figura.docs.renderer": "A global API providing functions that change the way Minecraft renders your player",
