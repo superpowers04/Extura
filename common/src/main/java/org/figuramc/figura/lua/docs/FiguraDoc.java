@@ -328,10 +328,15 @@ public abstract class FiguraDoc {
             for (int i = 0; i < parameterNames.length; i++) {
                 JsonArray param = new JsonArray();
                 for (int j = 0; j < parameterNames[i].length; j++) {
-                    JsonObject paramObj = new JsonObject();
-                    paramObj.addProperty("name", parameterNames[i][j]);
-                    paramObj.addProperty("type", FiguraDocsManager.getNameFor(parameterTypes[i][j]));
-                    param.add(paramObj);
+                	try{
+
+	                    JsonObject paramObj = new JsonObject();
+	                    paramObj.addProperty("name", parameterNames[i][j]);
+	                    paramObj.addProperty("type", FiguraDocsManager.getNameFor(parameterTypes[i][j]));
+	                    param.add(paramObj);
+                	}catch(Exception e){
+                		// FiguraMod.LOGGER.error("Exception trying to add parameter to ")
+                	}
                 }
 
                 params.add(param);

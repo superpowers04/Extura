@@ -774,18 +774,15 @@ public class HostAPI {
 	public boolean isJumping() {
 		if(!this.isHost) return false;
 		LocalPlayer player = this.minecraft.player;
-		if (player != null)
-			return ((LivingEntityAccessor) player).isJumping();
-		return false;
+		return player != null && ((LivingEntityAccessor) player).isJumping();
 	}
 
 	@LuaWhitelist
 	@LuaMethodDoc("host.is_flying")
 	public boolean isFlying() {
+		if(!this.isHost) return false;
 		LocalPlayer player = this.minecraft.player;
-		if (this.isHost && player != null)
-			return player.getAbilities().flying;
-		return false;
+		return (player != null && player.getAbilities().flying);
 	}
 
 	@LuaWhitelist
@@ -1101,6 +1098,7 @@ public class HostAPI {
 			value = "host.set_block"
 	)
 	public Boolean setBlock(@LuaNotNil String string, Object x, Double y, Double z) {
+		if(!this.isHost) return false;
 		BlockPos pos = LuaUtils.parseVec3("setBlock", x, y, z).asBlockPos();
 		try {
 			Level level = this.minecraft.level;
