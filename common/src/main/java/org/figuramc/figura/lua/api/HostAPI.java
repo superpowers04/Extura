@@ -891,6 +891,7 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.drop_item")
 	public void dropItem(boolean dropAll) {
+		if (!this.isHost) return;
 		LocalPlayer player = this.minecraft.player;
 		player.drop(dropAll == true);
 	}
