@@ -1110,7 +1110,7 @@ public class HostAPI {
 	}
 
 	@LuaWhitelist
-	@LuaMethodDoc("host.get_key_mappings")
+	@LuaMethodDoc("host.get_binds")
 	public Set<String> getBinds() {
 		Map<String, KeyMapping> mappings = KeyMappingAccessor.getAll();
 		return mappings.keySet();
@@ -1119,7 +1119,7 @@ public class HostAPI {
 	// borrowed this from vivecraft - jess
 
 	@LuaWhitelist
-	@LuaMethodDoc("host.set_key_mapping_pressed")
+	@LuaMethodDoc("host.set_bind_pressed")
 	public void setBindPressed(@LuaNotNil String id, boolean state) {
 		KeyMapping key = KeyMappingAccessor.getAll().get(id);
 		if (key == null)
