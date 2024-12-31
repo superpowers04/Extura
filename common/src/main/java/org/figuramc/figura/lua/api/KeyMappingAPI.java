@@ -1,7 +1,6 @@
 package org.figuramc.figura.lua.api;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.network.chat.Component;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaFieldDoc;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
@@ -45,14 +44,16 @@ public class KeyMappingAPI<T extends KeyMapping> {
 
     @LuaWhitelist
     @LuaMethodDoc("keymapping.click")
-    public void click() {
+    public KeyMappingAPI<T> click() {
         ++mapping.clickCount;
+        return this;
     }
 
     @LuaWhitelist
     @LuaMethodDoc("keymapping.set_down")
-    public void setDown(boolean state) {
+    public KeyMappingAPI<T> setDown(boolean state) {
         mapping.setDown(state);
+        return this;
     }
 
     @LuaWhitelist
