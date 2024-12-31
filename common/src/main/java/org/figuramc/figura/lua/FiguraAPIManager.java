@@ -184,6 +184,8 @@ public class FiguraAPIManager {
 		add(HttpRequestsAPI.class);
 		add(HttpRequestsAPI.HttpRequestBuilder.class);
 		add(HttpRequestsAPI.HttpResponse.class);
+
+		add(KeyMappingAPI.class);
 		
 	}};
 

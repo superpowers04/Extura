@@ -1111,9 +1111,16 @@ public class HostAPI {
 
 	@LuaWhitelist
 	@LuaMethodDoc("host.get_binds")
-	public Set<String> getBinds() {
+	public Map<String, KeyMappingAPI<?>> getBinds() {
+		if (!isHost()) return new HashMap<>();
+		HashMap<String, KeyMappingAPI<?>> mappingslist = new HashMap<>();
+
 		Map<String, KeyMapping> mappings = KeyMappingAccessor.getAll();
-		return mappings.keySet();
+
+		mappings.forEach((k,v) -> {
+			mappingslist.put(k,KeyMappingAPI.wrap(v));
+		});
+		return mappingslist;
 	}
 
 	// borrowed this from vivecraft - jess
@@ -1121,6 +1128,7 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.set_bind_pressed")
 	public void setBindPressed(@LuaNotNil String id, boolean state) {
+		if (!isHost()) return;
 		KeyMapping key = KeyMappingAccessor.getAll().get(id);
 		if (key == null)
 			throw new LuaError("Failed to find key: \"" + id + "\"");

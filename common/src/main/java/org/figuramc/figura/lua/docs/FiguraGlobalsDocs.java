@@ -105,6 +105,7 @@ public abstract class FiguraGlobalsDocs {
 
     @LuaFieldDoc("globals.extura")
     public ExturaAPI extura;
+
     @LuaMethodDoc(
             overloads = {
                     @LuaMethodOverload(
