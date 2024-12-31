@@ -201,7 +201,8 @@ public class FiguraDocsManager {
         ));
 
         put("host", List.of(
-                HostAPI.class
+                HostAPI.class,
+                KeyMappingAPI.class
         ));
 
         put("java", List.of(

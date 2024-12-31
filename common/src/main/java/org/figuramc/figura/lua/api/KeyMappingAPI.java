@@ -93,6 +93,6 @@ public class KeyMappingAPI<T extends KeyMapping> {
 
     @Override
     public String toString() {
-        return (Component.translatable(id) + " (KeyMapping)");
+        return (id + " (KeyMapping)");
     }
 }
