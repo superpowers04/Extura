@@ -1110,8 +1110,8 @@ public class HostAPI {
 	}
 
 	@LuaWhitelist
-	@LuaMethodDoc("host.get_binds")
-	public Map<String, KeyMappingAPI<?>> getBinds() {
+	@LuaMethodDoc("host.get_key_mappings")
+	public Map<String, KeyMappingAPI<?>> getKeyMappings() {
 		if (!isHost()) return new HashMap<>();
 		HashMap<String, KeyMappingAPI<?>> mappingslist = new HashMap<>();
 
