@@ -68,18 +68,26 @@ public class ExturaAPI {
 	// }
 	@LuaWhitelist
 	@LuaMethodDoc("extura.http_get")
-	public String httpGet(String arg) {
+	public String httpGet(String arg,String method) {
 		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return null;
 		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
+		if (method == null || method.isEmpty()) method = "";
 		try{
 			// https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
 			URLConnection connec = new URI(arg).toURL().openConnection();
+			if(connec instanceof HttpURLConnection){
+				((HttpURLConnection)connec).setRequestMethod(method);
+
+			}
+			connec.connect();
 			BufferedReader in = new BufferedReader(new InputStreamReader(connec.getInputStream()));
 			StringBuilder ret = new StringBuilder();
 			String inLine;
 			while ((inLine = in.readLine()) != null) ret.append(inLine);
 			in.close();
 			return ret.toString();
+		}catch (ProtocolException err) {
+			throw new LuaError("Request method '"+method +"' not valid for HTTP: " + err);
 		}catch (URISyntaxException | MalformedURLException err) {
 			throw new LuaError("Unable to parse URL: " + err);
 		}catch(IOException err){
@@ -97,12 +105,12 @@ public class ExturaAPI {
 	}
 	@LuaWhitelist
 	@LuaMethodDoc("extura.async_http_get")
-	public void asyncHttpGet(String arg, LuaFunction func) {
+	public void asyncHttpGet(String arg, LuaFunction func,String method) {
 		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value)) return;
 		// if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
 		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
 		CompletableFuture.runAsync(() -> {
-			func.call(httpGet(arg));
+			func.call(httpGet(arg,method));
 		});
 		return;
 	}
