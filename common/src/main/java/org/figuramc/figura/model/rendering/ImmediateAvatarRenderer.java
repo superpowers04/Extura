@@ -17,6 +17,7 @@ import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.lua.api.ClientAPI;
 import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.math.matrix.FiguraMat4;
+import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.model.*;
@@ -527,32 +528,60 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 		int overlay = customization.overlay;
 		int light = vertexData.fullBright ? LightTexture.FULL_BRIGHT : customization.light;
+		ToBeConsumedVertexData[] vertexDatas = new ToBeConsumedVertexData[vertCount]; // why the fuck did i use duckai for this
+		for (int i = 0; i < vertCount; i++) {
+			Vertex vertex = vertices.get(i);
 
+			pos.set(vertex.x, vertex.y, vertex.z, 1);
+			pos.transform(customization.positionMatrix);
+			pos.add(pos.normalized().scale(vertexData.vertexOffset));
+			normal.set(vertex.nx, vertex.ny, vertex.nz);
+			normal.transform(customization.normalMatrix);
+			uv.set(vertex.u, vertex.v, 1);
+			uv.divide(uvFixer);
+			uv.transform(customization.uvMatrix);
+
+			vertexDatas[i] = new ToBeConsumedVertexData(
+				FiguraVec3.of(pos.x,pos.y,pos.z),
+				FiguraVec4.of(vertexData.color.x, vertexData.color.y, vertexData.color.z, customization.alpha), // Yes I know this is supposed to be a static variable but shhhhh
+				FiguraVec2.of(uv.x,uv.y),
+				overlay,
+				light,
+				normal.copy()
+			);
+
+		}
 		VERTEX_BUFFER.getBufferFor(vertexData.renderType, vertexData.primary, vertexConsumer -> {
 			for (int i = 0; i < vertCount; i++) {
-				Vertex vertex = vertices.get(i);
-
-				pos.set(vertex.x, vertex.y, vertex.z, 1);
-				pos.transform(customization.positionMatrix);
-				pos.add(pos.normalized().scale(vertexData.vertexOffset));
-				normal.set(vertex.nx, vertex.ny, vertex.nz);
-				normal.transform(customization.normalMatrix);
-				uv.set(vertex.u, vertex.v, 1);
-				uv.divide(uvFixer);
-				uv.transform(customization.uvMatrix);
-
+				ToBeConsumedVertexData data = vertexDatas[i];
 				vertexConsumer
-						.vertex(pos.x, pos.y, pos.z)
-						.color((float) vertexData.color.x, (float) vertexData.color.y, (float) vertexData.color.z, customization.alpha)
-						.uv((float) uv.x, (float) uv.y)
-						.overlayCoords(overlay)
-						.uv2(light)
-						.normal((float) normal.x, (float) normal.y, (float) normal.z)
-						.endVertex();
+					.vertex(data.pos.x, data.pos.y, data.pos.z)
+					.color((float) data.color.x, (float) data.color.y, (float) data.color.z,(float) data.color.w)
+					.uv((float) data.uv.x, (float) data.uv.y)
+					.overlayCoords(data.overlay)
+					.uv2(data.light)
+					.normal((float) data.normal.x, (float) data.normal.y, (float) data.normal.z)
+					.endVertex();
 			}
 		});
 	}
 
+	private static class ToBeConsumedVertexData {
+		public FiguraVec3 pos;
+		public FiguraVec4 color;
+		public FiguraVec2 uv;
+		public int overlay;
+		public int light;
+		public FiguraVec3 normal;
+		public ToBeConsumedVertexData(FiguraVec3 pos, FiguraVec4 color, FiguraVec2 uv, int overlay, int light, FiguraVec3 normal) {
+			this.pos = pos;
+			this.color = color;
+			this.uv = uv;
+			this.overlay = overlay;
+			this.light = light;
+			this.normal = normal;
+		}
+	}
 	private static class VertexData {
 		public RenderType renderType;
 		public boolean fullBright;
