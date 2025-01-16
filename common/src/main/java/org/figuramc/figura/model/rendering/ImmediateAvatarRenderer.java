@@ -520,6 +520,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 	private static final FiguraVec4 pos = FiguraVec4.of();
 	private static final FiguraVec3 normal = FiguraVec3.of();
 	private static final FiguraVec3 uv = FiguraVec3.of(0, 0, 1);
+	private final List<ToBeConsumedVertexData> consumableVertexes = new ArrayList<ToBeConsumedVertexData>(); // did not use duck ai again naahhhhh
 	private void pushToBuffer(int faceCount, VertexData vertexData, PartCustomization customization, FiguraTextureSet textureSet, List<Vertex> vertices) {
 		int vertCount = faceCount * 4;
 
@@ -541,45 +542,66 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 			uv.divide(uvFixer);
 			uv.transform(customization.uvMatrix);
 
-			vertexDatas[i] = new ToBeConsumedVertexData(
-				FiguraVec3.of(pos.x,pos.y,pos.z),
-				FiguraVec4.of(vertexData.color.x, vertexData.color.y, vertexData.color.z, customization.alpha), // Yes I know this is supposed to be a static variable but shhhhh
-				FiguraVec2.of(uv.x,uv.y),
+			vertexDatas[i] = ToBeConsumedVertexData.get(this,
+				pos,
+				vertexData.color, customization.alpha, // Yes I know this is supposed to be a static variable but shhhhh
+				uv,
 				overlay,
 				light,
-				normal.copy()
+				normal
 			);
 
 		}
 		VERTEX_BUFFER.getBufferFor(vertexData.renderType, vertexData.primary, vertexConsumer -> {
 			for (int i = 0; i < vertCount; i++) {
 				ToBeConsumedVertexData data = vertexDatas[i];
-				vertexConsumer
-					.vertex(data.pos.x, data.pos.y, data.pos.z)
-					.color((float) data.color.x, (float) data.color.y, (float) data.color.z,(float) data.color.w)
-					.uv((float) data.uv.x, (float) data.uv.y)
-					.overlayCoords(data.overlay)
-					.uv2(data.light)
-					.normal((float) data.normal.x, (float) data.normal.y, (float) data.normal.z)
-					.endVertex();
+				data.consume(this,vertexConsumer);
 			}
 		});
 	}
 
 	private static class ToBeConsumedVertexData {
-		public FiguraVec3 pos;
-		public FiguraVec4 color;
-		public FiguraVec2 uv;
+		public Float x,y,z;
+		public Float r,g,b,a;
+		public Float uvX,uvY;
 		public int overlay;
 		public int light;
-		public FiguraVec3 normal;
-		public ToBeConsumedVertexData(FiguraVec3 pos, FiguraVec4 color, FiguraVec2 uv, int overlay, int light, FiguraVec3 normal) {
-			this.pos = pos;
-			this.color = color;
-			this.uv = uv;
-			this.overlay = overlay;
-			this.light = light;
-			this.normal = normal;
+		public Float nX,nY,nZ;
+		public boolean consumed;
+		public ToBeConsumedVertexData() {}
+		public void consume(ImmediateAvatarRenderer renderer,VertexConsumer vertexConsumer){
+			vertexConsumer
+				.vertex(this.x, this.y, this.z)
+				.color(this.r, this.g, this.b,this.a)
+				.uv(this.uvX, this.uvY)
+				.overlayCoords(this.overlay)
+				.uv2(this.light)
+				.normal(this.nX, this.nY, this.nZ)
+				.endVertex();
+			consumed = true;
+			renderer.consumableVertexes.add(this);
+		}
+		public static ToBeConsumedVertexData get(ImmediateAvatarRenderer renderer,FiguraVec4 pos, FiguraVec3 color,float alpha, FiguraVec3 uv, int overlay, int light, FiguraVec3 normal) {
+			ToBeConsumedVertexData data = renderer.consumableVertexes.size() == 0 ? 
+				new ToBeConsumedVertexData() : 
+				renderer.consumableVertexes.remove(renderer.consumableVertexes.size()-1);
+			data.consumed = false;
+			// this makes me want to kill someone
+			data.x = (float) pos.x;
+			data.y = (float) pos.y;
+			data.z = (float) pos.z;
+			data.r = (float) color.x;
+			data.g = (float) color.y;
+			data.b = (float) color.z;
+			data.a = alpha;
+			data.uvX = (float) uv.x;
+			data.uvY = (float) uv.y;
+			data.nX = (float) normal.x;
+			data.nY = (float) normal.y;
+			data.nZ = (float) normal.z;
+			data.overlay = overlay;
+			data.light = light;
+			return data;
 		}
 	}
 	private static class VertexData {
