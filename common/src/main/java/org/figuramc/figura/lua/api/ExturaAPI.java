@@ -71,7 +71,7 @@ public class ExturaAPI {
 	public String httpGet(String arg,String method) {
 		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return null;
 		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
-		if (method == null || method.isEmpty()) method = "";
+		if (method == null || method.isEmpty()) method = "GET";
 		try{
 			// https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
 			URLConnection connec = new URI(arg).toURL().openConnection();

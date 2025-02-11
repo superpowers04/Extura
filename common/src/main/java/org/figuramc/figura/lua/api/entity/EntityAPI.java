@@ -317,6 +317,7 @@ public class EntityAPI<T extends Entity> {
         checkEntity();
         return entity.isCrouching();
     }
+    @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
                     @LuaMethodOverload,
@@ -329,7 +330,7 @@ public class EntityAPI<T extends Entity> {
     )
     public boolean isMoving(boolean ignoreY) {
         checkEntity();
-        return entity.getX() != entity.xOld || (!ignoreY && entity.getY() != entity.yOld) || entity.getZ() != entity.zOld;
+        return entity.getX() != entity.xOld || (ignoreY || entity.getY() != entity.yOld) || entity.getZ() != entity.zOld;
     }
 
     @LuaWhitelist
