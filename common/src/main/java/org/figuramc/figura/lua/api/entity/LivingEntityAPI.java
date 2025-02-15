@@ -4,7 +4,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
-import net.minecraft.world.item.ItemStack;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.api.ClientAPI;
@@ -15,12 +14,9 @@ import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.mixin.LivingEntityAccessor;
-import org.luaj.vm2.LuaError;
-import java.lang.reflect.Field;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Objects;
+import org.figuramc.figura.utils.PlatformUtils;
+import java.util.List;
+import java.util.Map;
 
 
 @LuaWhitelist
@@ -238,41 +234,10 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
 
 	@LuaWhitelist
 	@LuaMethodDoc("entity.get_curio")
-	public ItemStackAPI getCurio(@LuaNotNil String slotType, int slot) {
+	public Map<String, List<ItemStackAPI>> getCurios() {
 		if(!ClientAPI.HAS_CURIOS) return null;
-		try {
-			Class<?> CuriosAPI = Class.forName("top.theillusivec4.curios.api.CuriosApi");
-			Method getCuriosInventory = CuriosAPI.getDeclaredMethod("getCuriosInventory", LivingEntity.class);
-			Object cInventoryLazyOptionalOBJ = getCuriosInventory.invoke(CuriosAPI,entity);
-
-			Class<?> LazyOptional = cInventoryLazyOptionalOBJ.getClass();
-			Method resolve = LazyOptional.getDeclaredMethod("resolve");
-			Object cInventoryOptionalOBJ = resolve.invoke(cInventoryLazyOptionalOBJ);
-
-			Class<?> Optional = cInventoryOptionalOBJ.getClass();
-			Method get = Optional.getDeclaredMethod("get");
-			Object curiosInventoryOBJ = get.invoke(cInventoryOptionalOBJ);
-
-			Class<?> curiosInventory = curiosInventoryOBJ.getClass();
-			Method getStacksHandler = curiosInventory.getDeclaredMethod("getStacksHandler", String.class);
-			Object sHandlerOptionalOBJ = getStacksHandler.invoke(curiosInventoryOBJ,slotType);
-
-			Object stacksHandlerOBJ = get.invoke(sHandlerOptionalOBJ);
-
-			Class<?> stacksHandler = stacksHandlerOBJ.getClass();
-			Method getStacks = stacksHandler.getDeclaredMethod("getStacks");
-			Object dynamicStackOBJ = getStacks.invoke(stacksHandlerOBJ);
-
-			Class<?> dynamicStack = Class.forName("net.minecraftforge.items.IItemHandler");
-			Method getStackInSlot = dynamicStack.getDeclaredMethod("getStackInSlot", int.class);
-			Object itemStackOBJ = getStackInSlot.invoke(dynamicStackOBJ,slot);
-
-			return ItemStackAPI.verify((ItemStack) itemStackOBJ);
-
-		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-			return null;
-		}
-		
+		checkEntity();
+		return PlatformUtils.getCurios(entity);
 	}
 
 

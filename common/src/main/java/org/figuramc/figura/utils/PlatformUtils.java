@@ -2,12 +2,17 @@ package org.figuramc.figura.utils;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.SharedConstants;
+import net.minecraft.world.entity.LivingEntity;
 import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.lua.LuaNotNil;
+import org.figuramc.figura.lua.api.world.ItemStackAPI;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 public class PlatformUtils {
 
@@ -38,6 +43,11 @@ public class PlatformUtils {
 
     @ExpectPlatform
     public static String getModVersion(String modId) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static Map<String, List<ItemStackAPI>> getCurios(LivingEntity entity) {
         throw new AssertionError();
     }
 
