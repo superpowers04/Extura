@@ -233,7 +233,7 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
 	}
 
 	@LuaWhitelist
-	@LuaMethodDoc("entity.get_curio")
+	@LuaMethodDoc("entity.get_curios")
 	public Map<String, List<ItemStackAPI>> getCurios() {
 		if(!ClientAPI.HAS_CURIOS) return null;
 		checkEntity();
