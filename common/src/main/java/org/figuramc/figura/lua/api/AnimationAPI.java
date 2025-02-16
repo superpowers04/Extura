@@ -51,11 +51,20 @@ public class AnimationAPI {
     }
 
     @LuaWhitelist
-    @LuaMethodDoc("animations.get_playing")
-    public List<Animation> getPlaying() {
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload,
+                    @LuaMethodOverload(
+                            argumentTypes = Boolean.class,
+                            argumentNames = "hold"
+                    )
+            },
+            value = "animations.get_playing"
+    )
+    public List<Animation> getPlaying(boolean hold) {
         List<Animation> list = new ArrayList<>();
         for (Animation animation : avatar.animations.values())
-            if (animation.playState == Animation.PlayState.PLAYING)
+            if (hold ? (animation.playState == Animation.PlayState.PLAYING || animation.playState == Animation.PlayState.HOLDING) : (animation.playState == Animation.PlayState.PLAYING))
                 list.add(animation);
         return list;
     }

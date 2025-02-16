@@ -88,10 +88,11 @@ public abstract class AvatarRenderer {
             byte[] bytes = src.getByteArray(key);
             if (bytes.length > 0) {
                 textures.put(key, new FiguraTexture(avatar, key, bytes));
-            } else {
-                ListTag size = src.getList(key, Tag.TAG_INT);
-                textures.put(key, new FiguraTexture(avatar, key, size.getInt(0), size.getInt(1)));
+                continue;
             }
+            ListTag size = src.getList(key, Tag.TAG_INT);
+            textures.put(key, new FiguraTexture(avatar, key, size.getInt(0), size.getInt(1)));
+            
         }
 
         // data files
