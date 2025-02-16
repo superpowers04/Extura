@@ -166,6 +166,12 @@ public class Animation {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc("animation.is_holding")
+    public boolean isHolding() {
+        return this.playState == PlayState.HOLDING;
+    }
+
+    @LuaWhitelist
     @LuaMethodDoc("animation.play")
     public Animation play() {
         switch (playState) {
