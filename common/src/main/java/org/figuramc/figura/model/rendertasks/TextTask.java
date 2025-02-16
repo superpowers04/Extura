@@ -113,6 +113,7 @@ public class TextTask extends RenderTask {
 
         Component component = TextUtils.tryParseJson(this.textCached);
         component = Badges.noBadges4U(component);
+        component = Badges.appendBadges(component, this.owner.owner, (this.textCached.contains("${badges}") || this.textCached.contains("${segdab}")));
         component = Emojis.applyEmojis(component);
         component = Emojis.removeBlacklistedEmojis(component);
         this.text = TextUtils.formatInBounds(component, Minecraft.getInstance().font, width, wrap);
