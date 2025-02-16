@@ -139,8 +139,11 @@ public class Badges {
 
 		// no custom badges text
 		if (!custom) return badges.getString().isBlank() ? text : text.copy().append(" ").append(badges);
-		if (!badges.getString().isBlank()) return TextUtils.replaceInText(TextUtils.replaceInText(text, "\\$\\{badges\\}(?s)", badges), "\\$\\{segdab\\}(?s)", TextUtils.reverse(badges));
-		return TextUtils.replaceInText(text, "\\$\\{(badges|segdab)\\}(?s)", Component.empty());
+		if (!badges.getString().isBlank()) 
+			return TextUtils.replaceInText(
+				TextUtils.replaceInText(text, "\\$\\{badges\\}(?s)", badges),
+				"\\$\\{segdab\\}(?s)", TextUtils.reverse(badges));
+		return TextUtils.replaceInText(text, "\\$\\{(badges|segdab)\\}(?s)", badges);
 	}
 
 	public enum System {
