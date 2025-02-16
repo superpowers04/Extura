@@ -361,6 +361,15 @@ public class Avatar {
 
 	// -- script events -- // 
 
+	public boolean consumePermission(Permissions perm){
+		if (avatar.permissions.get(perm) >= 1) {
+			avatar.noPermissions.remove(perm);
+			return true
+		}
+		avatar.noPermissions.add(Permissions.CANCEL_SOUNDS);
+		return false
+	}
+
 	private boolean isCancelled(Varargs args) {
 		if (args == null)
 			return false;
