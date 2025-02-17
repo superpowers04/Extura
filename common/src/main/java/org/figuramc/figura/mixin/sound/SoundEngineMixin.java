@@ -124,7 +124,7 @@ public abstract class SoundEngineMixin implements SoundEngineAccessor {
                     sound.getSound().getLocation().toString()
                 );
                 if(!cancel) return;
-                if(avatar.consumePermission(Permissions.CANCEL_SOUNDS)){
+                if(avatar.tryConsumePermission(Permissions.CANCEL_SOUNDS)){
                     c.cancel(); // calling cancel multple times is fine, right?
                 }
             });

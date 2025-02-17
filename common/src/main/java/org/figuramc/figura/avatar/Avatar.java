@@ -253,13 +253,7 @@ public class Avatar {
 		}
 
 		// tick permissions
-		for (Permissions t : permissionsToTick) {
-			if (permissions.get(t) > 0) {
-				noPermissions.remove(t);
-				continue;
-			}
-			noPermissions.add(t);
-		}
+		for (Permissions t : permissionsToTick) consumePermission(t);
 		if (lastPlayingSound > 0)
 			lastPlayingSound--;
 
@@ -361,13 +355,19 @@ public class Avatar {
 
 	// -- script events -- // 
 
-	public boolean consumePermission(Permissions perm){
-		if (avatar.permissions.get(perm) >= 1) {
-			avatar.noPermissions.remove(perm);
-			return true
+	public boolean tryConsumePermission(Permissions perm){
+		if (permissions.get(perm) > 0) {
+			noPermissions.remove(perm);
+			return true;
 		}
-		avatar.noPermissions.add(Permissions.CANCEL_SOUNDS);
-		return false
+		noPermissions.add(perm);
+		return false;
+	}
+	public void consumePermission(Permissions perm){
+		if (permissions.get(perm) > 0) {
+			noPermissions.remove(perm);
+		}
+		noPermissions.add(perm);
 	}
 
 	private boolean isCancelled(Varargs args) {

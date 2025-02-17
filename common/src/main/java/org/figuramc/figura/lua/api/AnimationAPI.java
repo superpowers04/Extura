@@ -4,6 +4,7 @@ import org.figuramc.figura.animation.Animation;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
+import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class AnimationAPI {
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
-                    @LuaMethodOverload,
+                    @LuaMethodOverload(),
                     @LuaMethodOverload(
                             argumentTypes = Boolean.class,
                             argumentNames = "hold"
