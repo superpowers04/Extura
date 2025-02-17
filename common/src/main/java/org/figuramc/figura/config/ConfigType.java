@@ -367,11 +367,9 @@ public abstract class ConfigType<T> {
                 if (!e.isJsonObject()) continue;
                 JsonObject o = e.getAsJsonObject();
                 JsonElement s = o.get("source");
-                JsonElement m = o.get("mode");
-                if (s == null || m == null || !s.isJsonPrimitive() || !m.isJsonPrimitive()) continue;
+                if (s == null || !s.isJsonPrimitive()) continue;
                 JsonPrimitive source = s.getAsJsonPrimitive();
-                JsonPrimitive mode = m.getAsJsonPrimitive();
-                if (!source.isString() || !mode.isNumber()) continue;
+                if (!source.isString()) continue;
                 filters.add(new NetworkingAPI.Filter(source.getAsString()));
             }
         }
