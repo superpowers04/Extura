@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[47,)"
 issueTrackerURL = "https://github.com/FiguraMC/Figura/issues"
-license = "LGPL-2.1"
+license = "Polyform-Noncommercial-1.0.0"
 displayURL = "https://github.com/FiguraMC/Figura"
 
 [[mods]]
