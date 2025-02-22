@@ -7,7 +7,6 @@ import org.figuramc.figura.lua.api.data.ResourcesAPI;
 import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.entity.PlayerAPI;
 import org.figuramc.figura.lua.api.event.EventsAPI;
-import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.json.JsonAPI;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.math.MatricesAPI;
