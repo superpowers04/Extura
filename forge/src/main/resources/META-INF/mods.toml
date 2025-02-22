@@ -1,13 +1,13 @@
 modLoader = "javafml"
 loaderVersion = "[47,)"
-issueTrackerURL = "https://github.com/FiguraMC/Figura/issues"
+issueTrackerURL = "https://github.com/superpowers04/Extura/issues"
 license = "Polyform-Noncommercial-1.0.0"
-displayURL = "https://github.com/FiguraMC/Figura"
+displayURL = "https://github.com/superpowers04/Extura"
 
 [[mods]]
 modId = "figura"
 version = "${version}"
-displayName = "Figura - Extura(Forge)"
+displayName = "Extura - Fork of Figura(Forge)"
 logoFile="assets/figura/icon.png"
 authors = "ConstantDust, Superpowers04, PoolloverNathan - ExtExtura"
 credits = "superpowers04, ConstantDust, PoolloverNathan"
