@@ -67,6 +67,35 @@ public class ExturaAPI {
 	// 	return ExturaClassAPI.fromString(arg);
 	// }
 	@LuaWhitelist
+	@LuaMethodDoc("extura.http_get")
+	public String httpGet(String arg,String method) {
+		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value))  return null;
+		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
+		if (method == null || method.isEmpty()) method = "GET";
+		try{
+			// https://docs.oracle.com/javase/tutorial/networking/urls/readingWriting.html my beloved
+			URLConnection connec = new URI(arg).toURL().openConnection();
+			if(connec instanceof HttpURLConnection){
+				((HttpURLConnection)connec).setRequestMethod(method);
+
+			}
+			connec.connect();
+			BufferedReader in = new BufferedReader(new InputStreamReader(connec.getInputStream()));
+			StringBuilder ret = new StringBuilder();
+			String inLine;
+			while ((inLine = in.readLine()) != null) ret.append(inLine);
+			in.close();
+			return ret.toString();
+		}catch (ProtocolException err) {
+			throw new LuaError("Request method '"+method +"' not valid for HTTP: " + err);
+		}catch (URISyntaxException | MalformedURLException err) {
+			throw new LuaError("Unable to parse URL: " + err);
+		}catch(IOException err){
+			throw new LuaError("Unable to send request: " + err);
+		}
+		// return null;
+	}
+	@LuaWhitelist
 	@LuaMethodDoc("extura.async_lua_function")
 	public void asyncLuaFunction(LuaFunction func) {
 		if (!this.isHost) return;
@@ -74,8 +103,157 @@ public class ExturaAPI {
 			func.call();
 		});
 	}
+	@LuaWhitelist
+	@LuaMethodDoc("extura.async_http_get")
+	public void asyncHttpGet(String arg, LuaFunction func,String method) {
+		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || arg == null || (!this.isHost && !Configs.EXPOSE_HTTP.value)) return;
+		// if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
+		if (owner.permissions.get(Permissions.NETWORKING) < 1) throw new LuaError("This avatar's permissions does not allow networking!");
+		CompletableFuture.runAsync(() -> {
+			func.call(httpGet(arg,method));
+		});
+		return;
+	}
 
 
+	public Object getJava(LuaValue name){
+		if(!name.isstring()) return null;
+		return getJava(name.tojstring());
+	}
+	public Object getJava(String name){
+		return (name.startsWith("$") ? javaVariables.get(name.substring(1)) : javaVariables.get(name));
+	}
+	public Object getJavaOnlyDollar(String name){
+		return (name.startsWith("$") ? javaVariables.get(name.substring(1)) : name);
+	}
+	public Object fromLua(LuaValue value) {
+		switch(value.type()){
+			case LuaValue.TBOOLEAN: return value.toboolean();
+			case LuaValue.TNUMBER:{
+				if(value.isint()) return value.toint();
+				if(value.islong()) return value.tolong();
+				return value.tofloat();
+			}
+			case LuaValue.TSTRING: return getJavaOnlyDollar(value.tojstring());
+			// case TTABLE: 
+			// case TFUNCTION: 
+			case LuaValue.TUSERDATA: return value.checkuserdata();
+			// case TTHREAD: 
+		}
+		return value;
+	}
+
+	@LuaWhitelist
+	@LuaMethodDoc("extura.reflect_java")
+	public Object reflectJava(@LuaNotNil LuaTable stuff) {
+		if (!Configs.EXPOSE_SENSITIVE_LIBRARIES.value || !this.isHost) return null;
+			int max = stuff.length();
+			if(max == 0) return null;
+			Object last = null;
+
+			for (int index = 1;index <= max;index++) {
+				LuaTable tbl = stuff.get(index).checktable();
+
+				String type = ((tbl.get("type").optjstring(tbl.get(1).checkjstring())) ).toLowerCase();
+				String path = ((tbl.get("path").optjstring(tbl.get(2).checkjstring())) );
+				LuaValue store = tbl.get("store");
+				switch(type){
+					case "get":{
+						last = javaVariables.get(path);
+						break;
+					}
+					case "set":{
+						last = fromLua(tbl.get("store"));
+						javaVariables.put(path,last);
+						break;
+					}
+					case "class":{
+						try{
+							last = Class.forName(path);
+						}catch(ClassNotFoundException e){
+							throw new LuaError("No such class '"+path+"'");
+						}
+						if(store.isstring()) javaVariables.put(store.tojstring(),last);
+						break;
+					}
+					case "method":{
+						LuaTable the = tbl.get("args").opttable(tbl.get(4).checktable());
+						int len = the.length();
+						Class<?>[] classes = new Class<?>[len];
+						for (int ci = 0;ci < len;ci++) {
+							String className = the.get(ci).checkjstring();
+							try{
+
+								Object VARI = getJava(className);
+								classes[ci] = (VARI==null ? Class.forName(path) : ((Class<?>)VARI));
+							}catch(ClassNotFoundException e){
+								throw new LuaError("No such class '"+path+"'");
+							}
+						}
+						try{
+							last = ((Class<?>) last).getDeclaredMethod(path,classes);
+						}catch(NoSuchMethodException e){
+							throw new LuaError("No such method '"+path+"' on "+last);
+						}
+						if(store.isstring()) javaVariables.put(store.tojstring(),last);
+						break;
+					}
+					case "field":{
+						try{
+							last = ((Class<?>) last).getDeclaredField(path).get(last);
+						}catch(NoSuchFieldException e){
+							throw new LuaError("No such field '"+path+"' on "+last);
+						}catch(IllegalAccessException e){
+							throw new LuaError("Unable to access field '"+path+"' on "+last);
+						}
+						if(store.isstring()) javaVariables.put(store.tojstring(),last);
+						break;
+					}
+					case "setfield":{
+						try{
+							((Class<?>) last).getDeclaredField(path).set(last,fromLua(tbl.get("store")));
+						}catch(NoSuchFieldException e){
+							throw new LuaError("No such field '"+path+"' on "+last);
+						}catch(IllegalAccessException e){
+							throw new LuaError("Unable to access field '"+path+"' on "+last);
+						}
+						break;
+					}
+					case "callmethod":{
+						LuaTable the = tbl.get("args").opttable(tbl.get(4).checktable());
+						int len = the.length();
+						Object[] args = new Object[len];
+						for (int ci = 0;ci < len;ci++) {
+							LuaValue className = the.get(ci);
+							Object VARI = getJava(className);
+							args[ci] = (VARI == null ? className : VARI);
+						}
+
+						try{
+							last = ((Method) last).invoke(last,args);
+						}catch(IllegalAccessException e){
+							throw new LuaError("Unable to invoke "+last);
+						}catch(InvocationTargetException e){
+							try{
+								last = ((Method) last).invoke(args);
+							}catch(IllegalAccessException er){
+								throw new LuaError("Unable to invoke "+last);
+							}catch(InvocationTargetException er){
+								throw new LuaError("Unable to invoke "+last);
+							}
+						}
+						if(store.isstring()) javaVariables.put(store.tojstring(),last);
+						break;
+					}
+					default:{
+						throw new LuaError("Invalid reflect type " + type);
+					}
+				}
+			}
+
+		return last;
+
+	}
 	@LuaWhitelist
 	public Object __index(String arg) {
 		if(arg.startsWith("java_")){
