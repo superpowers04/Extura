@@ -35,6 +35,8 @@
 	"figura.config.helper_errors.tooltip": "Enables the game throwing errors for extra things to help preventing confusing errors later",
 	"figura.config.expose_extura_api": "Expose Extura API",
 	"figura.config.expose_extura_api.tooltip": "Expose the Extura API to *ALL* Figura avatars",
+	"figura.config.hide_disclaimer": "Super Secret Enabler",
+	"figura.config.hide_disclaimer.tooltip": "The disclaimer explains how this works",
 	"figura.config.expose_java_api": "Expose Java API",
 	"figura.config.expose_java_api.tooltip": "Expose the Java API to *YOUR* Figura avatar.",
 	"figura.config.annual_cache_deletion": "Delete cache weekly",
@@ -45,6 +47,18 @@
 	"figura.config.expose_sensitive_libraries.tooltip": "Exposes io, os, debug and extura.getHttp to *YOUR* Figura avatar. If you do not know what this means DO NOT ENABLE THIS. This will allow any equipped avatars to run ANY program on your computer and edit ANY file on your computer",
 	"figura.config.get_blocks_limit": "Unlimited world.getBlocks",
 	"figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
+
+	"figura.gui.extura_disclaimer.title":"IMPORTANT!!",
+	"figura.gui.extura_disclaimer.0":"You're currently using Super Extura!",
+	"figura.gui.extura_disclaimer.1":"\n\nSuper Extura has options that can ",
+	"figura.gui.extura_disclaimer.2":"damage your machine, delete files or other harmful things!\n",
+	"figura.gui.extura_disclaimer.3":"If you do not want host avatars to do potentially harmful things or if what was just asked makes no sense,\n",
+	"figura.gui.extura_disclaimer.4":"IMMEDIATELY Remove the version of Extura you have installed and use normal ",
+	"figura.gui.extura_disclaimer.5":"!\nTo enable Super Extura's ",
+	"figura.gui.extura_disclaimer.6":"dangerous ",
+	"figura.gui.extura_disclaimer.7":"features, enable Super Secret Enabler.",
+	"figura.gui.extura_disclaimer.8":"\n\nSuper Extura, Extura and Figura are NOT responsible for ANY damages caused by this mod!",
+
 
 	"figura.config.get_target_limit": "Unlimited entity:getTarget",
 	"figura.config.get_target_limit.tooltip": "Toggles if scripts can bypass the 20 block limit of entity.getTargetedBlock and entity.getTargetedEntity",
