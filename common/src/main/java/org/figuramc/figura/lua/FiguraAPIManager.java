@@ -83,11 +83,6 @@ public class FiguraAPIManager {
 		add(EventsAPI.class);
 		add(LuaEvent.class);
 
-		add(JavaAPI.class);
-		add(ClassAPI.class);
-		add(InstanceAPI.class);
-		add(FieldAPI.class);
-
 		add(Vertex.class);
 		add(FiguraModelPart.class);
 		add(RenderTask.class);

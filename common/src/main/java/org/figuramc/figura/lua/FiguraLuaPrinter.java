@@ -381,13 +381,7 @@ public class FiguraLuaPrinter {
             case LuaValue.TBOOLEAN -> ColorUtils.Colors.LUA_PING.style;
             case LuaValue.TNUMBER -> ColorUtils.Colors.FIGURA_BLUE.style;
             case LuaValue.TSTRING -> Style.EMPTY.withColor(ChatFormatting.WHITE);
-            case LuaValue.TUSERDATA -> {
-                final var data = value.checkuserdata();
-                if (data instanceof ClassAPI<?>) yield Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE);
-                if (data instanceof InstanceAPI<?>) yield Style.EMPTY.withColor(ChatFormatting.AQUA);
-                if (data instanceof FieldAPI<?,?>) yield Style.EMPTY.withColor(ChatFormatting.DARK_GREEN).withItalic(true);
-                yield Style.EMPTY.withColor(ChatFormatting.YELLOW);
-            }
+            case LuaValue.TUSERDATA -> Style.EMPTY.withColor(ChatFormatting.YELLOW);
             case LuaValue.TTHREAD -> Style.EMPTY.withColor(ChatFormatting.GOLD);
         	default -> Style.EMPTY.withColor(ChatFormatting.WHITE);
         };
