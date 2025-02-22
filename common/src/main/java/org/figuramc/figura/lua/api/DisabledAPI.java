@@ -51,6 +51,7 @@ public class DisabledAPI {
     	return false;
     }
     @LuaWhitelist
+	@LuaMethodDoc("disabled.i_like_women")
     public void __newindex(String key, boolean value) {
     	anyAccess();
     }
