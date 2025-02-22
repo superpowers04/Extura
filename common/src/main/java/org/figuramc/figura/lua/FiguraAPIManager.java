@@ -206,7 +206,6 @@ public class FiguraAPIManager {
 		put("textures", r -> r.texture = new TextureAPI(r.owner));
 		put("config", r -> new ConfigAPI(r.owner));
 		if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
-		if(Configs.EXPOSE_JAVA_API.value) put("java", r -> r.java = new JavaAPI(r.owner));
         put("server_packets", r -> r.serverPackets = new ServerPacketsAPI(r.owner));
 
 		put("data", r -> new DataAPI(r.owner));
