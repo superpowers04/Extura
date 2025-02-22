@@ -111,7 +111,7 @@
 	"figura.docs.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
 	"figura.docs.extura.async_lua_function": "Runs specified lua function in a thread. NOTE: VERY UNSTABLE!",
 	"figura.docs.extura.httpGet": "Makes an http request to a url",
-	"figura": "Figura - Extura",
+	"figura": "Extura(Figura Fork)",
 	"EXTURA_SEPERATOR":"Extura exclusive",
 
 	"figura.fsb": "Enable FSB",
@@ -465,7 +465,7 @@
     "figura.gui.help.lua_manual": "Lua Manual",
     "figura.gui.help.external_wiki": "Online Wiki",
     "figura.gui.help.lua_version": "Lua Version: %s",
-    "figura.gui.help.figura_version": "Figura Version: %s",
+    "figura.gui.help.figura_version": "Extura, Compatible with Figura %s",
     "figura.config.nameplate": "Nameplate",
     "figura.config.nameplate.tooltip": "Nameplate settings",
     "figura.config.self_nameplate": "Enable Self Nameplate",
