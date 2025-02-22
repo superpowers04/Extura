@@ -201,13 +201,6 @@ public class FiguraDocsManager {
                 KeyMappingAPI.class
         ));
 
-        put("java", List.of(
-            JavaAPI.class,
-            ClassAPI.class,
-            InstanceAPI.class,
-            FieldAPI.class
-        ));
-
         put("avatar", List.of(
                 AvatarAPI.class
         ));
