@@ -67,8 +67,6 @@ public abstract class FiguraGlobalsDocs {
     public ClientAPI client;
     @LuaFieldDoc("globals.host")
     public HostAPI host;
-    @LuaFieldDoc("globals.java")
-    public JavaAPI java;
     @LuaFieldDoc("globals.avatar")
     public AvatarAPI avatar;
     @LuaFieldDoc("globals.particles")
