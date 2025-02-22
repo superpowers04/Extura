@@ -119,7 +119,7 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		// -- bottom -- // 
 
 		// version
-		final String buildString = FiguraMod.VERSION.noBuildString().replace("figura","Extura");
+		final String buildString = FiguraMod.VERSION.noBuildString().replace("Figura","Extura");
 		final String buildVersion = buildString.substring(0,buildString.lastIndexOf('-'));
 		final String dateBuilt = new Date(new Long(FiguraMod.VERSION.noBuildString().substring(buildVersion.length()+1))).toString();
 		MutableComponent versionText = FiguraText.of().append(" " + buildVersion + ", Built on " + dateBuilt).withStyle(ChatFormatting.ITALIC);
