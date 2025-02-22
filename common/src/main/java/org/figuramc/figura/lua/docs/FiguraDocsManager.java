@@ -24,6 +24,10 @@ import org.figuramc.figura.lua.api.entity.PlayerAPI;
 import org.figuramc.figura.lua.api.entity.ViewerAPI;
 import org.figuramc.figura.lua.api.event.EventsAPI;
 import org.figuramc.figura.lua.api.event.LuaEvent;
+import org.figuramc.figura.lua.api.java.ClassAPI;
+import org.figuramc.figura.lua.api.java.FieldAPI;
+import org.figuramc.figura.lua.api.java.InstanceAPI;
+import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.keybind.FiguraKeybind;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.math.MatricesAPI;
@@ -199,6 +203,13 @@ public class FiguraDocsManager {
         put("host", List.of(
                 HostAPI.class,
                 KeyMappingAPI.class
+        ));
+
+        put("java", List.of(
+            JavaAPI.class,
+            ClassAPI.class,
+            InstanceAPI.class,
+            FieldAPI.class
         ));
 
         put("avatar", List.of(

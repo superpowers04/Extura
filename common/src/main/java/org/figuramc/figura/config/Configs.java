@@ -399,13 +399,25 @@ public class Configs {
 				this.name = this.name.copy().withStyle(ChatFormatting.RED);
 				this.tooltip = FiguraText.of("config.get_target_limit.tooltip");
 			}}; // Did not know getTargetedEntity and getTargetedBlock were limited to 20 blocks
+	public static final ConfigType.BoolConfig EXPOSE_SENSITIVE_LIBRARIES = new ConfigType.BoolConfig("expose_sensitive_libraries", DANGEROUS, false) {{
+				this.name = this.name.copy().withStyle(ChatFormatting.RED);
+				this.tooltip = FiguraText.of("config.expose_sensitive_libraries.tooltip");
+			}};
 	public static final ConfigType.BoolConfig EXPOSE_EXTURA_API = new ConfigType.BoolConfig("expose_extura_api", EXTURA, true) {{
 				this.name = this.name.copy().withStyle(ChatFormatting.RED);
 				this.tooltip = FiguraText.of("expose_extura_api.tooltip");
 			}};
+	public static final ConfigType.BoolConfig EXPOSE_JAVA_API = new ConfigType.BoolConfig("expose_java_api", DANGEROUS, true) {{
+				this.name = this.name.copy().withStyle(ChatFormatting.RED);
+				this.tooltip = FiguraText.of("expose_java_api.tooltip");
+			}};
 	public static final ConfigType.BoolConfig USE_GLOBAL_SCRIPTS = new ConfigType.BoolConfig("use_global_scripts", EXTURA, false) {{
 				this.name = this.name.copy();
 				this.tooltip = FiguraText.of("config.use_global_scripts.tooltip");
+			}};
+	public static final ConfigType.BoolConfig EXPOSE_HTTP = new ConfigType.BoolConfig("expose_http", DANGEROUS, false) {{
+				this.name = this.name.copy();
+				this.tooltip = FiguraText.of("config.expose_http.tooltip");
 			}};
 	public static final ConfigType.BoolConfig USE_CACHE = new ConfigType.BoolConfig("use_cache", EXTURA, true) {{
 				this.name = this.name.copy();

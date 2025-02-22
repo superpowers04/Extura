@@ -15,6 +15,10 @@ import org.figuramc.figura.lua.api.action_wheel.ActionWheelAPI;
 import org.figuramc.figura.lua.api.action_wheel.Page;
 import org.figuramc.figura.lua.api.event.EventsAPI;
 import org.figuramc.figura.lua.api.event.LuaEvent;
+import org.figuramc.figura.lua.api.java.ClassAPI;
+import org.figuramc.figura.lua.api.java.FieldAPI;
+import org.figuramc.figura.lua.api.java.InstanceAPI;
+import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.keybind.FiguraKeybind;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.math.MatricesAPI;
@@ -82,6 +86,11 @@ public class FiguraAPIManager {
 
 		add(EventsAPI.class);
 		add(LuaEvent.class);
+
+		add(JavaAPI.class);
+		add(ClassAPI.class);
+		add(InstanceAPI.class);
+		add(FieldAPI.class);
 
 		add(Vertex.class);
 		add(FiguraModelPart.class);
@@ -201,6 +210,7 @@ public class FiguraAPIManager {
 		put("textures", r -> r.texture = new TextureAPI(r.owner));
 		put("config", r -> new ConfigAPI(r.owner));
 		if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
+		if(Configs.EXPOSE_JAVA_API.value) put("java", r -> r.java = new JavaAPI(r.owner));
         put("server_packets", r -> r.serverPackets = new ServerPacketsAPI(r.owner));
 
 		put("data", r -> new DataAPI(r.owner));
