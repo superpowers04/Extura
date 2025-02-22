@@ -12,7 +12,6 @@ import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.entity.NullEntity;
 import org.figuramc.figura.lua.api.event.EventsAPI;
 import org.figuramc.figura.lua.api.event.LuaEvent;
-import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.nameplate.NameplateAPI;
 import org.figuramc.figura.lua.api.ping.PingAPI;
@@ -47,7 +46,6 @@ public class FiguraLuaRuntime {
 	public VanillaModelAPI vanilla_model;
 	public KeybindAPI keybinds;
 	public HostAPI host;
-	public JavaAPI java;
 	public NameplateAPI nameplate;
 	public RendererAPI renderer;
 	public ActionWheelAPI action_wheel;
@@ -77,17 +75,8 @@ public class FiguraLuaRuntime {
 		userGlobals.load(new TableLib());
 		userGlobals.load(new JseStringLib());
 		userGlobals.load(new JseMathLib());
-		if(avatar.isHost){
-			userGlobals.set("isHost", LuaValue.TRUE);
-			if(Configs.EXPOSE_SENSITIVE_LIBRARIES.value){
-				userGlobals.load(new JseIoLib());
-				userGlobals.load(new JseOsLib());
-				userGlobals.load(new CoroutineLib());
-				userGlobals.rawset("expose_sensitive_libraries", LuaValue.TRUE);
-			}
-		}else{
-			userGlobals.set("isHost", LuaValue.FALSE);
-		}
+		userGlobals.set("isHost", avatar.isHost ? LuaValue.TRUE : LuaValue.FALSE);
+		
 
 		LuaC.install(userGlobals);
 
