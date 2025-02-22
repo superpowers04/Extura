@@ -419,6 +419,10 @@ public class Configs {
 				this.name = this.name.copy();
 				this.tooltip = FiguraText.of("config.expose_http.tooltip");
 			}};
+	public static final ConfigType.BoolConfig HIDE_DISCLAIMER = new ConfigType.BoolConfig("hide_disclaimer", DANGEROUS, false) {{
+				this.name = this.name.copy();
+				this.tooltip = FiguraText.of("config.hide_disclaimer.tooltip");
+			}};
 	public static final ConfigType.BoolConfig USE_CACHE = new ConfigType.BoolConfig("use_cache", EXTURA, true) {{
 				this.name = this.name.copy();
 				this.tooltip = FiguraText.of("config.use_cache.tooltip");
