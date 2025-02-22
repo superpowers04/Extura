@@ -7,6 +7,7 @@ import org.figuramc.figura.lua.api.data.ResourcesAPI;
 import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.entity.PlayerAPI;
 import org.figuramc.figura.lua.api.event.EventsAPI;
+import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.json.JsonAPI;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.math.MatricesAPI;
@@ -66,6 +67,8 @@ public abstract class FiguraGlobalsDocs {
     public ClientAPI client;
     @LuaFieldDoc("globals.host")
     public HostAPI host;
+    @LuaFieldDoc("globals.java")
+    public JavaAPI java;
     @LuaFieldDoc("globals.avatar")
     public AvatarAPI avatar;
     @LuaFieldDoc("globals.particles")
