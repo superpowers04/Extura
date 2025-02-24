@@ -1,5 +1,5 @@
-<h1 align="center"> Extura </h1>
-A Figura fork that allows you to do some out of Figura-scope things. This is mostly just a personal project for me to do random things. 
+<h1 align="center"> Extura-Insecure </h1>
+A branch of Extura that allows access to more dangerous functions. Extura is a Figura fork that allows you to do some out of Figura-scope things. This is mostly just a personal project for me to do random things. 
 I doubt I'll port it to a mixins addon since I know nothing about mixins
 
 <h1 align="center"> Figura </h1>
