@@ -30,7 +30,7 @@
 	"figura.config.vanilla_cloud.tooltip": "Forces the backend to use %s",
 	"figura.config.extura": "Extura - Advanced",
 	"figura.config.extura.tooltip": "Extura settings",
-	"figura.config.dangerous": "Extura - DANGEROUS | ALLOWS AVATARS TO DO DANGEROUS THINGS | EXTURA IS NOT RESPONSIBLE FOR DAMAGE CAUSED BY USING THIS!",
+	"figura.config.dangerous": "Extura-insecure - DANGEROUS | ALLOWS AVATARS TO DO DANGEROUS THINGS | EXTURA IS NOT RESPONSIBLE FOR DAMAGE CAUSED BY USING THIS!",
 	"figura.config.helper_errors": "Enable helper errors",
 	"figura.config.helper_errors.tooltip": "Enables the game throwing errors for extra things to help preventing confusing errors later",
 	"figura.config.expose_extura_api": "Expose Extura API",
@@ -49,15 +49,15 @@
 	"figura.config.get_blocks_limit.tooltip": "Toggles if scripts can bypass the 8 block limit of world.getBlocks",
 
 	"figura.gui.extura_disclaimer.title":"IMPORTANT!!",
-	"figura.gui.extura_disclaimer.0":"You're currently using Super Extura!",
-	"figura.gui.extura_disclaimer.1":"\n\nSuper Extura has options that can ",
+	"figura.gui.extura_disclaimer.0":"You're currently using the insecure branch of Extura!",
+	"figura.gui.extura_disclaimer.1":"\n\nExtura-insecure has options that can ",
 	"figura.gui.extura_disclaimer.2":"damage your machine, delete files or other harmful things!\n",
 	"figura.gui.extura_disclaimer.3":"If you do not want host avatars to do potentially harmful things or if what was just asked makes no sense,\n",
 	"figura.gui.extura_disclaimer.4":"IMMEDIATELY Remove the version of Extura you have installed and use normal ",
-	"figura.gui.extura_disclaimer.5":"!\nTo enable Super Extura's ",
+	"figura.gui.extura_disclaimer.5":"!\nTo enable Extura-insecure's ",
 	"figura.gui.extura_disclaimer.6":"dangerous ",
 	"figura.gui.extura_disclaimer.7":"features, enable Super Secret Enabler.",
-	"figura.gui.extura_disclaimer.8":"\n\nSuper Extura, Extura and Figura are NOT responsible for ANY damages caused by this mod!",
+	"figura.gui.extura_disclaimer.8":"\n\nExtura-insecure, Extura and Figura are NOT responsible for ANY damages caused by this mod!\nFiguraMC does not ENDORSE, provide help for or otherwise have any involvement with Extura or Extura-insecure outside of some loose commits",
 
 
 	"figura.config.get_target_limit": "Unlimited entity:getTarget",
