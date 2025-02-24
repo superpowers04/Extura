@@ -140,7 +140,7 @@ public class FiguraLuaRuntime {
 	private void loadExtraLibraries() {
 		// require
 		this.setGlobal("require", require);
-		this.setGlobal("addScript", addScript);
+		this.setGlobal("addScript", addScript); // TODO ADD DEPRECATION NOTICE
 		this.setGlobal("getScripts", getScripts);
 		this.setGlobal("getScript", getScript);
 		this.setGlobal("add_script", addScript);
