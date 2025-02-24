@@ -151,9 +151,9 @@ public class FiguraLuaRuntime {
         this.setGlobal("loadstring", loadstring);
 
         // addScript & getScript
-        this.setGlobal("add_script", addScript);
-        this.setGlobal("get_scripts", getScripts);
-        this.setGlobal("get_script", getScript);
+        this.setGlobal("addScript", addScript);
+        this.setGlobal("getScripts", getScripts);
+        this.setGlobal("getScript", getScript);
 
         // load print functions
         FiguraLuaPrinter.loadPrintFunctions(this);
