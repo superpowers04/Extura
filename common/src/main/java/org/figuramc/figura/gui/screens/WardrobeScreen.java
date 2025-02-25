@@ -119,10 +119,10 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		// -- bottom -- // 
 
 		// version
-		final String buildString = FiguraMod.VERSION.noBuildString().replace("Figura","Extura");
+		final String buildString = FiguraMod.VERSION.noBuildString();
 		final String buildVersion = buildString.substring(0,buildString.lastIndexOf('-'));
 		final String dateBuilt = new Date(new Long(FiguraMod.VERSION.noBuildString().substring(buildVersion.length()+1))).toString();
-		MutableComponent versionText = FiguraText.of().append(" " + buildVersion + ", Built on " + dateBuilt).withStyle(ChatFormatting.ITALIC);
+		MutableComponent versionText = FiguraText.of("Extura").append(", Compatible with " + buildVersion + "\n Built on " + dateBuilt).withStyle(ChatFormatting.ITALIC);
 		final int versionStatus = NetworkStuff.latestVersion != null ? NetworkStuff.latestVersion.compareTo(FiguraMod.VERSION) : 0;
 		boolean oldVersion = versionStatus > 0;
 		if (oldVersion) {

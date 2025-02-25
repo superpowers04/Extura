@@ -17,7 +17,7 @@
   },
 
   "license": "Polyform-Noncommercial-1.0.0",
-  "icon": "assets/figura/icon.png",
+  "icon": "assets/extura/icon.png",
 
   "environment": "*",
   "entrypoints": {
@@ -38,7 +38,7 @@
   ],
   "depends": {
     "java": ">=${java_version}",
-    "minecraft": "${minecraft_version}",
+    "minecraft": ">=${minecraft_version}",
     "fabricloader": ">=0.15.0"
   },
   "conflicts": {
@@ -58,7 +58,7 @@
         "Ko-fi": "https://ko-fi.com/skyrina",
         "Open Collective": "https://opencollective.com/figura",
         "Modrinth":  "https://modrinth.com/mod/figura/",
-        "GitHub":  "https://github.com/FiguraMC/Figura"
+        "GitHub":  "https://github.com/superpowers04/extura"
       }
     }
   }
