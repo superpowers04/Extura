@@ -5,22 +5,22 @@ license = "Polyform-Noncommercial-1.0.0"
 displayURL = "https://github.com/superpowers04/Extura"
 
 [[mods]]
-modId = "extura"
+modId = "extura-insecure"
 version = "${version}"
-displayName = "Extura - Fork of Figura(Forge)"
+displayName = "Extura-insecure - Insecure branch of Extura(Forge)"
 logoFile="assets/extura_insecure/icon.png"
-authors = "ConstantDust, Superpowers04, PoolloverNathan - ExtExtura"
-credits = "superpowers04, ConstantDust, PoolloverNathan"
+authors = "Superpowers04"
+credits = "superpowers04, ConstantDust, PoolloverNathan, soup587"
 description = '''
-A fork of Figura to add extra features
+A branch of a fork of Figura to add more spicy features
 '''
 [[mods]]
 modId = "extura"
 version = "${version}"
 displayName = "Extura - Fork of Figura(Forge)"
 logoFile="assets/extura/icon.png"
-authors = "ConstantDust, Superpowers04, PoolloverNathan - ExtExtura"
-credits = "superpowers04, ConstantDust, PoolloverNathan"
+authors = "Superpowers04"
+credits = "superpowers04, ConstantDust, soup587, PoolloverNathan"
 description = '''
 A fork of Figura to add extra features
 '''
