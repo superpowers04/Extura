@@ -5,7 +5,7 @@ license = "Polyform-Noncommercial-1.0.0"
 displayURL = "https://github.com/superpowers04/Extura"
 
 [[mods]]
-modId = "extura-insecure"
+modId = "extura_insecure"
 version = "${version}"
 displayName = "Extura-insecure - Insecure branch of Extura(Forge)"
 logoFile="assets/extura_insecure/icon.png"

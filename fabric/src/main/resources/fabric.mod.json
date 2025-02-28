@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "extura-insecure",
+  "id": "extura_insecure",
   "version": "${version}",
 
   "name": "Extura-insecure - Insecure branch of Extura(Fabric)",
