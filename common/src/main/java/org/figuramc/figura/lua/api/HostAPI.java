@@ -1042,7 +1042,6 @@ public class HostAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("host.close_container")
 	public void closeContainer() {
-		if (!canExturaCheat()) return;
 		LocalPlayer player = this.minecraft.player;
 		player.closeContainer();
 	}
@@ -1080,7 +1079,7 @@ public class HostAPI {
 	)
 	public void setPlayerMovement(Boolean playerMovement) {
 		LocalPlayer player;
-		if (!this.isHost || (player = this.minecraft.player) == null) return;
+		if (!this.isHost || (player = this.minecraft.player) == null || !canExturaCheat()) return;
 		player.input = (playerMovement ? new ExturaInput(this.minecraft.options) : new NoInput());
 
 	}
@@ -1244,7 +1243,7 @@ public class HostAPI {
 			value = "host.set_block"
 	)
 	public Boolean setBlock(@LuaNotNil String string, Object x, Double y, Double z) {
-		if(!this.isHost) return false;
+		if(!this.isHost || !canExturaCheat()) return false;
 		BlockPos pos = LuaUtils.parseVec3("setBlock", x, y, z).asBlockPos();
 		try {
 			Level level = this.minecraft.level;
