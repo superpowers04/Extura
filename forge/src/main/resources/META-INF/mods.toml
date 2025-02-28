@@ -8,6 +8,16 @@ displayURL = "https://github.com/superpowers04/Extura"
 modId = "extura"
 version = "${version}"
 displayName = "Extura - Fork of Figura(Forge)"
+logoFile="assets/extura_insecure/icon.png"
+authors = "ConstantDust, Superpowers04, PoolloverNathan - ExtExtura"
+credits = "superpowers04, ConstantDust, PoolloverNathan"
+description = '''
+A fork of Figura to add extra features
+'''
+[[mods]]
+modId = "extura"
+version = "${version}"
+displayName = "Extura - Fork of Figura(Forge)"
 logoFile="assets/extura/icon.png"
 authors = "ConstantDust, Superpowers04, PoolloverNathan - ExtExtura"
 credits = "superpowers04, ConstantDust, PoolloverNathan"

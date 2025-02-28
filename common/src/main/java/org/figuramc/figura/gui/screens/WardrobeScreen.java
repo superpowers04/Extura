@@ -20,6 +20,8 @@ import org.figuramc.figura.utils.FiguraIdentifier;
 import org.figuramc.figura.utils.FiguraText;
 import org.figuramc.figura.utils.IOUtils;
 import org.figuramc.figura.utils.TextUtils;
+import org.figuramc.figura.utils.ColorUtils;
+import org.figuramc.figura.utils.ColorUtils.Colors;
 import org.figuramc.figura.utils.ui.UIHelper;
 import org.figuramc.figura.backend2.Destination;
 
@@ -43,9 +45,11 @@ public class WardrobeScreen extends AbstractPanelScreen {
 
 	private Button upload, delete, back;
 	private ContextMenu uploadContext, deleteContext;
+	private boolean shownDisclaimer=false;
 
 	public WardrobeScreen(Screen parentScreen) {
 		super(parentScreen, FiguraText.of("gui.panels.title.wardrobe"));
+
 	}
 
 	private AvatarInfoWidget infoWidget;
@@ -117,12 +121,34 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		addRenderableOnly(new LoadingErrorWidget(statusWidget.getX() - 18, statusWidget.getY(), 14));
 
 		// -- bottom -- // 
+		if(!Configs.HIDE_DISCLAIMER.value && !shownDisclaimer){
+			shownDisclaimer = true;
+			Configs.EXPOSE_JAVA_API.setValue("false");
+			Configs.EXPOSE_SENSITIVE_LIBRARIES.setValue("false");
+			Configs.EXPOSE_HTTP.setValue("false");
+			minecraft.setScreen(new FiguraConfirmScreen(confirmed -> {
 
+				minecraft.setScreen(this);
+			}, FiguraText.of("gui.extura_disclaimer.title").withStyle(Colors.LUA_ERROR.style).withStyle(ChatFormatting.BOLD), 
+			FiguraText.of("gui.extura_disclaimer.0")
+				.append(FiguraText.of("gui.extura_disclaimer.1"))
+				.append(FiguraText.of("gui.extura_disclaimer.2").withStyle(Colors.LUA_ERROR.style).withStyle(ChatFormatting.BOLD))
+				.append(FiguraText.of("gui.extura_disclaimer.3"))
+				.append(FiguraText.of("gui.extura_disclaimer.4").withStyle(Colors.LUA_ERROR.style).withStyle(ChatFormatting.BOLD))
+				.append(Component.literal("Extura").withStyle(ChatFormatting.BOLD).withStyle(Colors.PURPLE.style).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/superpowers04/extura"))))
+				.append(Component.literal(" or ").withStyle(ChatFormatting.BOLD).withStyle(Colors.LUA_ERROR.style))
+				.append(Component.literal("Figura").withStyle(ChatFormatting.BOLD).withStyle(Colors.FIGURA_BLUE.style).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/FiguraMC/Figura"))))
+				.append(FiguraText.of("gui.extura_disclaimer.5"))
+				.append(FiguraText.of("gui.extura_disclaimer.6").withStyle(ChatFormatting.RED, ChatFormatting.BOLD))
+				.append(FiguraText.of("gui.extura_disclaimer.7"))
+				.append(FiguraText.of("gui.extura_disclaimer.8").withStyle(ChatFormatting.RED, ChatFormatting.BOLD))
+			, this));
+		}
 		// version
 		final String buildString = FiguraMod.VERSION.noBuildString();
 		final String buildVersion = buildString.substring(0,buildString.lastIndexOf('-'));
 		final String dateBuilt = new Date(new Long(FiguraMod.VERSION.noBuildString().substring(buildVersion.length()+1))).toString();
-		MutableComponent versionText = Component.literal("Extura").append(", Compatible with " + buildVersion + "\n Built on " + dateBuilt).withStyle(ChatFormatting.ITALIC);
+		MutableComponent versionText = FiguraText.of("Extura-Insecure").append(", Compatible with " + buildVersion + "\nBuilt on " + dateBuilt).withStyle(ChatFormatting.ITALIC);
 		final int versionStatus = NetworkStuff.latestVersion != null ? NetworkStuff.latestVersion.compareTo(FiguraMod.VERSION) : 0;
 		boolean oldVersion = versionStatus > 0;
 		if (oldVersion) {
@@ -190,6 +216,7 @@ public class WardrobeScreen extends AbstractPanelScreen {
 				button -> Minecraft.getInstance().setScreen(new KeybindScreen(this))
 		);
 		addRenderableWidget(keybinds);
+
 
 		// avatar metadata
 		addRenderableOnly(infoWidget = new AvatarInfoWidget(this.width - panels - 4, 56, panels, back.getY() - 60));

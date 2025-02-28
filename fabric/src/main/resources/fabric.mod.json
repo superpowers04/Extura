@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "extura",
+  "id": "extura-insecure",
   "version": "${version}",
 
-  "name": "Extura - Fork of Figura(Fabric)",
-  "description": "Extensive customization of the Player model. Extura fork",
+  "name": "Extura-insecure - Insecure branch of Extura(Fabric)",
+  "description": "A branch of a a fork of Figura.",
   "authors": [
     "skyrina", "lumelia", "UnlikePaladin", "omoflop","ConstantDust - Original Extura","Superpowers04 - Extura","soup587 - Extura","PoolloverNathan - ExtExtura"
   ],
