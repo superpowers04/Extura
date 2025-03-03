@@ -1,12 +1,17 @@
 package org.figuramc.figura.mixin.render;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
@@ -16,6 +21,7 @@ import org.figuramc.figura.lua.api.ClientAPI;
 import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.math.matrix.FiguraMat4;
 import org.figuramc.figura.math.vector.FiguraVec3;
+import org.figuramc.figura.model.rendering.texture.RenderTypes.FiguraShaderStorage;
 import org.figuramc.figura.utils.EntityUtils;
 import org.figuramc.figura.utils.RenderUtils;
 import org.joml.Matrix4f;
@@ -26,6 +32,10 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.function.Consumer;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin implements GameRendererAccessor {
@@ -45,6 +55,28 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
     private Matrix4f bobbingMatrix;
     @Unique
     private boolean hasShaders;
+
+    @Inject(
+            method = "reloadShaders",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Ljava/util/List;add(Ljava/lang/Object;)Z",
+                    remap = false,
+                    shift = At.Shift.AFTER
+            ),
+            slice = @Slice(
+                    from = @At(
+                            value = "NEW",
+                            target = "(Lnet/minecraft/server/packs/resources/ResourceProvider;Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;)Lnet/minecraft/client/renderer/ShaderInstance;",
+                            ordinal = 0
+                    )
+            )
+    )
+    private void addShaders(ResourceProvider factory, CallbackInfo ci, @Local(ordinal = 1) List<Pair<ShaderInstance, Consumer<ShaderInstance>>> list2) throws IOException {
+        list2.add(
+                Pair.of(new ShaderInstance(factory,"figura_rendertype_no_shading", DefaultVertexFormat.NEW_ENTITY), (shaderInstance) -> FiguraShaderStorage.rendertypeNoShadingShader = shaderInstance)
+        );
+    }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setup(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/world/entity/Entity;ZZF)V", shift = At.Shift.BEFORE))
     private void onCameraRotation(float tickDelta, long limitTime, PoseStack stack, CallbackInfo ci) {
