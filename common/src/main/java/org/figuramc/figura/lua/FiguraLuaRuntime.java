@@ -234,7 +234,7 @@ public class FiguraLuaRuntime {
 
 	private final ThreeArgFunction addScript = new ThreeArgFunction() {
 		@Override
-		public LuaValue call(LuaValue arg,LuaValue contents,LuaValue replacing) {
+		public LuaValue call(LuaValue arg,LuaValue contents,LuaValue errorIfNotReplacing) {
 			Path path = PathUtils.getPath(arg.checkjstring());
 			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
 			String scriptName = PathUtils.computeSafeString(PathUtils.getPath(PathUtils.computeSafeString(
@@ -249,7 +249,7 @@ public class FiguraLuaRuntime {
 			}
 			String scriptContent = contents.checkjstring();
 			var scriptNbt = owner.nbt.getCompound("scripts");
-			if(replacing.toboolean()){
+			if(errorIfNotReplacing.toboolean()){
 				if(!scripts.containsKey(scriptName)){
 					throw new LuaError("Script " + scriptName + " doesn't exist!");
 				}
