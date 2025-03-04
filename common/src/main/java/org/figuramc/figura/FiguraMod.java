@@ -66,10 +66,10 @@ public class FiguraMod {
 		LocalAvatarFetcher.init();
 		CacheAvatarLoader.init();
 		FiguraDocsManager.init();
-		FiguraRuntimeResources.init();
 
 		GeckoLibCompat.init();
 		SimpleVCCompat.init();
+		FiguraRuntimeResources.init();
 	}
 
 	public static List<FiguraResourceListener> getResourceListeners() {
