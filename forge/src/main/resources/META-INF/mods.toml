@@ -27,6 +27,12 @@ description = '''
 Extensive customization of the Player model. A stub so mods think normal Figura is installed
 '''
 
+[[dependencies.extura]]
+modId = "figura"
+mandatory = true
+versionRange = "[0.1.4,)"
+ordering = "NONE"
+side = "BOTH"
 
 [modproperties.figura]
 assets_version="${assets_version}"
