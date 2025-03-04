@@ -22,6 +22,7 @@ import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.utils.EntityUtils;
+import net.minecraft.network.chat.Component;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -211,6 +212,8 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
 		map.put("nametag_visibility", team.getNameTagVisibility().name);
 		map.put("death_message_visibility", team.getDeathMessageVisibility().name);
 		map.put("collision_rule", team.getCollisionRule().name);
+		map.put("suffixJson", Component.Serializer.toJson(team.getPlayerSuffix()));
+        map.put("prefixJson", Component.Serializer.toJson(team.getPlayerPrefix()));
 
 		return map;
 	}
