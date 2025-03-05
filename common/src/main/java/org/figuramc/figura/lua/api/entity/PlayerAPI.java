@@ -188,8 +188,6 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
         map.put("name", team.getName());
         map.put("display_name", team.getDisplayName().getString());
         map.put("color", team.getColor().getName());
-        map.put("suffixJson", Component.Serializer.toJson(team.getPlayerSuffix()));
-        map.put("prefixJson", Component.Serializer.toJson(team.getPlayerPrefix()));
         map.put("prefix", team.getPlayerPrefix().getString());
         map.put("suffix", team.getPlayerSuffix().getString());
         map.put("friendly_fire", team.isAllowFriendlyFire());
