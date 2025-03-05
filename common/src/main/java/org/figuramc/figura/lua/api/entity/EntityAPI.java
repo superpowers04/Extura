@@ -18,6 +18,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.NbtToLua;
 import org.figuramc.figura.lua.ReadOnlyLuaTable;
@@ -70,17 +71,20 @@ public class EntityAPI<T extends Entity> {
             return new LivingEntityAPI<>(le);
         return new EntityAPI<>(e);
     }
-
-    protected final boolean checkEntity() {
-        boolean thingy = true;
-        if (entity.isRemoved() || getLevel() != Minecraft.getInstance().level) {
-            @SuppressWarnings("unchecked")
-            T newEntityInstance = (T) EntityUtils.getEntityByUUID(entityUUID);
-            thingy = newEntityInstance != null;
-            if (thingy)
-                entity = newEntityInstance;
+    @LuaWhitelist
+    @LuaMethodDoc("entity.regrab_entity")
+    public boolean regrabEntity(){
+    	@SuppressWarnings("unchecked")
+        T newEntityInstance = (T) EntityUtils.getEntityByUUID(entityUUID);
+        if (newEntityInstance != null){
+            entity = newEntityInstance;
+            return true;
         }
-        return thingy;
+        return false;
+    }
+    protected final boolean checkEntity() {
+        if (!entity.isRemoved() && getLevel() == Minecraft.getInstance().level) return true;
+        return regrabEntity();
     }
 
     protected Level getLevel() {
@@ -327,16 +331,15 @@ public class EntityAPI<T extends Entity> {
     )
     public boolean isMoving(boolean ignoreY) {
         checkEntity();
-        return entity.getX() != entity.xOld
-                || (ignoreY ? false : (entity.getY() != entity.yOld))
-                || entity.getZ() != entity.zOld;
+        return entity.getX() != entity.xOld || (ignoreY || entity.getY() != entity.yOld) || entity.getZ() != entity.zOld;
     }
 
     @LuaWhitelist
     @LuaMethodDoc("entity.is_falling")
     public boolean isFalling() {
         checkEntity();
-        return !entity.onGround() && entity.getY() < entity.yOld;
+        return !entity.onGround()
+                && entity.getY() < entity.yOld;
     }
 
     @LuaWhitelist
@@ -369,7 +372,13 @@ public class EntityAPI<T extends Entity> {
     public LuaTable getNbt() {
         checkEntity();
         CompoundTag tag = new CompoundTag();
-        entity.saveWithoutId(tag);
+        try{
+
+	        entity.saveWithoutId(tag);
+        }catch(net.minecraft.ReportedException meow){
+        	regrabEntity();
+        	entity.saveWithoutId(tag);
+        }
         return (LuaTable) NbtToLua.convert(tag);
     }
 
@@ -451,9 +460,18 @@ public class EntityAPI<T extends Entity> {
     public Object[] getTargetedBlock(boolean ignoreLiquids, Double distance) {
         checkEntity();
         if (distance == null) distance = 20d;
-        distance = Math.max(Math.min(distance, 20), -20);
+        if (!Configs.GET_TARGET_LIMIT.value) distance = Math.max(Math.min(distance, 20), -20);
         HitResult result = entity.pick(distance, 1f, !ignoreLiquids);
         return LuaUtils.parseBlockHitResult(result);
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("entity.get_supporting_block_pos" )
+    public BlockPos getSupportingBlockPos() {
+        checkEntity();
+        try{
+			return entity.mainSupportingBlockPos.get();
+        }catch(Exception ignored){return null;}
     }
 
     @LuaWhitelist
@@ -470,7 +488,7 @@ public class EntityAPI<T extends Entity> {
     public Object[] getTargetedEntity(Double distance) {
         checkEntity();
         if (distance == null) distance = 20d;
-        distance = Math.max(Math.min(distance, 20), 0);
+        if (!Configs.GET_TARGET_LIMIT.value) distance = Math.max(Math.min(distance, 20), 0);
 
         Vec3 vec3 = entity.getEyePosition(1f);
         HitResult result = entity.pick(distance, 1f, false);
@@ -480,10 +498,8 @@ public class EntityAPI<T extends Entity> {
         AABB aABB = entity.getBoundingBox().expandTowards(vec32.scale(distance)).inflate(1d);
         EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, e -> e != entity, distance);
 
-        if (entityHit != null)
-            return new Object[]{EntityAPI.wrap(entityHit.getEntity()), FiguraVec3.fromVec3(entityHit.getLocation())};
 
-        return null;
+        return ((entityHit == null) ? null : new Object[]{EntityAPI.wrap(entityHit.getEntity()), FiguraVec3.fromVec3(entityHit.getLocation())});
     }
 
     @LuaWhitelist
@@ -542,8 +558,7 @@ public class EntityAPI<T extends Entity> {
     public LuaValue getVariable(String key) {
         checkEntity();
         Avatar a = AvatarManager.getAvatar(entity);
-        LuaTable table = a == null || a.luaRuntime == null ? new LuaTable() : a.luaRuntime.avatar_meta.storedStuff;
-        table = new ReadOnlyLuaTable(table);
+        LuaTable table = new ReadOnlyLuaTable((a == null || a.luaRuntime == null) ? new LuaTable() : a.luaRuntime.avatar_meta.storedStuff);
         return key == null ? table : table.get(key);
     }
 

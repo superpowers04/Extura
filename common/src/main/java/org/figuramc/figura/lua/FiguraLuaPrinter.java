@@ -73,7 +73,6 @@ public class FiguraLuaPrinter {
                 .replace("\n\t[Java]: in ?", "")
                 .replace("'<eos>' expected", "Expected end of script");
 
-
         // get script line
         line: {
             if (owner.minify) {
@@ -114,7 +113,9 @@ public class FiguraLuaPrinter {
 
         owner.errorText = TextUtils.replaceTabs(Component.literal(message).withStyle(ColorUtils.Colors.LUA_ERROR.style));
 
-        if ((owner.entityType == EntityType.PLAYER && !Configs.LOG_OTHERS.value && !FiguraMod.isLocal(owner.owner)) || owner.permissions.getCategory() == Permissions.Category.BLOCKED)
+        if (!FiguraMod.isLocal(owner.owner) && 
+            ((!Configs.LOG_OTHERS.value && owner.entityType == EntityType.PLAYER)
+            || owner.permissions.getCategory() == Permissions.Category.BLOCKED))
             return;
 
         chatQueue.offer(component); // bypass the char limit filter
@@ -153,8 +154,9 @@ public class FiguraLuaPrinter {
     private static final Function<FiguraLuaRuntime, LuaValue> PRINT_FUNCTION = runtime -> new VarArgFunction() {
         @Override
         public Varargs invoke(Varargs args) {
-            if (!Configs.LOG_OTHERS.value && !FiguraMod.isLocal(runtime.owner.owner))
-                return NIL;
+            boolean local = FiguraMod.isLocal(runtime.owner.owner);
+            if (!local && (!Configs.LOG_OTHERS.value || runtime.owner.permissions.get(Permissions.PRINTING) < 1))
+	            return NIL;
 
             MutableComponent text = Component.empty();
             for (int i = 0; i < args.narg(); i++)
@@ -176,8 +178,8 @@ public class FiguraLuaPrinter {
         @Override
         public Varargs invoke(Varargs args) {
             boolean local = FiguraMod.isLocal(runtime.owner.owner);
-            if (!Configs.LOG_OTHERS.value && !local)
-                return NIL;
+            if (!local && (!Configs.LOG_OTHERS.value || runtime.owner.permissions.get(Permissions.PRINTING) < 1))
+	            return NIL;
 
             TextUtils.allowScriptEvents = true;
 
@@ -186,12 +188,9 @@ public class FiguraLuaPrinter {
                 text.append(TextUtils.tryParseJson(args.arg(i + 1).tojstring()));
 
             TextUtils.allowScriptEvents = false;
+            
+            sendLuaChatMessage(!local ? TextUtils.removeClickableObjects(text) : text);
 
-            if (!local) {
-                sendLuaChatMessage(TextUtils.removeClickableObjects(text));
-            } else {
-                sendLuaChatMessage(text);
-            }
 
             return LuaValue.valueOf(text.getString());
         }
@@ -205,9 +204,10 @@ public class FiguraLuaPrinter {
     private static final Function<FiguraLuaRuntime, LuaValue> PRINT_TABLE_FUNCTION = runtime -> new VarArgFunction() {
         @Override
         public Varargs invoke(Varargs args) {
-            if (!Configs.LOG_OTHERS.value && !FiguraMod.isLocal(runtime.owner.owner))
-                return NIL;
-
+            if (!FiguraMod.isLocal(runtime.owner.owner) && (!Configs.LOG_OTHERS.value || runtime.owner.permissions.get(Permissions.PRINTING) < 1))
+	            return NIL;
+	        
+		    
             boolean silent = false;
             MutableComponent text = Component.empty();
 
@@ -229,6 +229,36 @@ public class FiguraLuaPrinter {
         }
     };
 
+    private static Component tableToTextLimited(LuaTypeManager typeManager, LuaValue value, int depth, int indent, boolean hasTooltip) {
+        // attempt to parse top
+        if (value.isuserdata())
+            return userdataToText(typeManager, value, depth, indent, hasTooltip);
+
+        // normal print when invalid type or depth limit
+        if (!value.istable() || depth <= 0)
+            return getPrintText(typeManager, value, hasTooltip, true);
+
+        // format text
+        MutableComponent text = Component.empty()
+                .append(Component.literal("table:").withStyle(getTypeColor(value)))
+                .append(Component.literal(" {\n").withStyle(ChatFormatting.GRAY));
+
+        String spacing = "\t".repeat(indent - 1);
+
+        LuaTable table = value.checktable();
+        int limit = 150;
+        for (LuaValue key : table.keys()){
+            if(limit <= 0){
+                text.append(Component.literal("...").withStyle(ChatFormatting.GRAY));
+                break;
+            }
+            text.append(getTableEntry(typeManager, spacing, key, table.get(key), hasTooltip, depth, indent));
+            limit--;
+        }
+
+        text.append(spacing).append(Component.literal("}").withStyle(ChatFormatting.GRAY));
+        return text;
+    }
     private static Component tableToText(LuaTypeManager typeManager, LuaValue value, int depth, int indent, boolean hasTooltip) {
         // attempt to parse top
         if (value.isuserdata())
@@ -337,7 +367,7 @@ public class FiguraLuaPrinter {
 
         // table tooltip
         if (hasTooltip && (value.istable() || value.isuserdata())) {
-            Component table = TextUtils.replaceTabs(tableToText(typeManager, value, 1, 1, false));
+            Component table = TextUtils.replaceTabs(tableToTextLimited(typeManager, value, 1, 1, false));
             text.withStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, table)));
         }
 
@@ -345,22 +375,16 @@ public class FiguraLuaPrinter {
     }
 
     private static Style getTypeColor(LuaValue value) {
-        if (value.istable())
-            return ColorUtils.Colors.AWESOME_BLUE.style;
-        else if (!(value instanceof LuaString) && value.isnumber())
-            return ColorUtils.Colors.FIGURA_BLUE.style;
-        else if (value.isnil())
-            return ColorUtils.Colors.LUA_ERROR.style;
-        else if (value.isboolean())
-            return ColorUtils.Colors.LUA_PING.style;
-        else if (value.isfunction())
-            return Style.EMPTY.withColor(ChatFormatting.GREEN);
-        else if (value.isuserdata())
-            return Style.EMPTY.withColor(ChatFormatting.YELLOW);
-        else if (value.isthread())
-            return Style.EMPTY.withColor(ChatFormatting.GOLD);
-        else
-            return Style.EMPTY.withColor(ChatFormatting.WHITE);
+        return switch (value.type()) {
+            case LuaValue.TTABLE -> ColorUtils.Colors.AWESOME_BLUE.style;
+            case LuaValue.TNIL -> ColorUtils.Colors.LUA_ERROR.style;
+            case LuaValue.TBOOLEAN -> ColorUtils.Colors.LUA_PING.style;
+            case LuaValue.TNUMBER -> ColorUtils.Colors.FIGURA_BLUE.style;
+            case LuaValue.TSTRING -> Style.EMPTY.withColor(ChatFormatting.WHITE);
+            case LuaValue.TUSERDATA -> Style.EMPTY.withColor(ChatFormatting.YELLOW);
+            case LuaValue.TTHREAD -> Style.EMPTY.withColor(ChatFormatting.GOLD);
+        	default -> Style.EMPTY.withColor(ChatFormatting.WHITE);
+        };
     }
 
     // -- SLOW PRINTING OF LOG --// 

@@ -178,16 +178,16 @@ public class PermissionManager {
         if (BACKEND_CHECKED.contains(id))
             return;
 
-        boolean canAdd;
+        boolean canAdd = false;
         if (!PLAYERS.containsKey(id)) {
             // player do not exist, so pass
             canAdd = true;
         } else {
             // check if the player is still considered default by having no changes on them
-            PermissionPack.PlayerPermissionPack pack = PLAYERS.get(id);
-            Permissions.Category def = getDefaultCategory();
-            if (def == null) def = Permissions.Category.DEFAULT;
-            canAdd = !pack.hasChanges() && pack.getCategory() == def;
+            // PermissionPack.PlayerPermissionPack pack = PLAYERS.get(id);
+            // Permissions.Category def = getDefaultCategory();
+            // if (def == null) def = Permissions.Category.DEFAULT;
+            // canAdd = !pack.hasChanges() && pack.getCategory() == def;
         }
 
         // set the new category for the player

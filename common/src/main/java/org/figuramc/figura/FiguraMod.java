@@ -1,5 +1,7 @@
 package org.figuramc.figura;
 
+import com.google.common.cache.LoadingCache;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;

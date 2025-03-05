@@ -19,16 +19,37 @@ import java.util.concurrent.CompletableFuture;
 public class FiguraInputStream extends InputStream {
     private final InputStream sourceStream;
     private final boolean asyncOnly;
-    private final Avatar parent;
-    public FiguraInputStream(Avatar parent, InputStream sourceStream) {
-        this(parent, sourceStream, false);
-    }
+    private final Avatar avatar;
 
-    public FiguraInputStream(Avatar parent, InputStream sourceStream, boolean asyncOnly) {
+    public FiguraInputStream(InputStream sourceStream) {
+        this.sourceStream = sourceStream;
+        this.asyncOnly = false;
+        this.avatar = null;
+    }
+    public FiguraInputStream(InputStream sourceStream, boolean asyncOnly) {
         this.sourceStream = sourceStream;
         this.asyncOnly = asyncOnly;
-        this.parent = parent;
-        parent.openInputStreams.add(this);
+        this.avatar = null;
+    }
+    public FiguraInputStream(InputStream sourceStream, Avatar avatar) {
+        this(sourceStream, false, avatar);
+    }
+
+    public FiguraInputStream(InputStream sourceStream, boolean asyncOnly, Avatar avatar) {
+        this.sourceStream = sourceStream;
+        this.asyncOnly = asyncOnly;
+        this.avatar = avatar;
+        avatar.openInputStreams.add(this);
+    }
+    public FiguraInputStream(Avatar avatar, InputStream sourceStream) {
+        this(avatar, sourceStream, false);
+    }
+
+    public FiguraInputStream(Avatar avatar, InputStream sourceStream, boolean asyncOnly) {
+        this.sourceStream = sourceStream;
+        this.asyncOnly = asyncOnly;
+        this.avatar = avatar;
+        avatar.openInputStreams.add(this);
     }
 
     @Override
@@ -48,7 +69,7 @@ public class FiguraInputStream extends InputStream {
     public FiguraFuture<LuaString> readAsync(Integer limit) {
         final int finalLimit = limit != null ? limit : available();
         // Future handle that will be returned
-        FiguraFuture<LuaString> future = new FiguraFuture<>();
+        FiguraFuture<LuaString> future = avatar == null ? new FiguraFuture<>() : new FiguraFuture<>(avatar);
         // Calling an async read that will be put in a future results
         CompletableFuture.supplyAsync(() -> {
             try {
@@ -63,7 +84,7 @@ public class FiguraInputStream extends InputStream {
             } catch (IOException e) {
                 throw new LuaError(e);
             }
-        }).whenCompleteAsync(future::handle);
+        }).whenCompleteAsync(future::complete);
         return future;
     }
 
@@ -97,7 +118,11 @@ public class FiguraInputStream extends InputStream {
     @LuaMethodDoc("input_stream.close")
     public void close() throws IOException {
         sourceStream.close();
-        parent.openInputStreams.remove(this);
+        if(avatar != null)
+        	avatar.openInputStreams.remove(this);
+    }
+    public void closeWithoutPop() throws IOException {
+        sourceStream.close();
     }
 
     @Override

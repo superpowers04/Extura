@@ -3,7 +3,7 @@
   "id": "figura",
   "version": "${version}",
 
-  "name": "Figura",
+  "name": "Extura",
   "description": "Extensive customization of the Player model",
   "authors": [
     "skyrina", "lumelia", "UnlikePaladin", "omoflop"
@@ -17,7 +17,7 @@
   },
 
   "license": "Polyform-Noncommercial-1.0.0",
-  "icon": "assets/figura/icon.png",
+  "icon": "assets/extura/icon.png",
 
   "environment": "client",
   "entrypoints": {
@@ -34,7 +34,7 @@
   ],
   "depends": {
     "java": ">=${java_version}",
-    "minecraft":  "<=${minecraft_version} >=1.21",
+    "minecraft":  ">=${minecraft_version}",
     "fabricloader": ">=0.15"
   },
   "conflicts": {
@@ -50,7 +50,7 @@
         "Ko-fi": "https://ko-fi.com/skyrina",
         "Open Collective": "https://opencollective.com/figura",
         "Modrinth":  "https://modrinth.com/mod/figura/",
-        "GitHub":  "https://github.com/FiguraMC/Figura"
+        "GitHub":  "https://github.com/superpowers04/extura"
       }
     }
   }

@@ -78,12 +78,13 @@ public class NetworkStuff {
 
     //limits
     private static final RefilledNumber
-            uploadRate = new RefilledNumber(),
-            downloadRate = new RefilledNumber();
-    private static int maxAvatarSize = Integer.MAX_VALUE;
+			uploadRate = new RefilledNumber(),
+			downloadRate = new RefilledNumber();
+	private static int maxAvatarSize = Integer.MAX_VALUE;
+	private static int pingsRateLimit = Integer.MAX_VALUE, pingsSizeLimit = Integer.MAX_VALUE;
 
-    public static void tick() {
-        //limits
+	public static void tick() {
+		//limits
         uploadRate.tick();
         downloadRate.tick();
 
@@ -198,12 +199,17 @@ public class NetworkStuff {
     // -- connection -- //
 
 
-    public static void connect(String token) {
-        if (isConnected())
-            disconnect(null);
+	public static void connect(String token) {
+		if (isConnected())
+			disconnect(null);
+		if(Configs.BLOCK_CLOUD.value){
+			backendStatus = 1;
+			disconnectedReason = "Cloud disabled";
+			return;
+		}
 
-        backendStatus = 2;
-        connectAPI(token);
+		backendStatus = 2;
+		connectAPI(token);
         connectWS(token);
     }
 
@@ -212,12 +218,13 @@ public class NetworkStuff {
             responseDebug("motd", code, data);
             if (data != null) motd = Emojis.applyEmojis(TextUtils.tryParseJson(data));
         });
-    }
+	}
 
-    public static void disconnect(String reason) {
-        backendStatus = 1;
-        disconnectedReason = reason;
-        disconnectAPI();
+	public static void disconnect(String reason) {
+		if (tasks != null) tasks.cancel(true);
+		backendStatus = 1;
+		disconnectedReason = reason;
+		disconnectAPI();
         disconnectWS();
     }
 
@@ -239,23 +246,25 @@ public class NetworkStuff {
 
     private static void responseDebug(String src, int code, String data) {
         if (debug) FiguraMod.debug("Got response of \"" + src + "\" with code " + code + ":\n\t" + data);
-    }
+	}
 
-    private static void connectAPI(String token) {
-        api = new HttpAPI(token);
-        checkVersion();
-        setLimits();
+	private static void connectAPI(String token) {
+		if(Configs.BLOCK_CLOUD.value) return;
+		api = new HttpAPI(token);
+		checkVersion();
+		setLimits();
     }
 
     private static void disconnectAPI() {
         api = null;
         clear(Util.NIL_UUID);
-    }
+	}
 
-    private static void checkAPI() {
-        async(() -> {
-            if (api == null) {
-                reAuth();
+	private static void checkAPI() {
+		if(Configs.BLOCK_CLOUD.value) return;
+		async(() -> {
+			if (api == null) {
+				reAuth();
                 return;
             }
 
@@ -290,6 +299,15 @@ public class NetworkStuff {
 
             JsonObject limits = json.getAsJsonObject("limits");
             maxAvatarSize = limits.get("maxAvatarSize").getAsInt();
+
+			try {
+				pingsRateLimit = rate.get("pingRate").getAsInt();
+				pingsSizeLimit = rate.get("pingSize").getAsInt();
+			}
+			catch (Exception e) {
+				pingsRateLimit = 32;
+				pingsSizeLimit = 1024;
+			}
         });
     }
 
@@ -302,10 +320,15 @@ public class NetworkStuff {
             responseDebug("getUser", code, data);
 
             //error
-            if (code != 200) {
-                if (code == 404 && Configs.CONNECTION_TOASTS.value)
-                    FiguraToast.sendToast(FiguraText.of("backend.user_not_found"), FiguraToast.ToastType.ERROR);
-                return;
+			if (code != 200) {
+				if(Configs.CONNECTION_TOASTS.value){
+
+					if (code == 404)
+						FiguraToast.sendToast(FiguraText.of("backend.user_not_found",user.id.toString()), FiguraToast.ToastType.ERROR);
+					else
+						FiguraToast.sendToast(FiguraText.of("backend.user_not_found"),code.toString(), FiguraToast.ToastType.ERROR);
+				}
+				return;
             }
 
             //success
@@ -432,12 +455,36 @@ public class NetworkStuff {
         downloadRate.use();
     }
 
+	public static void setBadge(int badgeId) {
+		queueString(Util.NIL_UUID, api -> api.setBadge(badgeId), (code, data) -> {
+			// On error
+			if (code != 200) {
+				FiguraToast.sendToast(FiguraText.of("backend.badge_set_error"), FiguraToast.ToastType.ERROR);
+				return;
+			}
+
+			FiguraToast.sendToast(FiguraText.of("backend.badge_set"));
+		});
+	}
+
+	public static void clearBadge() {
+		queueString(Util.NIL_UUID, HttpAPI::clearBadge, (code, data) -> {
+			// On error
+			if (code != 200) {
+				FiguraToast.sendToast(FiguraText.of("backend.badge_clear_error"), FiguraToast.ToastType.ERROR);
+				return;
+			}
+
+			FiguraToast.sendToast(FiguraText.of("backend.badge_clear"));
+		});
+	}
 
     // -- ws stuff -- //
 
 
     private static void connectWS(String token) {
         if (ws != null) ws.disconnect();
+		if(Configs.BLOCK_CLOUD.value) return;
         try {
             ws = KeyStoreHelper.websocketWithBackendCertificates(token);
             ws.connect();

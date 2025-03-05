@@ -45,6 +45,7 @@ import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.model.FiguraModelPart;
 import org.figuramc.figura.model.rendering.Vertex;
 import org.figuramc.figura.model.rendering.texture.FiguraTexture;
+import org.figuramc.figura.config.Configs;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -140,6 +141,7 @@ public class FiguraAPIManager {
         add(ConfigAPI.class);
 
         add(TextureAtlasAPI.class);
+		add(ExturaAPI.class);
 
         add(FiguraInputStream.class);
         add(FiguraOutputStream.class);
@@ -188,6 +190,7 @@ public class FiguraAPIManager {
         put("pings", r -> r.ping = new PingAPI(r.owner));
         put("textures", r -> r.texture = new TextureAPI(r.owner));
         put("config", r -> new ConfigAPI(r.owner));
+		if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
         put("data", r -> new DataAPI(r.owner));
         put("file", r -> new FileAPI(r.owner));
         put("json", r -> JsonAPI.INSTANCE);

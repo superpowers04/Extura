@@ -1,18 +1,30 @@
 modLoader = "javafml"
 loaderVersion = "[47,)"
-issueTrackerURL = "https://github.com/FiguraMC/Figura/issues"
+issueTrackerURL = "https://github.com/superpowers04/Extura/issues"
 license = "Polyform-Noncommercial-1.0.0"
-displayURL = "https://github.com/FiguraMC/Figura"
+displayURL = "https://github.com/superpowers04/Extura"
+
+[[mods]]
+modId = "extura"
+version = "${version}"
+displayName = "Extura - Fork of Figura(Forge)"
+logoFile="assets/extura/icon.png"
+authors = "ConstantDust, Superpowers04, PoolloverNathan - ExtExtura"
+credits = "superpowers04, ConstantDust, PoolloverNathan"
+description = '''
+A fork of Figura to add extra features
+'''
+
 
 [[mods]]
 modId = "figura"
 version = "${version}"
-displayName = "Figura"
+displayName = "Figura(Stub)"
 logoFile="assets/figura/icon.png"
 authors = "skyrina, lumelia, UnlikePaladin, omoflop"
 credits = "TooManyLimits, Lexize, KitCat962, Manuel-3, superpowers04, auriafoxgirl, applejuiceyy"
 description = '''
-Extensive customization of the Player model
+Extensive customization of the Player model. A stub so mods think normal Figura is installed
 '''
 
 [modproperties.figura]

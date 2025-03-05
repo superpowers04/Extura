@@ -1,5 +1,6 @@
 -- math utils --
-
+local math = math
+local fl = math.floor
 function math.clamp(val, min, max)
    return min > max and max or val > max and max or val < min and min or val
 end
@@ -7,9 +8,8 @@ end
 function math.lerp(a, b, t)
   return a + (b - a) * t
 end
-
 function math.round(arg)
-  return math.floor(arg + 0.5)
+  return fl(arg + 0.5)
 end
 
 function math.map(value, min1, max1, min2, max2)

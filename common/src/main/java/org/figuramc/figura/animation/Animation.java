@@ -9,6 +9,7 @@ import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.model.FiguraModelPart;
 import org.luaj.vm2.LuaError;
+import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 import java.util.*;
@@ -18,6 +19,7 @@ import java.util.*;
         name = "Animation",
         value = "animation"
 )
+// Stole lua AnimationChannel and keyframe stuff from https://github.com/FiguraMC/Figura/pull/41
 public class Animation {
 
     private final Avatar owner;
@@ -47,6 +49,7 @@ public class Animation {
     protected float speed = 1f;
     protected float startDelay, loopDelay;
     protected int override;
+    private float overrideMultiplier = 1;
     protected int priority = 0;
     protected LoopMode loop;
 
@@ -103,9 +106,7 @@ public class Animation {
             }
             case HOLD -> {
                 time = inverted ? Math.max(time, offset) : Math.min(time, length);
-                if (!inverted && time >= length)
-                    playState = PlayState.HOLDING;
-                else if (inverted && time <= 0)
+                if ((!inverted && time >= length) || (inverted && time <= 0))
                     playState = PlayState.HOLDING;
             }
         }
@@ -578,9 +579,7 @@ public class Animation {
         if (speed == null) speed = 1f;
         this.speed = speed;
         this.inverted = speed < 0;
-        if (inverted && this.time >= this.length && this.playState == PlayState.HOLDING)
-            this.playState = PlayState.PLAYING;
-        else if (!inverted && this.time <= 0 && this.playState == PlayState.HOLDING)
+        if (this.playState == PlayState.HOLDING && (inverted ? this.time >= this.length : this.time <= 0))
             this.playState = PlayState.PLAYING;
         return this;
     }
@@ -614,8 +613,8 @@ public class Animation {
     public enum PlayState {
         STOPPED,
         PAUSED,
-        PLAYING,
-        HOLDING
+        HOLDING,
+        PLAYING
     }
 
     public enum LoopMode {
@@ -623,6 +622,32 @@ public class Animation {
         ONCE,
         HOLD
     }
+    @LuaWhitelist
+    @LuaMethodDoc("animation.getChannels")
+    public LuaTable getChannels() {
+        LuaTable ret = new LuaTable();
+        for (Map.Entry<FiguraModelPart, List<Animation.AnimationChannel>> entry : animationParts) {
+            List<AnimationChannel> value = new ArrayList<>(entry.getValue());
+            ret.set((LuaValue) owner.luaRuntime.typeManager.javaToLua(entry.getKey()), (LuaValue) owner.luaRuntime.typeManager.javaToLua(value));
+        }
+        return ret;
+    }
+    @LuaWhitelist
+    @LuaTypeDoc(
+            name = "AnimationChannel",
+            value = "animation_channel"
+    )
+    public record AnimationChannel(TransformType type, Keyframe... keyframes) {
 
-    public record AnimationChannel(TransformType type, Keyframe... keyframes) {}
+        @LuaWhitelist
+        @LuaMethodDoc("animation.get_keyframes")
+        public List<Keyframe> getKeyframes() {
+            return List.of(keyframes);
+        }
+        @LuaWhitelist
+        @LuaMethodDoc("animation.get_type")
+        public String getType() {
+            return type.toString();
+        }
+    }
 }

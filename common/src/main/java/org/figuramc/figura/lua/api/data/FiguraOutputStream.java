@@ -1,6 +1,5 @@
 package org.figuramc.figura.lua.api.data;
 
-import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
@@ -8,6 +7,7 @@ import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaString;
+import org.figuramc.figura.avatar.Avatar;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,6 +18,10 @@ public class FiguraOutputStream extends OutputStream {
     private final Avatar parent;
     private final OutputStream destinationStream;
 
+    public FiguraOutputStream(OutputStream destinationStream) {
+        this.destinationStream = destinationStream;
+        parent=null;
+    }
     public FiguraOutputStream(Avatar parent, OutputStream destinationStream) {
         this.destinationStream = destinationStream;
         this.parent = parent;
@@ -53,9 +57,12 @@ public class FiguraOutputStream extends OutputStream {
     @LuaMethodDoc("output_stream.close")
     public void close() throws IOException {
         destinationStream.close();
-        parent.openOutputStreams.remove(this);
+        if(parent != null)
+	        parent.openOutputStreams.remove(this);
     }
-
+    public void closeWithoutPop() throws IOException {
+        destinationStream.close();
+    }
     @Override
     public String toString() {
         return "OutputStream";

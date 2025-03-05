@@ -2,23 +2,27 @@ package org.figuramc.figura.lua.api.entity;
 
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.network.chat.Component;
+import org.luaj.vm2.LuaError;
+import org.luaj.vm2.LuaTable;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.NbtToLua;
 import org.figuramc.figura.lua.ReadOnlyLuaTable;
 import org.figuramc.figura.lua.api.world.ItemStackAPI;
+import org.figuramc.figura.lua.api.world.BlockStateAPI;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.utils.EntityUtils;
-import org.luaj.vm2.LuaError;
+import net.minecraft.network.chat.Component;
 import org.luaj.vm2.LuaTable;
 
 import java.util.HashMap;
@@ -79,6 +83,12 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
     }
 
     @LuaWhitelist
+	@LuaMethodDoc("player.get_last_death_pos")
+	public FiguraVec3 getLastDeathPos() {
+		return FiguraVec3.fromBlockPos(entity.getLastDeathLocation().get().pos());
+	}
+	 
+	@LuaWhitelist
     @LuaMethodDoc("player.get_xp_for_next_level")
     public int getExperienceForNextLevel(){
         checkEntity();
@@ -151,6 +161,12 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
     }
 
     @LuaWhitelist
+	@LuaMethodDoc("player.is_flying")
+	public boolean isFlying() {
+		return entity.getAbilities().flying;
+	}
+
+	@LuaWhitelist
     @LuaMethodDoc("player.get_charged_attack_delay")
     public float getChargedAttackDelay() {
         checkEntity();
@@ -214,6 +230,66 @@ public class PlayerAPI extends LivingEntityAPI<Player> {
         if (delta == null) delta = 0f;
         return this.entity.getCooldowns().getCooldownPercent(stack.itemStack.getItem(), delta);
     }
+
+
+
+	
+	@LuaWhitelist
+	@LuaMethodDoc("player.get_destroy_speed")
+	public float getDestroySpeed(BlockStateAPI block) {
+		checkEntity();
+		return entity.getDestroySpeed(block.blockState);
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("player.has_correct_tool_for_drops")
+	public boolean hasCorrectToolForDrops(BlockStateAPI block) {
+		checkEntity();
+		return entity.hasCorrectToolForDrops(block.blockState);
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("player.can_be_seen_as_enemy")
+	public boolean canBeSeenAsEnemy() {
+		checkEntity();
+		return entity.canBeSeenAsEnemy();
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("player.can_harm_player")
+	public boolean canHarmPlayer(PlayerAPI otherPlayer) {
+		checkEntity();
+		return entity.canHarmPlayer(otherPlayer.entity);
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("player.is_using_spy_glass")
+	public boolean isUsingSpyGlass() {
+		checkEntity();
+		return entity.isScoping();
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("player.get_projectile")
+	public ItemStackAPI getProjectile(ItemStackAPI item) {
+		checkEntity();
+		return ItemStackAPI.verify(entity.getProjectile(item.itemStack));
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("player.get_fishing_bobber")
+	public EntityAPI getFishingBobber() {
+		checkEntity();
+		return EntityAPI.wrap(entity.fishing);
+	}
+
+
+	@LuaWhitelist
+	@LuaMethodDoc("player.get_tablist_display_name")
+	public Object getTabListDisplayName() {
+		checkEntity();
+		return (checkPlayerInfo() ? playerInfo.getTabListDisplayName() : Component.empty());
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("player.get_latency")
+	public int getLatency() {
+		checkEntity();
+		return (checkPlayerInfo() ? playerInfo.getLatency() : -1 );
+	}
 
     @Override
     public String toString() {

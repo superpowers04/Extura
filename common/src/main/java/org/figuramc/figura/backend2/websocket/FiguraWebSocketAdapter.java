@@ -55,18 +55,14 @@ public class FiguraWebSocketAdapter extends WebSocketAdapter {
     }
 
     public static String getBackendAddress() {
-        return "wss://" + getBackendAddressWithPort() + "/ws";
-    }
 
-    private static String getBackendAddressWithPort() {
-        ServerAddress backendIP = ServerAddress.parseString(Configs.SERVER_IP.value);
-        boolean hasPort = Configs.SERVER_IP.value.matches("[^:]+:\\d+");
-        if (hasPort) {
-            try {
-                return backendIP.getHost() + ":" + backendIP.getPort();
-            } catch (IllegalStateException ignored) { }
+        if(Configs.BLOCK_CLOUD.value) return "ws://invalidHost.thisisdumb/ws";
+        if(Configs.VANILLA_CLOUD.value){
+            return "wss://" + ServerAddress.parseString(Configs.SERVER_IP.defaultValue).getHost() + "/ws";
         }
-        return backendIP.getHost();
+        String backendIP = Configs.USE_MC_HOST_RESOLVER.value ? ServerAddress.parseString(Configs.SERVER_IP.value).getHost() : Configs.SERVER_IP.value;
+        if(Configs.USE_SECURE_CLOUD.value) return "wss://" + backendIP + "/ws";
+        return "ws://" + backendIP + "/ws";
     }
 
     @Override

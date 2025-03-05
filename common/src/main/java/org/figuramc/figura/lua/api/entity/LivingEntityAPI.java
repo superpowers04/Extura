@@ -5,12 +5,20 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+
+import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
+import org.figuramc.figura.lua.api.ClientAPI;
 import org.figuramc.figura.lua.api.world.ItemStackAPI;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
+import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.mixin.LivingEntityAccessor;
+import org.figuramc.figura.utils.PlatformUtils;
+import java.util.List;
+import java.util.Map;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -225,12 +233,27 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
     @LuaMethodDoc("living_entity.riptide_spinning")
     public boolean riptideSpinning() {
         checkEntity();
-        return entity.isAutoSpinAttack();
-    }
+		return entity.isAutoSpinAttack();
+	}
 
-    @Override
-    public String toString() {
-        checkEntity();
+
+	@LuaWhitelist
+	@LuaMethodDoc("living_entity.get_nameplate")
+	public String getNameplate(String type) {
+		checkEntity();
+		Avatar avi = AvatarManager.getAvatar(entity);
+		if(avi == null || avi.luaRuntime == null) return null;
+		switch(type.toUpperCase()){
+			case "ENTITY": return avi.luaRuntime.nameplate.ENTITY.getText();
+			case "LIST": return avi.luaRuntime.nameplate.LIST.getText();
+			case "CHAT": return avi.luaRuntime.nameplate.CHAT.getText();
+			default: return null;
+		}
+	}
+
+	@Override
+	public String toString() {
+		checkEntity();
         return (entity.hasCustomName() ? entity.getCustomName().getString() + " (" + getType() + ")" : getType() ) + " (LivingEntity)";
     }
 }

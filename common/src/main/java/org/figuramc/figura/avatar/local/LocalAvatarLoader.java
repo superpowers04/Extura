@@ -4,9 +4,11 @@ import net.minecraft.Util;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import org.apache.commons.lang3.concurrent.Computable;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.avatar.UserData;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.FiguraToast;
 import org.figuramc.figura.parsers.AvatarMetadataParser;
 import org.figuramc.figura.parsers.BlockbenchModelParser;
@@ -24,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -120,6 +123,7 @@ public class LocalAvatarLoader {
                 loadState = LoadState.SCRIPTS;
                 loadScripts(finalPath, nbt);
 
+				loadGlobalScripts(nbt);
                 // custom sounds
                 loadState = LoadState.SOUNDS;
                 loadSounds(finalPath, nbt);
@@ -225,37 +229,53 @@ public class LocalAvatarLoader {
         }
     }
 
-    private static void loadScripts(Path path, CompoundTag nbt) throws IOException {
-        List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
-        if (scripts.size() > 0) {
-            CompoundTag scriptsNbt = new CompoundTag();
-            String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
-            for (Path script : scripts) {
-                String name = script.toString()
-                        .replaceFirst(pathRegex, "")
-                        .replaceAll("[/\\\\]", ".");
-                name = name.substring(0, name.length() - 4);
-                scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
-            }
-            nbt.put("scripts", scriptsNbt);
-        }
-    }
+	private static void loadScripts(Path path, CompoundTag nbt) throws IOException {
+		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
+		if (scripts.size() < 0) return;
+		CompoundTag scriptsNbt = new CompoundTag();
 
-    private static void loadSounds(Path path, CompoundTag nbt) throws IOException {
-        List<Path> sounds = IOUtils.getFilesByExtension(path, ".ogg");
-        if (sounds.size() > 0) {
-            CompoundTag soundsNbt = new CompoundTag();
-            String pathRegex = Pattern.quote(path.toString().isEmpty() ? path.toString() : path + path.getFileSystem().getSeparator());
-            for (Path sound : sounds) {
-                String name = sound.toString()
-                        .replaceFirst(pathRegex, "")
-                        .replaceAll("[/\\\\]", ".");
-                name = name.substring(0, name.length() - 4);
-                soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
-            }
-            nbt.put("sounds", soundsNbt);
-        }
-    }
+		int pathLength = (path + path.getFileSystem().getSeparator()).length();
+		for (Path script : scripts) {
+			String name = script.toString();
+			name = name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
+			scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
+		}
+		nbt.put("scripts",scriptsNbt);
+
+
+	}
+	private static void loadGlobalScripts(CompoundTag nbt) throws IOException {
+		if (!Configs.USE_GLOBAL_SCRIPTS.value) return;
+		Path path = IOUtils.getOrCreateDir(FiguraMod.getFiguraDirectory(),"global_scripts");
+		addWatchKey(path, KEYS::put);
+		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
+		if (scripts.size() < 0) return;
+		CompoundTag scriptsNbt = nbt.getCompound("scripts");
+		if (scriptsNbt == null){
+			nbt.put("scripts",scriptsNbt = new CompoundTag());
+		}
+		int pathLength = (path + path.getFileSystem().getSeparator()).length();
+		for (Path script : scripts) {
+			String name = script.toString();
+			name = "global."+name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
+			scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
+		}
+
+	}
+
+	private static void loadSounds(Path path, CompoundTag nbt) throws IOException {
+		List<Path> sounds = IOUtils.getFilesByExtension(path, ".ogg");
+		if (sounds.size() == 0) return;
+		CompoundTag soundsNbt = new CompoundTag();
+		int pathLength = (path + path.getFileSystem().getSeparator()).length();
+		for (Path sound : sounds) {
+			String name = sound.toString();
+			name = name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
+			soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
+		}
+		nbt.put("sounds", soundsNbt);
+		
+	}
 
     private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchModelParser parser, CompoundTag textures, ListTag animations, String folders) throws Exception {
         CompoundTag result = new CompoundTag();
@@ -289,26 +309,55 @@ public class LocalAvatarLoader {
 
                     textures.getList("data", Tag.TAG_COMPOUND).addAll(dataTag.getList("data", Tag.TAG_COMPOUND));
                     textures.getCompound("src").merge(dataTag.getCompound("src"));
-                }
-            }
+				}
+			}
 
-        if (children.size() > 0)
-            result.put("chld", children);
+		if (!children.isEmpty())
+			result.put("chld", children);
 
-        return result;
-    }
+		return result;
+	}
+	public static Matcher ValidFileMatcher = Pattern.compile(".*(avatar.json|(\\.lua|\\.bbmodel|\\.ogg|\\.png))$").matcher("");
+	/**
+	 * Tick the watched key for hotswapping avatars
+	 */
+	public static void tick() {
+		WatchEvent<?> event = null;
+		try{
 
-    /**
-     * Tick the watched key for hotswapping avatars
-     */
-    public static void tick() {
-        WatchEvent<?> event = null;
-        boolean reload = false;
+			if(IS_WINDOWS){ // This literally just removes one unix-only check, but it prevents some useless looping :3
 
-        for (Map.Entry<Path, WatchKey> entry : KEYS.entrySet()) {
-            WatchKey key = entry.getValue();
-            if (!key.isValid())
-                continue;
+				var entries = KEYS.entrySet();
+				for (Map.Entry<Path, WatchKey> entry : entries) {
+					if(entry == null) continue;
+					WatchKey key = entry.getValue();
+					if (!key.isValid())
+						continue;
+
+					for (WatchEvent<?> watchEvent : key.pollEvents()) {
+						if (watchEvent.kind() == StandardWatchEventKinds.OVERFLOW)
+							continue;
+
+						event = watchEvent;
+						Path path = entry.getKey().resolve((Path) event.context());
+						String name = IOUtils.getFileNameOrEmpty(path);
+
+						if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
+							continue;
+						FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
+						AvatarManager.loadLocalAvatar(lastLoadedPath);
+						return;
+					}
+				}
+				return;
+			}
+			boolean reload = false;
+			var entries = KEYS.entrySet();
+			for (Map.Entry<Path, WatchKey> entry : entries) {
+				if(entry == null) continue;
+				WatchKey key = entry.getValue();
+				if (!key.isValid())
+					continue;
 
             for (WatchEvent<?> watchEvent : key.pollEvents()) {
                 WatchEvent.Kind<?> kind = watchEvent.kind();
@@ -316,36 +365,38 @@ public class LocalAvatarLoader {
                     continue;
 
                 event = watchEvent;
-                Path path = entry.getKey().resolve((Path) event.context());
-                String name = IOUtils.getFileNameOrEmpty(path);
+					Path path = entry.getKey().resolve((Path) event.context());
+					String name = IOUtils.getFileNameOrEmpty(path);
 
-                if (IOUtils.isHiddenAvatarResource(path) || !(Files.isDirectory(path) || name.matches("(.*(\\.lua|\\.bbmodel|\\.ogg|\\.png)$|avatar\\.json)")))
-                    continue;
+					if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
+						continue;
 
-                if (kind == StandardWatchEventKinds.ENTRY_CREATE && !IS_WINDOWS)
-                    addWatchKey(path, KEYS::put);
+					// This is it, this is the Unix-only check. I(superpowers04) dunno why only Unix needs to add paths like this
+					if (kind == StandardWatchEventKinds.ENTRY_CREATE) 
+						addWatchKey(path, KEYS::put);
 
-                reload = true;
-                break;
-            }
+					reload = true;
 
-            if (reload)
-                break;
-        }
+				}
+			}
 
-        // reload avatar
-        if (reload) {
-            FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
-            AvatarManager.loadLocalAvatar(lastLoadedPath);
-        }
-    }
+			// reload avatar
+			if (reload) {
+				FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
+				AvatarManager.loadLocalAvatar(lastLoadedPath);
+			}
+		}catch(java.util.ConcurrentModificationException meow){
+			FiguraMod.debug("LocalAvatarLoader.java:tick java.util.ConcurrentModificationException ignored");
+		}
+	}
 
-    public static void resetWatchKeys() {
-        lastLoadedPath = null;
-        for (WatchKey key : KEYS.values())
-            key.cancel();
-        KEYS.clear();
-    }
+	public static void resetWatchKeys() {
+		lastLoadedPath = null;
+		var values = KEYS.values();
+		for (WatchKey key : values)
+			key.cancel();
+		KEYS.clear();
+	}
 
     /**
      * register new watch keys

@@ -33,12 +33,22 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(at = @At("TAIL"), method = "handleDamageEvent")
     private void handleDamageEvent(DamageSource source, CallbackInfo ci) {
         Avatar avatar = AvatarManager.getAvatar(this);
-        if (avatar == null) return;
-        avatar.damageEvent(
-                source.typeHolder().unwrapKey().get().location().toString(),
-                EntityAPI.wrap(source.getEntity()),
-                EntityAPI.wrap(source.getDirectEntity()),
-                source.getSourcePosition() != null ? FiguraVec3.fromVec3(source.getSourcePosition()) : null
-        );
+        if (avatar != null){
+        	
+	        avatar.damageEvent(
+	                source.typeHolder().unwrapKey().get().location().toString(),
+	                EntityAPI.wrap(source.getEntity()),
+	                EntityAPI.wrap(source.getDirectEntity()),
+	                source.getSourcePosition() != null ? FiguraVec3.fromVec3(source.getSourcePosition()) : null
+	        );
+        }
+        Avatar avatar2 = AvatarManager.getAvatar(source.getEntity());
+        if (avatar2 != null){
+            avatar2.attackEvent(
+                    source.typeHolder().unwrapKey().get().location().toString(),
+                    EntityAPI.wrap(this),
+                    source.getSourcePosition() != null ? FiguraVec3.fromVec3(source.getSourcePosition()) : null
+            );
+        }
     }
 }

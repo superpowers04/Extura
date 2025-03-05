@@ -88,6 +88,9 @@ public class EventsAPI {
     @LuaFieldDoc("events.resource_reload")
     public final LuaEvent RESOURCE_RELOAD = new LuaEvent();
     @LuaWhitelist
+    @LuaFieldDoc("events.attack")
+    public final LuaEvent ATTACK = new LuaEvent();
+    @LuaWhitelist
     @LuaFieldDoc("events.totem")
     public final LuaEvent TOTEM = new LuaEvent();
     @LuaFieldDoc("events.damage")
@@ -117,6 +120,8 @@ public class EventsAPI {
         events.put("ITEM_RENDER", ITEM_RENDER);
         events.put("ON_PLAY_SOUND", ON_PLAY_SOUND);
         events.put("RESOURCE_RELOAD", RESOURCE_RELOAD);
+
+        events.put("ATTACK", ATTACK);
         events.put("TOTEM", TOTEM);
         events.put("DAMAGE", DAMAGE);
 

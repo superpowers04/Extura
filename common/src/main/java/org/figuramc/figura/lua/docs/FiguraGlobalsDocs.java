@@ -18,6 +18,7 @@ import org.figuramc.figura.lua.api.ping.PingAPI;
 import org.figuramc.figura.lua.api.sound.SoundAPI;
 import org.figuramc.figura.lua.api.vanilla_model.VanillaModelAPI;
 import org.figuramc.figura.lua.api.world.WorldAPI;
+import org.figuramc.figura.lua.api.ExturaAPI;
 import org.figuramc.figura.model.FiguraModelPart;
 import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaTable;
@@ -97,6 +98,8 @@ public abstract class FiguraGlobalsDocs {
     @LuaFieldDoc("globals.type")
     public LuaFunction type;
 
+    @LuaFieldDoc("globals.extura")
+    public ExturaAPI extura;
     @LuaMethodDoc(
             overloads = {
                     @LuaMethodOverload(
