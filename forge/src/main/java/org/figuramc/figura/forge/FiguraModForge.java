@@ -8,6 +8,5 @@ import net.minecraftforge.fml.common.Mod;
 public class FiguraModForge {
     // dummy empty mod class, we are client only
     public FiguraModForge() {
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> FiguraModClientForge::initClient);
     }
 }
