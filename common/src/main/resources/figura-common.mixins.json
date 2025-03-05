@@ -38,6 +38,7 @@
     "gui.GuiAccessor",
     "gui.GuiMessageLineMixin",
     "gui.GuiMessageMixin",
+    "gui.GuiMixin",
     "gui.InventoryScreenMixin",
     "gui.PauseScreenMixin",
     "gui.PlayerTabOverlayAccessor",

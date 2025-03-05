@@ -64,7 +64,8 @@ public class Permissions {
             CUSTOM_SKULL,
             BUFFER_SIZE,
             BUFFERS_COUNT,
-            NETWORKING
+            NETWORKING,
+            PRINTING
     );
 
 

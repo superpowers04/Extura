@@ -11,6 +11,7 @@ import java.util.Locale;
 public class ColorUtils {
 
     public enum Colors {
+        PINK(0xEE80AE),
         AWESOME_BLUE(0x5EA5FF),
         PURPLE(0xA672EF),
         FIGURA_BLUE(0x00F0FF),

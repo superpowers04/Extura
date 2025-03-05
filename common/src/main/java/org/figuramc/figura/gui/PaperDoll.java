@@ -17,17 +17,17 @@ public class PaperDoll {
     private static Long lastActivityTime = 0L;
 
     public static void render(GuiGraphics gui, boolean force) {
+        if(!Configs.HAS_PAPERDOLL.value && !force) return;
         Minecraft minecraft = Minecraft.getInstance();
         LivingEntity entity = minecraft.getCameraEntity() instanceof LivingEntity e ? e : null;
-        Avatar avatar;
 
-        if ((!Configs.HAS_PAPERDOLL.value && !force) ||
-                entity == null ||
+        if (entity == null ||
                 !Minecraft.renderNames() ||
                 minecraft.getDebugOverlay().showDebugScreen() ||
                 (Configs.FIRST_PERSON_PAPERDOLL.value && !minecraft.options.getCameraType().isFirstPerson() && !force) ||
                 entity.isSleeping())
             return;
+        Avatar avatar;
 
         // check if it should stay always on
         if (!Configs.PAPERDOLL_ALWAYS_ON.value && !force && (avatar = AvatarManager.getAvatar(entity)) != null && avatar.luaRuntime != null && !avatar.luaRuntime.renderer.forcePaperdoll) {
@@ -63,7 +63,7 @@ public class PaperDoll {
                 x, y,
                 scale * 30f,
                 Configs.PAPERDOLL_PITCH.tempValue, Configs.PAPERDOLL_YAW.tempValue,
-                entity, gui, new Vector3f(), EntityRenderMode.PAPERDOLL
+                entity, gui, new Vector3f(),EntityRenderMode.PAPERDOLL
         );
     }
 }

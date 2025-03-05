@@ -236,6 +236,13 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
 		return entity.isAutoSpinAttack();
 	}
 
+	@LuaWhitelist
+	@LuaMethodDoc("entity.get_curios")
+	public Map<String, List<ItemStackAPI>> getCurios() {
+		if(!ClientAPI.HAS_CURIOS) return null;
+		checkEntity();
+		return PlatformUtils.getCurios(entity);
+	}
 
 	@LuaWhitelist
 	@LuaMethodDoc("living_entity.get_nameplate")
