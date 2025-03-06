@@ -296,6 +296,7 @@ public class Configs {
         @Override
         public void onChange() {
             super.onChange();
+            cachedPath = null;
             PermissionManager.reinit();
             LocalAvatarFetcher.reinit();
             EntryPointManager.reinit();

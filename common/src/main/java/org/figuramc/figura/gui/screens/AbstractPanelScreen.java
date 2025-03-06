@@ -36,9 +36,6 @@ public abstract class AbstractPanelScreen extends Screen {
     public ContextMenu contextMenu;
     public Component tooltip;
 
-    // stuff :3
-    private static final String EGG = "ĉĉĈĈćĆćĆBAā";
-    private String egg = EGG;
 
     protected AbstractPanelScreen(Screen parentScreen, Component title) {
         super(title);
@@ -213,12 +210,6 @@ public abstract class AbstractPanelScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        egg += (char) keyCode;
-        egg = egg.substring(1);
-        if (EGG.equals(egg)) {
-            Minecraft.getInstance().setScreen(new GameScreen(this));
-            return true;
-        }
 
         if (children().contains(panels) && panels.cycleTab(keyCode))
             return true;

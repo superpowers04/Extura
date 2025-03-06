@@ -4,6 +4,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ShortTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.ByteTag;
+import net.minecraft.nbt.ByteArrayTag;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.Badges;
 import org.figuramc.figura.lua.LuaNotNil;
@@ -18,7 +29,10 @@ import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.LuaUtils;
 import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
+import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.backend2.Destination;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,12 +59,166 @@ public class AvatarAPI {
     @LuaWhitelist
     @LuaMethodDoc("avatar.get_nbt")
     public LuaTable getNBT() {
-        return (LuaTable) NbtToLua.convert(avatar.nbt);
-    }
+		return (LuaTable) NbtToLua.convert(avatar.nbt);
+	}
 
-    @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = @LuaMethodOverload(
+	/* TODO: TYPE AUTO-DETECT AND MORE TYPES*/
+
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {@LuaMethodOverload(
+								argumentTypes = {LuaTable.class, Object.class},
+								argumentNames = {"path", "value"}
+						),@LuaMethodOverload(
+								argumentTypes = {LuaTable.class, Object.class,String.class},
+								argumentNames = {"path", "value","valueType"}
+						)},
+			value="avatar.set_nbt")
+	public void setNBT(LuaTable seperatedPath, Object value, String valueType) {
+		if(!avatar.isHost) throw new LuaError("Only the host avatar can be edited");
+		if(seperatedPath == null) throw new LuaError("table expected at argument 1");
+		var length = seperatedPath.length();
+		if(length == 0) throw new LuaError("expected string table, got empty table");
+		// LuaValue pathEndValue = seperatedPath.get(length);
+
+		// if(!pathEndValue.isstring()) throw new LuaError("expected string at index " + length +" of string table, got "+ pathEndValue.typename());
+		// String pathEnd = pathEndValue.tojstring();
+		Tag currentNbt = avatar.nbt;
+		if(length > 1){
+			for(int i=1; i < length;i++){
+				final LuaValue partValue = seperatedPath.get(i);
+				// if(!partValue.isstring()) throw new LuaError("expected string at index " + i +" of string table, got "+ pathEndValue.typename());
+				switch(currentNbt.getId()){
+					case 9:
+						final int partI = partValue.checkint();
+						if(!((ListTag)currentNbt).contains(partI)) throw new LuaError("Path " +seperatedPath.toString()+" not found at "+partI);
+						currentNbt = ((ListTag)currentNbt).get(partI);
+						break;
+					case 10:
+						final String partS = partValue.checkjstring();
+						if(!((CompoundTag)currentNbt).contains(partS)) throw new LuaError("Path " +seperatedPath.toString()+" not found at "+partS);
+						currentNbt = ((CompoundTag)currentNbt).get(partS);
+						break;
+
+					default:
+						throw new LuaError("Encountered unindexable NBT at index " + i + " of type " + currentNbt.getType().getName());
+				}
+
+
+			}
+		}
+		String type = (valueType == null ? (value == null || value == LuaValue.NIL ? "null" : value.getClass().toString()) : valueType).toLowerCase();
+		final int lastDot = type.lastIndexOf('.');
+		if(lastDot != -1) type=type.substring(lastDot+1);
+		// This is actually bad but hear me out, it's probably faster than reflection maybe
+		LuaValue pathEndValue = seperatedPath.get(length);
+		switch(currentNbt.getId()){
+			case 9:
+
+				if(!pathEndValue.isint()) throw new LuaError("expected int at index " + length +" of string table, got "+ pathEndValue.typename());
+				int pathEndI = pathEndValue.toint();
+				ListTag nbtList = (ListTag)currentNbt;
+				switch(type){
+					case "float":
+						nbtList.set(pathEndI,FloatTag.valueOf((float)value));
+						break;
+					case "int":
+						nbtList.set(pathEndI,IntTag.valueOf((int)value));
+						break;
+					case "short":
+						nbtList.set(pathEndI,ShortTag.valueOf((short)value));
+						break;
+					case "long":
+						nbtList.set(pathEndI,LongTag.valueOf((long)value));
+						break;
+					case "double":
+						nbtList.set(pathEndI,DoubleTag.valueOf((double)value));
+						break;
+					case "string":
+						nbtList.set(pathEndI,StringTag.valueOf((String)value));
+						break;
+					case "bool":
+					case "boolean":
+					case "byte":
+						nbtList.set(pathEndI,ByteTag.valueOf((byte)value));
+						break;
+					case "bytearray":
+						nbtList.set(pathEndI,new ByteArrayTag((byte[])value));
+						break;
+					case "null":
+					case "nil":
+						nbtList.remove(pathEndI);
+						break;
+
+
+					default:
+						throw new LuaError("Value is invalid type "+type);
+				}
+				break;
+			case 10:
+
+				if(!pathEndValue.isstring()) throw new LuaError("expected string at index " + length +" of string table, got "+ pathEndValue.typename());
+				String pathEndS = pathEndValue.tojstring();
+				CompoundTag nbtCompound = (CompoundTag)currentNbt;
+				switch(type){
+					case "float":
+						nbtCompound.putFloat(pathEndS,(float)value);
+						break;
+					case "int":
+						nbtCompound.putInt(pathEndS,(int)value);
+						break;
+					case "short":
+						nbtCompound.putShort(pathEndS,(short)value);
+						break;
+					case "long":
+						nbtCompound.putLong(pathEndS,(long)value);
+						break;
+					case "double":
+						nbtCompound.putDouble(pathEndS,(double)value);
+						break;
+					case "string":
+						nbtCompound.putString(pathEndS,(String)value);
+						break;
+					case "bool":
+					case "boolean":
+						nbtCompound.putBoolean(pathEndS,(boolean)value);
+						break;
+					case "byte":
+						nbtCompound.putByte(pathEndS,(byte)value);
+						break;
+					case "bytearray":
+						nbtCompound.putByteArray(pathEndS,(byte[])value);
+						break;
+					case "null":
+					case "nil":
+						nbtCompound.remove(pathEndS);
+						break;
+
+
+					default:
+						throw new LuaError("Value is invalid type "+type);
+				}
+				break;
+			default:
+				throw new LuaError("Encountered unindexable NBT at index " + length + " of type " + currentNbt.getType().getName());
+
+		}
+
+
+		return;
+	}
+
+
+	@LuaWhitelist
+	@LuaMethodDoc("avatar.forcePings")
+	public AvatarAPI forcePings(boolean backend,boolean fsb) {
+		avatar.forcePings = Destination.fromBool(backend,fsb);
+		return this;
+	}
+
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = @LuaMethodOverload(
                     argumentTypes = {String.class, Object.class},
                     argumentNames = {"key", "value"}
             ),
@@ -161,13 +329,13 @@ public class AvatarAPI {
         return avatar.entityName;
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("avatar.get_size")
-    public double getSize() {
-        return avatar.fileSize;
-    }
+	@LuaWhitelist
+	@LuaMethodDoc("avatar.get_size")
+	public double getSize() {
+		return avatar.getFileSize();
+	}
 
-    @LuaWhitelist
+	@LuaWhitelist
     @LuaMethodDoc("avatar.has_texture")
     public boolean hasTexture() {
         return avatar.hasTexture;

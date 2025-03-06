@@ -104,13 +104,11 @@ public class ActionWheel {
     // -- render helpers -- // 
 
     private static double getAngle(int i) {
-        double angle;
-        if (i < rightSlots)
-            angle = 180d / rightSlots * (i - ((rightSlots - 1) * 0.5));
-        else
-            angle = 180d / leftSlots * (i - rightSlots - ((leftSlots - 1) * 0.5f) + leftSlots);
+        return Math.toRadians(180d / ((i < rightSlots)?
+		rightSlots * (i - ((rightSlots - 1) * 0.5))
+		:leftSlots * (i - rightSlots - ((leftSlots - 1) * 0.5f) + leftSlots)
+    	));
 
-        return Math.toRadians(angle);
     }
 
     private static void renderEmpty(GuiGraphics gui, boolean avatar) {
