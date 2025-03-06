@@ -40,7 +40,7 @@ public class GuiMixin {
 			FiguraGui.renderOverlays(guiGraphics);
 	}
 	@Inject(at = @At("HEAD"), method = "renderHotbarAndDecorations", cancellable = true)
-	private void renderHotbarAndDecorations(DeltaTracker deltaTracker, GuiGraphics graphics, CallbackInfo ci) {
+	private void renderHotbarAndDecorations(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
 		Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
 		if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderHotbar)
 			return;
