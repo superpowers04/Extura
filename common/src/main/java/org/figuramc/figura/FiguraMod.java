@@ -108,21 +108,22 @@ public class FiguraMod {
 		if (FiguraMod.debugModeEnabled()) LOGGER.info("[DEBUG] " + str, args);
 		else LOGGER.debug(str, args);
 	}
+	public static Path cachedPath;
 	// mod root directory
 	public static Path getFiguraDirectory() {
+		if(cachedPath != null) return cachedPath;
 		String config = Configs.MAIN_DIR.value;
-		if(!config.isBlank()) return IOUtils.createDirIfNeeded(Path.of(config.toString()));
+		if(!config.isBlank()) return cachedPath = IOUtils.createDirIfNeeded(Path.of(config.toString()));
 		Path p = GAME_DIR.resolve(MOD_ID);
 		int indexOfInstances = p.toAbsolutePath().toString().lastIndexOf("instances");
 		
 		if(indexOfInstances != -1){
-
 			Path p2 = Path.of(p.toAbsolutePath().toString().substring(0,indexOfInstances)).resolve(MOD_ID);
 			if(Files.exists(p2)){
-				return p2;
+				return cachedPath = p2;
 			}
 		}
-		return IOUtils.createDirIfNeeded(p);
+		return cachedPath = IOUtils.createDirIfNeeded(p);
 	}
 
 	// mod cache directory
