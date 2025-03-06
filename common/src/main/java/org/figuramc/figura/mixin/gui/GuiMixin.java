@@ -47,7 +47,7 @@ public class GuiMixin {
 		ci.cancel();
 	}
 	@Inject(at = @At("HEAD"), method = "renderEffects", cancellable = true)
-	private void renderEffects(GuiGraphics graphics, CallbackInfo ci) {
+	private void renderEffects(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
 		Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
 		if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderEffects)
 			return;
@@ -86,7 +86,7 @@ public class GuiMixin {
 		ci.cancel();
 	}
 	@Inject(at = @At("HEAD"), method = "renderTabList", cancellable = true)
-	private void renderTabList(GuiGraphics graphics, CallbackInfo ci) {
+	private void renderTabList(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
 		Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
 		if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null ||
 				avatar.luaRuntime.renderer.renderTabList)
@@ -94,7 +94,7 @@ public class GuiMixin {
 		ci.cancel();
 	}
 	@Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)
-	private void renderCrosshair(GuiGraphics guiGraphics, CallbackInfo ci) {
+	private void renderCrosshair(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
 		crosshairOffset = null;
 
 		if (ActionWheel.isEnabled()) {
@@ -116,17 +116,31 @@ public class GuiMixin {
 		crosshairOffset = renderer.crosshairOffset;
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V"), method = "renderCrosshair")
-	private void blitRenderCrosshair(GuiGraphics guiGraphics, CallbackInfo ci) {
-		if (crosshairOffset == null) return;
-		guiGraphics.pose().pushPose();
-		guiGraphics.pose().translate(crosshairOffset.x, crosshairOffset.y, 0d);
-		
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V"), method = "renderCrosshair")
+    private void blitRenderCrosshair(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        if (crosshairOffset != null) {
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(crosshairOffset.x, crosshairOffset.y, 0d);
+        }
+    }
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V", shift = At.Shift.AFTER), method = "renderCrosshair")
-	private void afterBlitRenderCrosshair(GuiGraphics guiGraphics, CallbackInfo ci) {
-		if (crosshairOffset == null) return;
-		guiGraphics.pose().popPose();
-	}
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V", shift = At.Shift.AFTER), method = "renderCrosshair")
+    private void afterBlitRenderCrosshair(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        if (crosshairOffset != null)
+            guiGraphics.pose().popPose();
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIIIIIII)V"), method = "renderCrosshair")
+    private void blitRenderCrosshairSliced(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        if (crosshairOffset != null) {
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(crosshairOffset.x, crosshairOffset.y, 0d);
+        }
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIIIIIII)V", shift = At.Shift.AFTER), method = "renderCrosshair")
+    private void afterBlitRenderCrosshairSliced(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        if (crosshairOffset != null)
+            guiGraphics.pose().popPose();
+    }
 }
