@@ -1,6 +1,7 @@
 package org.figuramc.figura.mixin.gui;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.Entity;
@@ -26,8 +27,8 @@ public class GuiMixin {
     @Unique private FiguraVec2 crosshairOffset;
 
     @Inject(at = @At("HEAD"), method = "render", cancellable = true)
-    private void onRender(GuiGraphics guiGraphics, float tickDelta, CallbackInfo ci) {
-        FiguraGui.onRender(guiGraphics, tickDelta, ci);
+    private void onRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        FiguraGui.onRender(guiGraphics, deltaTracker.getGameTimeDeltaPartialTick(false), ci);
         Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
         if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderGUI)
             return;
@@ -35,12 +36,12 @@ public class GuiMixin {
     }
 
     @Inject(at = @At("RETURN"), method = "render")
-    private void afterRender(GuiGraphics guiGraphics, float tickDelta, CallbackInfo ci) {
+    private void afterRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (!AvatarManager.panic)
             FiguraGui.renderOverlays(guiGraphics);
     }
     @Inject(at = @At("HEAD"), method = "renderHotbar", cancellable = true)
-    private void renderHotbar(float tickDelta, GuiGraphics graphics, CallbackInfo ci) {
+    private void renderHotbar(DeltaTracker deltaTracker, GuiGraphics graphics, CallbackInfo ci) {
         Entity entity = this.minecraft.getCameraEntity(); Avatar avatar;
         if (entity == null || (avatar = AvatarManager.getAvatar(entity)) == null || avatar.luaRuntime == null || avatar.luaRuntime.renderer.renderHotbar)
             return;
