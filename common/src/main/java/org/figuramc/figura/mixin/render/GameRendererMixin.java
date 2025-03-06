@@ -142,10 +142,10 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
         try {
             avatarPostShader = true;
             this.effectActive = true;
-            if (this.postEffect == null || !this.postEffect.getName().equals(resource.toString()))
-                if (this.getMinecraft().getResourceManager().getResource(resource).isPresent()) {
-                    this.loadEffect(resource);
-                }
+            if ((this.postEffect == null || !this.postEffect.getName().equals(resource.toString())) &&
+				(this.getMinecraft().getResourceManager().getResource(resource).isPresent())) 
+                this.loadEffect(resource);
+                
         } catch (Exception ignored) {
             this.effectActive = false;
             avatar.luaRuntime.renderer.postShader = null;
@@ -204,6 +204,7 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
         Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
         if (!RenderUtils.vanillaModelAndScript(avatar) || hasShaders)
             original.call(instance, stack, f);
+        else if(avatar.luaRuntime != null && !avatar.luaRuntime.renderer.renderViewBobbing) return;
     }
 
     @WrapOperation(method = "renderLevel",

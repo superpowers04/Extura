@@ -63,11 +63,15 @@ public class RendererAPI {
     @LuaFieldDoc("renderer.render_jump_meter")
     public boolean renderJumpMeter = true;
     @LuaWhitelist
-    @LuaFieldDoc("renderer.render_Effects")
+    @LuaFieldDoc("renderer.render_effects")
     public boolean renderEffects = true;
     @LuaWhitelist
     @LuaFieldDoc("renderer.render_gui")
     public boolean renderGUI = true;
+    @LuaFieldDoc("renderer.render_tab_list")
+    public boolean renderTabList = true;
+    @LuaFieldDoc("renderer.render_view_bobbing")
+    public boolean renderViewBobbing = true;
 
     public FiguraVec3 cameraPos;
     public FiguraVec3 cameraPivot, cameraOffsetPivot;
@@ -181,6 +185,17 @@ public class RendererAPI {
             value = "renderer.set_render_hud")
     public RendererAPI setRenderHUD(boolean renderHUD) {
         this.renderHUD = renderHUD;
+        return this;
+    }
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = @LuaMethodOverload(
+                    argumentTypes = Boolean.class,
+                    argumentNames = "renderTabList"
+            ),
+            value = "renderer.set_render_tab_list")
+    public RendererAPI setRenderTabList(boolean renderTabList) {
+        this.renderTabList = renderTabList;
         return this;
     }
 
@@ -788,6 +803,8 @@ public class RendererAPI {
 			case "renderJumpMeter" -> renderJumpMeter;
 			case "renderEffects" -> renderEffects;
 			case "renderGUI" -> renderGUI;
+			case "renderTabList" -> renderTabList;
+			case "renderViewBobbing" -> renderViewBobbing;
             default -> null;
         };
     }
@@ -807,6 +824,8 @@ public class RendererAPI {
 			case "renderJumpMeter" -> renderJumpMeter = value;
 			case "renderEffects" -> renderEffects = value;
 			case "renderGUI" -> renderGUI = value;
+			case "renderTabList" -> renderTabList = value;
+			case "renderViewBobbing" -> renderViewBobbing = value;
             default -> throw new LuaError("Cannot assign value on key \"" + key + "\"");
         }
     }
