@@ -240,9 +240,7 @@ public class ItemStackAPI {
 
         ItemStack t = this.itemStack;
         ItemStack o = other.itemStack;
-        if (t.getCount() != o.getCount())
-            return false;
-        if (!t.is(o.getItem()))
+        if (!t.toString().equals(o.toString()) || !t.is(o.getItem()))
             return false;
 
         DataComponentMap tag1 = t.getComponents();
