@@ -224,9 +224,6 @@ public class ItemStackAPI {
 
     @LuaWhitelist
     public boolean __eq(ItemStackAPI other) {
-        if (this == other)
-            return true;
-
         ItemStack t = this.itemStack;
         ItemStack o = other.itemStack;
         if (t.getCount() != o.getCount())

@@ -37,6 +37,7 @@ import java.util.Locale;
 )
 public class NetworkingAPI {
     private static FileOutputStream logFileOutputStream;
+    private static final String NETWORKING_IS_HOST_ONLY = "NetworkingAPI is only allowed in a host environment!";
     private static final String NETWORKING_DISABLED_ERROR_TEXT = "Networking is disabled in config";
     private static final String NO_PERMISSION_ERROR_TEXT = "This avatar doesn't have networking permissions";
     private static final String NETWORKING_DISALLOWED_FOR_LINK_ERROR = "Networking whitelist/blacklist does not allow access to link: %s";
@@ -50,16 +51,21 @@ public class NetworkingAPI {
         http = new HttpRequestsAPI(this);
     }
 
-    public void securityCheck(String link) throws RuntimeException {
+    public static void securityCheckLink(Avatar owner,String link) throws RuntimeException {
+        if (!owner.isHost)
+            throw new LuaError(NETWORKING_IS_HOST_ONLY);
         if (!Configs.ALLOW_NETWORKING.value)
             throw new LuaError(NETWORKING_DISABLED_ERROR_TEXT);
         if (owner.permissions.get(Permissions.NETWORKING) < 1) {
             owner.noPermissions.add(Permissions.NETWORKING);
             throw new LuaError(NO_PERMISSION_ERROR_TEXT);
         }
-        if (!isLinkAllowed(link)) {
+        if (!_isLinkAllowed(owner,link)) {
             throw new LinkNotAllowedException(NETWORKING_DISALLOWED_FOR_LINK_ERROR.formatted(link));
         }
+    }
+    public void securityCheck(String link) throws RuntimeException {
+        securityCheckLink(owner,link);
     }
 
     @LuaWhitelist
@@ -70,13 +76,31 @@ public class NetworkingAPI {
             )
     )
     public boolean isNetworkingAllowed() {
-    	try{
-			return Configs.ALLOW_NETWORKING.value && owner.permissions.get(Permissions.NETWORKING) >= 1;
-    	}catch(RuntimeException e){
-    		return false;
-    	}
+        return owner.isHost && Configs.ALLOW_NETWORKING.value && owner.permissions.get(Permissions.NETWORKING) >= 1;
     }
 
+    public static boolean _isLinkAllowed(Avatar owner,String link) {
+        if (!owner.isHost)
+            throw new LuaError(NETWORKING_IS_HOST_ONLY);
+
+        RestrictionLevel level = RestrictionLevel.getById(Configs.NETWORKING_RESTRICTION.value);
+        if (level == null) return false;
+        ArrayList<Filter> filters = Configs.NETWORK_FILTER.getFilters();
+        try {
+            URL url = new URL(link);
+            if (url.getPort() != -1 && url.getPort() != 80 && url.getPort() != 443)
+                throw new LuaError("Port %s not allowed, only 80 (HTTP) and 443 (HTTPS) are permitted.".formatted(url.getPort()));
+
+            return switch (level) {
+                case WHITELIST -> filters.stream().anyMatch(f -> f.matches(url.getHost()));
+                case BLACKLIST -> filters.stream().noneMatch(f -> f.matches(url.getHost()));
+                case NONE -> true;
+            };
+        }
+        catch (MalformedURLException e) {
+            throw new LinkNotAllowedException(NETWORKING_DISALLOWED_FOR_LINK_ERROR.formatted(link));
+        }
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             value = "net.is_link_allowed",
@@ -87,11 +111,16 @@ public class NetworkingAPI {
             )
     )
     public boolean isLinkAllowed(String link) {
+        if (!owner.isHost)
+            throw new LuaError(NETWORKING_IS_HOST_ONLY);
+
         RestrictionLevel level = RestrictionLevel.getById(Configs.NETWORKING_RESTRICTION.value);
         if (level == null) return false;
         ArrayList<Filter> filters = Configs.NETWORK_FILTER.getFilters();
         try {
             URL url = new URL(link);
+            if (url.getPort() != -1 && url.getPort() != 80 && url.getPort() != 443)
+                throw new LuaError("Port %s not allowed, only 80 (HTTP) and 443 (HTTPS) are permitted.".formatted(url.getPort()));
 
             return switch (level) {
                 case WHITELIST -> filters.stream().anyMatch(f -> f.matches(url.getHost()));
