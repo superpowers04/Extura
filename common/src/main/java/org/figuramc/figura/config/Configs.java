@@ -300,6 +300,7 @@ public class Configs {
 		@Override
 		public void onChange() {
 			super.onChange();
+			FiguraMod.cachedPath = null;
 			PermissionManager.reinit();
 			LocalAvatarFetcher.reinit();
 			EntryPointManager.reinit();
