@@ -410,4 +410,15 @@ public class Configs {
 				this.name = this.name.copy();
 				this.tooltip = FiguraText.of("config.helper_errors.tooltip");
 			}};
+	public static final ConfigType.BoolConfig PER_INSTANCE_CONFIG = new ConfigType.BoolConfig("per_instance_config", EXTURA, false) {
+		@Override
+		public void onChange() {
+			super.onChange();
+			ConfigManager.changePerInstance((boolean) this.value);
+		}
+		{
+			this.name = this.name.copy();
+			this.tooltip = FiguraText.of("config.per_instance_config.tooltip");
+		}
+	};
 }

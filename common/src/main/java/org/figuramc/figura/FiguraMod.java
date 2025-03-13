@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutionException;
 public class FiguraMod {
 
 	public static final String MOD_ID = "figura";
+	public static final String FORK_ID = "extura";
 	public static final String MOD_NAME = "Figura - Extura";
 	public static final FiguraModMetadata METADATA = FiguraModMetadata.getMetadataForMod(MOD_ID);
 	public static final Version VERSION = new Version(PlatformUtils.getFiguraModVersionString());

@@ -12,6 +12,8 @@
 	"figura.docs.globals.get_scripts": "Returns a table of script names.",
 	"figura.docs.globals.get_script": "Returns the contents of a script or nil if the script doesn't exist.",
 
+	"figura.config.per_instance_config": "(Extura) Per Instance Config",
+	"figura.config.per_instance_config.tooltip": "If enabled, will pull from config folder, if disabled will pull from Figura folder",
 	"figura.config.use_secure_cloud": "(Extura) Secure Cloud",
 	"figura.config.use_secure_cloud.tooltip": "Whether to use a Secure Connection for the cloud",
 	"figura.config.block_cloud": "(Extura) Disable cloud",

@@ -6,7 +6,6 @@
   "client": [
     "ClientCommandSourceMixinForge",
     "CommandSuggestionsMixinForge",
-    "GuiMixin",
     "HumanoidArmorLayerMixinForge"
   ],
   "mixins": [
