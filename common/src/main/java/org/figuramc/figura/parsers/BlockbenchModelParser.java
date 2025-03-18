@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.*;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.math.vector.FiguraVec3;
@@ -266,6 +267,12 @@ public class BlockbenchModelParser {
 
             //parse fields
             nbt.putString("name", element.name);
+            //invalid UUIDs are still technically valid Blockbench models, so handle those
+            try {
+                nbt.putIntArray("nr", UUIDUtil.uuidToIntArray(UUID.fromString(element.uuid)));
+            } catch (IllegalArgumentException ignored) {
+                nbt.putString("nr", element.uuid);
+            }
 
             //parse transform data
             if (notZero(element.from))
