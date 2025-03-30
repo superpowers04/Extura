@@ -16,6 +16,8 @@
 	"figura.config.use_secure_cloud.tooltip": "Whether to use a Secure Connection for the cloud",
 	"figura.config.block_cloud": "(Extura) Disable cloud",
 	"figura.config.block_cloud.tooltip": "Disable Figura's multiplayer features",
+	"figura.config.per_instance_config": "(Extura) Per Instance Config",
+	"figura.config.per_instance_config.tooltip": "If enabled, will pull from config folder, if disabled will pull from Figura folder",
 	"figura.docs.world.get_spawn_point": "(Extura) Returns a vector with the coordinates of the world spawn",
 	"figura.docs.world.isChunkLoaded": "(Extura) Returns whether a chunk is loaded at the given block position",
 	"figura.docs.world.get_nearby_entities": "(Extura) Returns entities near the given block position",
