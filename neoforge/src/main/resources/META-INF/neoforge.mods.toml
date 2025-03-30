@@ -7,7 +7,7 @@ displayURL = "https://github.com/superpowers04/Extura"
 [[mods]]
 modId = "extura"
 version = "${version}"
-displayName = "Extura - Fork of Figura(Forge)"
+displayName = "Extura - Fork of Figura(NeoForge)"
 logoFile="assets/extura/icon.png"
 authors = "ConstantDust, Superpowers04, PoolloverNathan - ExtExtura"
 credits = "superpowers04, ConstantDust, PoolloverNathan"
