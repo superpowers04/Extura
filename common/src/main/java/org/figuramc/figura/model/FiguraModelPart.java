@@ -1,7 +1,5 @@
 package org.figuramc.figura.model;
 
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.phys.Vec3;
@@ -16,7 +14,6 @@ import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.math.matrix.FiguraMat4;
 import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
-import org.figuramc.figura.model.rendering.AvatarRenderer;
 import org.figuramc.figura.model.rendering.ImmediateAvatarRenderer;
 import org.figuramc.figura.model.rendering.Vertex;
 import org.figuramc.figura.model.rendering.texture.FiguraTexture;
@@ -25,8 +22,7 @@ import org.figuramc.figura.model.rendering.texture.RenderTypes;
 import org.figuramc.figura.model.rendertasks.*;
 import org.figuramc.figura.utils.LuaUtils;
 import org.figuramc.figura.utils.ui.UIHelper;
-import org.joml.Matrix3f;
-import org.joml.Quaternionf;
+import org.jetbrains.annotations.Nullable;
 import org.luaj.vm2.*;
 
 import java.util.*;
@@ -50,7 +46,9 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public PartCustomization playerCustomization;
 
     private final Map<String, FiguraModelPart> childCache = new HashMap<>();
+    private final Map<String, List<FiguraModelPart>> collections = new HashMap<>();
     public final List<FiguraModelPart> children;
+    private final byte[] collectionInfo;
 
     public List<Integer> facesByTexture;
 
@@ -77,20 +75,33 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     @LuaFieldDoc("model_part.post_render")
     public LuaFunction postRender; // after children
 
-    public FiguraModelPart(Avatar owner, String name, PartCustomization customization, Map<Integer, List<Vertex>> vertices, List<FiguraModelPart> children) {
+    public FiguraModelPart(Avatar owner, String name, PartCustomization customization, Map<Integer, List<Vertex>> vertices, List<FiguraModelPart> children, String @Nullable[] collections, byte[] collectionInfo) {
         this.owner = owner;
         this.name = name;
         this.customization = customization;
         this.vertices = vertices;
         this.children = children;
+        this.collectionInfo = collectionInfo;
+        if (collections != null) {
+            for (String n: collections) this.collections.put(n, new ArrayList<>());
+            walkCollections(this.collections, collections);
+        }
+    }
+
+    private void walkCollections(Map<String, List<FiguraModelPart>> root, String names[]) {
+        if (collectionInfo != null)
+        for (byte b: collectionInfo)
+        root.get(names[b]).add(this);
+        for (var c: children) c.walkCollections(root, names);
     }
 
     public boolean pushVerticesImmediate(ImmediateAvatarRenderer avatarRenderer, int[] remainingComplexity) {
         for (int i = 0; i < facesByTexture.size(); i++) {
             if (remainingComplexity[0] <= 0)
                 return false;
-            remainingComplexity[0] -= facesByTexture.get(i);
-            avatarRenderer.pushFaces(facesByTexture.get(i) + Math.min(remainingComplexity[0], 0), remainingComplexity, textures.get(i), vertices.get(i));
+            int faces = facesByTexture.get(i);
+            remainingComplexity[0] -= faces;
+            avatarRenderer.pushFaces(faces + Math.min(remainingComplexity[0], 0), remainingComplexity, textures.get(i), vertices.get(i));
         }
         return true;
     }
@@ -175,15 +186,12 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         if (parentType != ParentType.Camera)
             return;
 
-        // Because view/rot isn't implicitly in the matrix anymore we have to multiply by it
-        // multiplied by the inverse of the position matrix as we don't want to move parts twice
         FiguraMat4 prevPartToView = currentTransforms.positionMatrix.inverted();
-
         double s = 1 / 16d;
         if (UIHelper.paperdoll) {
             s *= -UIHelper.dollScale;
         } else {
-            prevPartToView.rightMultiply(AvatarRenderer.worldToViewMatrix());
+            prevPartToView.rightMultiply(FiguraMat4.of().rotateY(180));
         }
         FiguraVec3 scale = currentTransforms.stackScale.scaled(s);
         FiguraVec3 piv = customization.getPivot();
@@ -202,18 +210,19 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             FiguraVec3 pos = customization.getAnimPos();
             pos.add(-vec.x, vec.y, vec.z);
             customization.setAnimPos(pos.x, pos.y, pos.z);
-        } else {
-            customization.setAnimPos(-vec.x, vec.y, vec.z);
+            return;
         }
+        customization.setAnimPos(-vec.x, vec.y, vec.z);
     }
     public void animRotation(FiguraVec3 vec, boolean merge) {
         if (merge) {
             FiguraVec3 rot = customization.getAnimRot();
             rot.add(-vec.x, -vec.y, vec.z);
             customization.setAnimRot(rot.x, rot.y, rot.z);
-        } else {
-            customization.setAnimRot(-vec.x, -vec.y, vec.z);
+            return;
         }
+        customization.setAnimRot(-vec.x, -vec.y, vec.z);
+        
     }
     public void globalAnimRot(FiguraVec3 vec, boolean merge) {
         /*FiguraModelPart part = parent;
@@ -229,9 +238,10 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             FiguraVec3 scale = customization.getAnimScale();
             scale.multiply(vec);
             customization.setAnimScale(scale.x, scale.y, scale.z);
-        } else {
-            customization.setAnimScale(vec.x, vec.y, vec.z);
+            return;
         }
+        customization.setAnimScale(vec.x, vec.y, vec.z);
+        
     }
 
     // -- LUA BUSINESS --//
@@ -292,7 +302,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     @LuaMethodDoc("model_part.get_children")
     public Map<Integer, FiguraModelPart> getChildren() {
         Map<Integer, FiguraModelPart> map = new HashMap<>();
-        for (int i = 0; i < this.children.size(); i++)
+        Integer size = this.children.size();
+        for (int i = 0; i < size; i++)
             map.put(i + 1, this.children.get(i));
         return map;
     }
@@ -338,8 +349,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_pos"
     )
     public FiguraModelPart setPos(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setPos", x, y, z);
-        this.customization.setPos(vec);
+        this.customization.setPos(LuaUtils.parseVec3("setPos", x, y, z));
         return this;
     }
 
@@ -382,8 +392,36 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_rot"
     )
     public FiguraModelPart setRot(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setRot", x, y, z);
-        this.customization.setRot(vec);
+        this.customization.setRot(LuaUtils.parseVec3("setRot", x, y, z));
+        return this;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = FiguraVec3.class,
+                            argumentNames = "pos"
+                    ),
+                    @LuaMethodOverload(
+                            argumentTypes = {Double.class, Double.class, Double.class},
+                            argumentNames = {"x", "y", "z"}
+                    )
+            },
+            aliases = "rot",
+            value = "model_part.point_at"
+    )
+    public FiguraModelPart pointAt(Object x, Double y, Double z) {
+        FiguraVec3 start = this.savedPartToWorldMat.copy().apply(0D,0D,0D);
+        FiguraVec3 end = LuaUtils.parseVec3("pointAt", x, y, z);
+
+        Vec3 dir = end.asVec3().subtract(start.asVec3()).normalize();
+        double yaw = Math.atan2(dir.x, dir.z);
+        double pitch = Math.asin(dir.y);
+
+        Vec3 rot = new Vec3(Math.toDegrees(pitch), Math.toDegrees(yaw), 0);
+
+        this.customization.setRot(rot.x, rot.y, rot.z);
         return this;
     }
 
@@ -414,8 +452,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_offset_rot"
     )
     public FiguraModelPart setOffsetRot(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setOffsetRot", x, y, z);
-        this.customization.offsetRot(vec);
+        this.customization.offsetRot(LuaUtils.parseVec3("setOffsetRot", x, y, z));
         return this;
     }
 
@@ -458,8 +495,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_scale"
     )
     public FiguraModelPart setScale(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseOneArgVec("setScale", x, y, z, 1d);
-        this.customization.setScale(vec);
+        this.customization.setScale(LuaUtils.parseOneArgVec("setScale", x, y, z, 1d));
         return this;
     }
 
@@ -490,8 +526,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_offset_scale"
     )
     public FiguraModelPart setOffsetScale(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseOneArgVec("setOffsetScale", x, y, z, 1d);
-        this.customization.offsetScale(vec);
+        this.customization.offsetScale(LuaUtils.parseOneArgVec("setOffsetScale", x, y, z, 1d));
         return this;
     }
 
@@ -534,8 +569,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_pivot"
     )
     public FiguraModelPart setPivot(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setPivot", x, y, z);
-        this.customization.setPivot(vec);
+        this.customization.setPivot(LuaUtils.parseVec3("setPivot", x, y, z));
         return this;
     }
 
@@ -566,8 +600,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.set_offset_pivot"
     )
     public FiguraModelPart setOffsetPivot(Object x, Double y, Double z) {
-        FiguraVec3 vec = LuaUtils.parseVec3("setOffsetPivot", x, y, z);
-        this.customization.offsetPivot(vec);
+        this.customization.offsetPivot(LuaUtils.parseVec3("setOffsetPivot", x, y, z));
         return this;
     }
 
@@ -740,6 +773,46 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         return LuaValue.userdataOf(val);
     }
 
+    @LuaWhitelist
+  	@LuaMethodDoc(
+            overloads = @LuaMethodOverload(
+                    argumentTypes = Boolean.class,
+                    argumentNames = "shade"
+            ),
+            aliases = "shade",
+            value = "model_part.shading"
+    )
+    public FiguraModelPart shading(boolean bool) {
+        this.customization.shade(bool);
+        return this;
+    }
+
+    @LuaWhitelist
+    public FiguraModelPart shade(boolean bool) {
+        return shading(bool);
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            value = "model_part.no_shading",
+            overloads = @LuaMethodOverload(
+                    argumentTypes = Boolean.class,
+                    argumentNames = "noShading"
+            ),
+            aliases = "noShade"
+    )
+    public FiguraModelPart noShading(boolean bool) {
+        return shading(!bool);
+    }
+
+    @LuaWhitelist
+    public FiguraModelPart noShade(boolean bool) { return noShading(bool); }
+
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.is_shaded")
+    public Boolean isShaded() {
+        return this.customization.isShaded();
+    }
 
 
     @LuaWhitelist
@@ -891,6 +964,11 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public FiguraMat4 partToWorldMatrix() {
         return this.savedPartToWorldMat.copy();
     }
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.part_to_world")
+    public FiguraVec3 partToWorld() {
+        return this.savedPartToWorldMat.copy().apply(0D,0D,0D);
+    }
 
     @LuaWhitelist
     @LuaMethodDoc("model_part.get_texture_size")
@@ -920,9 +998,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             aliases = "uv",
             value = "model_part.set_uv")
     public FiguraModelPart setUV(Object x, Double y) {
-        this.customization.uvMatrix.reset();
         FiguraVec2 uv = LuaUtils.parseVec2("setUV", x, y);
-        this.customization.uvMatrix.translate(uv.x % 1, uv.y % 1);
+        this.customization.uvMatrix.reset().translate(uv.x % 1, uv.y % 1);
         return this;
     }
 
@@ -980,8 +1057,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         if (this.textureWidth == -1 || this.textureHeight == -1) {
             if (this.customization.partType == PartCustomization.PartType.GROUP)
                 throw new LuaError("Cannot call getUVPixels on groups!");
-            else
-                throw new LuaError("Cannot call getUVPixels on parts with multiple texture sizes!");
+            else throw new LuaError("Cannot call getUVPixels on parts with multiple texture sizes!");
         }
 
         return getUV().multiply(this.textureWidth, this.textureHeight);
@@ -1010,7 +1086,25 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public FiguraMat3 getUVMatrix() {
         return this.customization.uvMatrix;
     }
-
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(
+                            argumentTypes = FiguraVec3.class,
+                            argumentNames = "color"
+                    ),
+                    @LuaMethodOverload(
+                            argumentTypes = {Double.class, Double.class, Double.class},
+                            argumentNames = {"r", "g", "b"}
+                    )
+            },
+            value = "model_part.set_color")
+    public FiguraModelPart setColorUnlimited(Object r, Double g, Double b) {
+        FiguraVec3 vec = LuaUtils.parseVec3("setColor", r, g, b);
+        this.customization.color.set(vec);
+        this.customization.color2.set(vec);
+        return this;
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
@@ -1277,7 +1371,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_item")
     public ItemTask newItem(@LuaNotNil String name) {
-        ItemTask task = new ItemTask(name, owner, this);
+    	ItemTask task = new ItemTask(name, owner, this);
         this.renderTasks.put(name, task);
         return task;
     }
@@ -1290,9 +1384,18 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_block")
     public BlockTask newBlock(@LuaNotNil String name) {
-        BlockTask task = new BlockTask(name, owner, this);
+    	BlockTask task = new BlockTask(name, owner, this);
         this.renderTasks.put(name, task);
         return task;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.remove")
+    public FiguraModelPart remove() {
+        if (parent != null)
+            this.parent.removeChild(this);
+
+        return this;
     }
 
     @LuaWhitelist
@@ -1303,7 +1406,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_sprite")
     public SpriteTask newSprite(@LuaNotNil String name) {
-        SpriteTask task = new SpriteTask(name, owner, this);
+    	SpriteTask task = new SpriteTask(name, owner, this);
         this.renderTasks.put(name, task);
         return task;
     }
@@ -1316,7 +1419,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             ),
             value = "model_part.new_entity")
     public EntityTask newEntity(@LuaNotNil String name) {
-        EntityTask task = new EntityTask(name, owner, this);
+    	EntityTask task = new EntityTask(name, owner, this);
         this.renderTasks.put(name, task);
         return task;
     }
@@ -1342,8 +1445,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     public Object getTask(String name) {
         if (name != null)
             return this.renderTasks.get(name);
-        else
-            return this.renderTasks;
+        return this.renderTasks;
     }
 
     @LuaWhitelist
@@ -1366,14 +1468,6 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         return this;
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("model_part.remove")
-    public FiguraModelPart remove() {
-        if (parent != null)
-            this.parent.removeChild(this);
-
-        return this;
-    }
 
     @LuaWhitelist
     @LuaMethodDoc(
@@ -1494,7 +1588,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
 		if (name == null) name = this.name;
         PartCustomization customization = new PartCustomization();
         this.customization.copyTo(customization);
-        FiguraModelPart result = new FiguraModelPart(owner, name, customization, copyVertices(), new ArrayList<>(children));
+        FiguraModelPart result = new FiguraModelPart(owner, name, customization, copyVertices(), new ArrayList<>(children), null, null);
         result.facesByTexture = new ArrayList<>(facesByTexture);
         result.textures = new ArrayList<>(textures);
         result.parentType = parentType;
@@ -1522,7 +1616,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.new_part"
     )
     public FiguraModelPart newPart(@LuaNotNil String name, String parentType) {
-        FiguraModelPart newer = new FiguraModelPart(owner, name, new PartCustomization(), new HashMap<>(), new ArrayList<>());
+        FiguraModelPart newer = new FiguraModelPart(owner, name, new PartCustomization(), new HashMap<>(), new ArrayList<>(), null, null);
         newer.facesByTexture = new ArrayList<>();
         newer.textures = new ArrayList<>();
 
@@ -1571,12 +1665,9 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
 
     @Override
     public int compareTo(FiguraModelPart o) {
-        if (this.isChildOf(o))
-            return 1;
-        else if (o.isChildOf(this))
-            return -1;
-        else
-            return 0;
+        if (this.isChildOf(o)) return 1;
+        else if (o.isChildOf(this)) return -1;
+        return 0;
     }
 
     @Override
