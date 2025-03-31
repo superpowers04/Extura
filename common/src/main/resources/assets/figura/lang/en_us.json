@@ -1439,6 +1439,8 @@
     "figura.docs.model_part.set_offset_rot": "Sets the rotation offset for this part\nNil values for rotation are assumed to be 0\nAngles are given in degrees\nFor absolute rotation values, check out the non-offset rot functions",
     "figura.docs.model_part.get_anim_rot": "Gets the rotation offset provided by the currently active animation of this model part",
     "figura.docs.model_part.get_true_rot": "Gets the true rotation of this model part, which is a sum of the rotation, the offset rotation and the animation position",
+    "figura.docs.model_part.get_collection": "Returns a list of modelparts in the given collection\nOnly works on modelparts corresponding to Blockbench model\nReturns nil if the collection does not exist",
+    "figura.docs.model_part.get_collections": "Returns a table of every collection the model has\nOnly works on modelparts corresponding to Blockbench models",
     "figura.docs.model_part.get_scale": "Gets the scale of the model part, as a multiple of its Blockbench size\nOnly changes from {1,1,1} when you call setScale()",
     "figura.docs.model_part.set_scale": "Sets the scale factor for this part\nNil values for scale are assumed to be 1",
     "figura.docs.model_part.get_offset_scale": "Gets the scale offset of the model part, offset from its default scale\nFor absolute scale values, check out the non-offset rot functions",
