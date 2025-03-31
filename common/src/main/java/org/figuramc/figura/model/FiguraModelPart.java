@@ -1602,6 +1602,18 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc("model_part.get_collection")
+    public List<FiguraModelPart> getCollection(String name) {
+        return collections.get(name);
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.get_collections")
+    public Map<String, List<FiguraModelPart>> getCollections() {
+        return collections;
+    }
+
+    @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
                     @LuaMethodOverload(
