@@ -23,6 +23,7 @@ import org.figuramc.figura.model.rendering.texture.RenderTypes;
 import org.figuramc.figura.utils.MathUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Take the reading code out of FiguraModelPart itself, since that class
@@ -90,7 +91,9 @@ public class FiguraModelPartReader {
                 children.add(read(owner, (CompoundTag) tag, textureSets, smoothNormals));
         }
 
-        FiguraModelPart result = new FiguraModelPart(owner, name, customization, vertices, children);
+		String collections[] = partCompound.contains("cn") ? partCompound.getList("cn", Tag.TAG_STRING).stream().map(Tag::getAsString).toArray(String[]::new) : null;
+		byte collectionInfo[] = partCompound.contains("pr") ? partCompound.getByteArray("pr") : null;
+        FiguraModelPart result = new FiguraModelPart(owner, name, customization, vertices, children, collections, collectionInfo);
 
         for (FiguraModelPart child : children)
             child.parent = result;
