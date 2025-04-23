@@ -84,8 +84,9 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         for (int i = 0; i < facesByTexture.size(); i++) {
             if (remainingComplexity[0] <= 0)
                 return false;
-            remainingComplexity[0] -= facesByTexture.get(i);
-            avatarRenderer.pushFaces(facesByTexture.get(i) + Math.min(remainingComplexity[0], 0), remainingComplexity, textures.get(i), vertices.get(i));
+            int faces = facesByTexture.get(i);
+            remainingComplexity[0] -= faces;
+            avatarRenderer.pushFaces(faces + Math.min(remainingComplexity[0], 0), remainingComplexity, textures.get(i), vertices.get(i));
         }
         return true;
     }
