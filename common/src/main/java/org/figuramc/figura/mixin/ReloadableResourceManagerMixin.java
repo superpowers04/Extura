@@ -24,14 +24,15 @@ public class ReloadableResourceManagerMixin {
         //         index = i + 1;
         // }
         int index=0;
-        for (int i = list.size()-1; i-- >= 0;) {
+        String fb = "Fabric Mods";
+        String vanilla = "vanilla";
+        for (int i = list.size()-1; --i >= 0;) {
             String id = list.get(i).packId();
-            if ("Fabric Mods".equals(id) || "vanilla".equals(id)){
+            if (fb.equals(id) || vanilla.equals(id)){
                 index = i + 1;
                 break;
             }
         }
-
         FiguraRuntimeResources.joinFuture();
         list.add(index, FiguraRuntimeResources.PACK);
 
