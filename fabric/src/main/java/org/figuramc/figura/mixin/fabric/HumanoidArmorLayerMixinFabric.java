@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.List;
 
 @Mixin(value = HumanoidArmorLayer.class, priority = 900)
 public abstract class HumanoidArmorLayerMixinFabric<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T, M> implements HumanoidArmorLayerAccessor<T, M, A> {
@@ -268,11 +269,14 @@ public abstract class HumanoidArmorLayerMixinFabric<T extends LivingEntity, M ex
         int i = itemStack.is(ItemTags.DYEABLE) ? DyedItemColor.getOrDefault(itemStack, -6265536) : -1;
 
         ArmorMaterial material = armorItem.getMaterial().value();
-        for(ArmorMaterial.Layer layer : material.layers()) {
-            ResourceLocation normalArmorResource = RenderUtils.getArmorResource(entity, itemStack, armorItem, armorSlot, bl, layer);
-
-            VertexConsumer regularArmorConsumer = vertexConsumers.getBuffer(RenderType.armorCutoutNoCull(normalArmorResource));
-            modelPart.render(poseStack, regularArmorConsumer, light, OverlayTexture.NO_OVERLAY, i);
+        List<ArmorMaterial.Layer> layers = material.layers();
+        if(layers != null && layers.size() > 0){
+            for(ArmorMaterial.Layer layer : material.layers()) {
+                ResourceLocation normalArmorResource = RenderUtils.getArmorResource(entity, itemStack, armorItem, armorSlot, bl, layer);
+    
+                VertexConsumer regularArmorConsumer = vertexConsumers.getBuffer(RenderType.armorCutoutNoCull(normalArmorResource));
+                modelPart.render(poseStack, regularArmorConsumer, light, OverlayTexture.NO_OVERLAY, i);
+            }
         }
 
         ArmorTrim trim = itemStack.get(DataComponents.TRIM);
