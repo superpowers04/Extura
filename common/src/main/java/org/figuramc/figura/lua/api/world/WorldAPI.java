@@ -37,6 +37,7 @@ import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.NoiseGenerator;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.figuramc.figura.mixin.ClientLevelInvoker;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaTable;
 import org.figuramc.figura.math.vector.FiguraVec2;
@@ -515,6 +516,16 @@ public class WorldAPI {
                 .stream()
                 .map(EntityAPI::wrap)
                 .collect(Collectors.toList());
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("world.get_all_entities")
+    public static List<EntityAPI<?>> getAllEntities() {
+        List<EntityAPI<?>> ents = new ArrayList<>();
+        for (Entity ent : ((ClientLevelInvoker) getCurrentWorld()).getEntityGetter().getAll()) {
+            ents.add(EntityAPI.wrap(ent));
+        }
+        return ents;
     }
 
     @LuaWhitelist

@@ -22,6 +22,7 @@
 	"figura.docs.world.isChunkLoaded": "(Extura) Returns whether a chunk is loaded at the given block position",
 	"figura.docs.world.get_nearby_entities": "(Extura) Returns entities near the given block position",
 	"figura.docs.world.raycast_entity": "(Extura > linetraceEntity) Returns the entity and pos of a linetrace.",
+ 	"figura.docs.world.get_all_entities": "(Extura) Returns all entities currently loaded on your client",
 	"figura.docs.world.raycast_block": "(Extura > linetraceBlock) Returns the block, side, and pos of a linetrace",
 
 
