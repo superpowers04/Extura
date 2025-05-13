@@ -118,6 +118,7 @@ public class LocalAvatarLoader {
 
 				// scripts
 				loadState = LoadState.SCRIPTS;
+				nbt.put("scripts",new CompoundTag());
 				loadGlobalScripts(nbt);
 				loadScripts(finalPath, nbt);
 
@@ -153,6 +154,14 @@ public class LocalAvatarLoader {
 				if (metadataTag.contains("resources_paths")) {
 					loadResources(nbt, metadataTag.getList("resources_paths", Tag.TAG_STRING), finalPath);
 					metadataTag.remove("resource_paths");
+				}
+
+				if (metadataTag.contains("script_paths")) {
+					ListTag pathsTag = metadataTag.getList("script_paths", Tag.TAG_STRING);
+					for (int i = 0; i < pathsTag.size(); i++){
+						loadScripts(finalPath.resolve(pathsTag.getString(i)),nbt);
+					}
+					metadataTag.remove("script_paths");
 				}
 
 				// load
@@ -224,9 +233,6 @@ public class LocalAvatarLoader {
 		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
 		if (scripts.size() < 0) return;
 		CompoundTag scriptsNbt = nbt.getCompound("scripts");
-		if (scriptsNbt == null){
-			nbt.put("scripts",scriptsNbt = new CompoundTag());
-		}
 
 		int pathLength = (path + path.getFileSystem().getSeparator()).length();
 		for (Path script : scripts) {
@@ -245,9 +251,7 @@ public class LocalAvatarLoader {
 		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
 		if (scripts.size() < 0) return;
 		CompoundTag scriptsNbt = nbt.getCompound("scripts");
-		if (scriptsNbt == null){
-			nbt.put("scripts",scriptsNbt = new CompoundTag());
-		}
+
 		int pathLength = (path + path.getFileSystem().getSeparator()).length();
 		for (Path script : scripts) {
 			String name = script.toString();
@@ -410,9 +414,11 @@ public class LocalAvatarLoader {
 			WatchKey key = IS_WINDOWS ? path.register(watcher, events, com.sun.nio.file.ExtendedWatchEventModifier.FILE_TREE) : path.register(watcher, events);
 
 			consumer.accept(path, key);
+			if (IS_WINDOWS)
+				return;
 
 			List<Path> children = IOUtils.listPaths(path);
-			if (children == null || IS_WINDOWS)
+			if (children == null)
 				return;
 
 			for (Path child : children)
