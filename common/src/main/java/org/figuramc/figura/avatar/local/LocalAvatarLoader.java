@@ -118,9 +118,9 @@ public class LocalAvatarLoader {
 
 				// scripts
 				loadState = LoadState.SCRIPTS;
+				loadGlobalScripts(nbt);
 				loadScripts(finalPath, nbt);
 
-				loadGlobalScripts(nbt);
 				// custom sounds
 				loadState = LoadState.SOUNDS;
 				loadSounds(finalPath, nbt);
