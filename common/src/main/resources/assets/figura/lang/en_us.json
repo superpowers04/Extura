@@ -22,6 +22,7 @@
 	"figura.docs.world.raycast_entity": "(Extura > linetraceEntity) Returns the entity and pos of a linetrace.",
  	"figura.docs.world.get_all_entities": "(Extura) Returns all entities currently loaded on your client",
 	"figura.docs.world.raycast_block": "(Extura > linetraceBlock) Returns the block, side, and pos of a linetrace",
+ 	"figura.docs.itemstack.get_food_properties": "(Extura) Returns a table of an item's food properties. If the item is not edible, an empty table is returned",
 
 
 	"figura.docs.world.linetraceBlock": "(Extura) Returns the block, side, and pos of a linetrace",
