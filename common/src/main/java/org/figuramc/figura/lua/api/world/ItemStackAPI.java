@@ -17,9 +17,7 @@ import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.luaj.vm2.LuaTable;
 import net.minecraft.world.food.FoodProperties;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -121,11 +119,11 @@ public class ItemStackAPI {
         FoodProperties foodProperties = itemStack.getItem().getFoodProperties();
         if(foodProperties == null) return foodPropertiesMap;
         
-		foodPropertiesMap.set("nutrition", foodProperties.nutrition)
-		foodPropertiesMap.set("saturationModifier", foodProperties.saturationModifier)
-		foodPropertiesMap.set("isMeat", foodProperties.isMeat)
-		foodPropertiesMap.set("canAlwaysEat", foodProperties.canAlwaysEat)
-		foodPropertiesMap.set("fastFood", foodProperties.fastFood)
+        foodPropertiesMap.put("nutrition", foodProperties.getNutrition());
+        foodPropertiesMap.put("saturationModifier", foodProperties.getSaturationModifier());
+        foodPropertiesMap.put("isMeat", foodProperties.isMeat());
+        foodPropertiesMap.put("canAlwaysEat", foodProperties.canAlwaysEat());
+        foodPropertiesMap.put("fastFood", foodProperties.isFastFood());
         
 
         return foodPropertiesMap;
