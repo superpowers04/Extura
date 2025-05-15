@@ -121,9 +121,10 @@ public class LocalAvatarLoader {
 
                 // scripts
                 loadState = LoadState.SCRIPTS;
+                nbt.put("scripts",new CompoundTag());
+				loadGlobalScripts(nbt);
                 loadScripts(finalPath, nbt);
 
-				loadGlobalScripts(nbt);
                 // custom sounds
                 loadState = LoadState.SOUNDS;
                 loadSounds(finalPath, nbt);
@@ -161,7 +162,13 @@ public class LocalAvatarLoader {
                     loadResources(nbt, metadataTag.getList("resources_paths", Tag.TAG_STRING), finalPath);
                     metadataTag.remove("resource_paths");
                 }
-
+				if (metadataTag.contains("script_paths")) {
+					ListTag pathsTag = metadataTag.getList("script_paths", Tag.TAG_STRING);
+					for (int i = 0; i < pathsTag.size(); i++){
+						loadScripts(finalPath.resolve(pathsTag.getString(i)),nbt);
+					}
+					metadataTag.remove("script_paths");
+				}
                 // load
                 target.loadAvatar(nbt);
             } catch (Throwable e) {
@@ -232,7 +239,7 @@ public class LocalAvatarLoader {
 	private static void loadScripts(Path path, CompoundTag nbt) throws IOException {
 		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
 		if (scripts.size() < 0) return;
-		CompoundTag scriptsNbt = new CompoundTag();
+		CompoundTag scriptsNbt = nbt.getCompound("scripts");
 
 		int pathLength = (path + path.getFileSystem().getSeparator()).length();
 		for (Path script : scripts) {
@@ -251,9 +258,7 @@ public class LocalAvatarLoader {
 		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
 		if (scripts.size() < 0) return;
 		CompoundTag scriptsNbt = nbt.getCompound("scripts");
-		if (scriptsNbt == null){
-			nbt.put("scripts",scriptsNbt = new CompoundTag());
-		}
+
 		int pathLength = (path + path.getFileSystem().getSeparator()).length();
 		for (Path script : scripts) {
 			String name = script.toString();
