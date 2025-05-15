@@ -39,7 +39,7 @@ import org.luaj.vm2.LuaTable;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
+import org.figuramc.figura.mixin.ClientLevelInvoker;
 @LuaWhitelist
 @LuaTypeDoc(
         name = "WorldAPI",
@@ -515,6 +515,16 @@ public class WorldAPI {
                 .stream()
                 .map(EntityAPI::wrap)
                 .collect(Collectors.toList());
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("world.get_all_entities")
+    public static List<EntityAPI<?>> getAllEntities() {
+        List<EntityAPI<?>> ents = new ArrayList<>();
+        for (Entity ent : ((ClientLevelInvoker) getCurrentWorld()).getEntityGetter().getAll()) {
+            ents.add(EntityAPI.wrap(ent));
+        }
+        return ents;
     }
 
     @LuaWhitelist
