@@ -333,9 +333,9 @@ public class LocalAvatarFetcher {
 	/**
 	 * Represents a path which contains avatar(s) in it's sub-paths.
 	 */
-	public static class FolderPath extends AvatarPath {
+	public static class FolderPath extends LocalAvatarFetcher.AvatarPath {
 
-		protected final List<AvatarPath> children = new ArrayList<>();
+		protected final List<LocalAvatarFetcher.AvatarPath> children = new ArrayList<>();
 		protected final FileSystem fileSystem;
 
 		public FolderPath(FileSystem fileSystem, Path folder, Path path) {
