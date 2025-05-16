@@ -35,6 +35,7 @@ dependencies {
     include(implementation("org.concentus:Concentus:1.0-SNAPSHOT"))
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.3.1'))
+    modCompileOnly("maven.modrinth:sodium:${rootProject.sodium}")
 
     if(rootProject.run_on_quilt == "false") {
         modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
@@ -77,6 +78,14 @@ dependencies {
 
 }
 
+repositories {
+	/* Sodium*/
+    maven { 
+        name = "Modrinth" 
+        url = "https://api.modrinth.com/maven" 
+    }
+    
+}
 
 
 processResources {
