@@ -136,15 +136,21 @@ public class LuaTypeManager {
 			@Override
 			public Varargs invoke(Varargs args) {
 
-				if (!isStatic)
-					caller = args.checkuserdata(1, clazz);
-
+				if(!isStatic){
+                    try {
+                        caller = args.checkuserdata(1, clazz);
+                    } catch (LuaError e) {
+                        String methodName = method.getName();
+                        String targetType = getTypeName(clazz);
+                        throw new LuaError(String.format("bad argument #1 to %s(expected %s, got %s)\n(try to call with %s:%s instead of %s.%s)",methodName,targetType,args.arg(1).typename(),methodName,targetType,methodName));
+                    }
+                }
 				// dirty hack for QOL of ignoring the first argument if the method is static and the arg matches the class type
-				int offset = isStatic && argumentTypes.length > 0 && !argumentTypes[0].isAssignableFrom(clazz) && args.isuserdata(1) && clazz.isAssignableFrom(args.checkuserdata(1).getClass()) ? 1 : 0;
+				int offset=(!isStatic || (argumentTypes.length > 0 && !argumentTypes[0].isAssignableFrom(clazz) && args.isuserdata(1) && clazz.isAssignableFrom(args.checkuserdata(1).getClass())) ? 2 : 1);
 
 				// Fill in actualArgs from args
 				for (int i = 0; i < argumentTypes.length; i++) {
-					int argIndex = i + (isStatic ? 1 : 2) + offset;
+					int argIndex = i + offset;
 					boolean nil = args.isnil(argIndex);
 					if (nil && requiredNotNil[i])
 						throw new LuaError("bad argument: " + method.getName() + " " + argIndex + " do not allow nil values, expected " + FiguraDocsManager.getNameFor(argumentTypes[i]));
@@ -165,11 +171,8 @@ public class LuaTypeManager {
 							};
 						} catch (LuaError err) {
 							String expectedType = FiguraDocsManager.getNameFor(argumentTypes[i]);
-							String actualType;
-							if (args.arg(argIndex).type() == LuaValue.TUSERDATA)
-								actualType = FiguraDocsManager.getNameFor(args.arg(argIndex).checkuserdata().getClass());
-							else
-								actualType = args.arg(argIndex).typename();
+							LuaValue arg = args.arg(argIndex);
+							String actualType = arg.type() == LuaValue.TUSERDATA ? FiguraDocsManager.getNameFor(arg.checkuserdata().getClass()) : arg.typename();
 							throw new LuaError("Invalid argument " + argIndex + " to function " + method.getName() + ". Expected " + expectedType + ", but got " + actualType);
 						}
 					} else {
@@ -184,16 +187,14 @@ public class LuaTypeManager {
 					}
 				}
 
-				// Invoke the wrapped method
-				Object result;
 				try {
-					result = method.invoke(caller, actualArgs);
+					// Invoke the wrapped method
+					// Convert the return value
+					Object result = method.invoke(caller, actualArgs);
+					return result instanceof Varargs v ? v : javaToLua(result);
 				} catch (IllegalAccessException | InvocationTargetException e) {
 					throw e.getCause() instanceof LuaError l ? l : new LuaError(e.getCause());
 				}
-
-				// Convert the return value
-				return result instanceof Varargs v ? v : javaToLua(result);
 			}
 
 			@Override
