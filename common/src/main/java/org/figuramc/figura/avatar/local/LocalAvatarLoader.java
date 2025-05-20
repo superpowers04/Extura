@@ -119,7 +119,8 @@ public class LocalAvatarLoader {
 				// scripts
 				loadState = LoadState.SCRIPTS;
 				nbt.put("scripts",new CompoundTag());
-				loadGlobalScripts(nbt);
+				if(Configs.USE_GLOBAL_SCRIPTS.value) 
+					loadScriptsFromPath(IOUtils.getOrCreateDir(FiguraMod.getFiguraDirectory(),"global_scripts"),nbt,"global.");
 				loadScripts(finalPath, nbt);
 
 				// custom sounds
@@ -159,7 +160,9 @@ public class LocalAvatarLoader {
 				if (metadataTag.contains("script_paths")) {
 					ListTag pathsTag = metadataTag.getList("script_paths", Tag.TAG_STRING);
 					for (int i = 0; i < pathsTag.size(); i++){
-						loadScripts(finalPath.resolve(pathsTag.getString(i)),nbt);
+						Path scriptPath = FiguraMod.getFiguraDirectory().resolve(pathsTag.getString(i));
+						String p_string = scriptPath.toString();
+						loadScriptsFromPath(scriptPath,nbt,p_string.substring(p_string.lastIndexOf('/',p_string.length()-2)+1,p_string.length()-1));
 					}
 					metadataTag.remove("script_paths");
 				}
@@ -241,12 +244,8 @@ public class LocalAvatarLoader {
 			scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
 		}
 		nbt.put("scripts",scriptsNbt);
-
-
 	}
-	private static void loadGlobalScripts(CompoundTag nbt) throws IOException {
-		if (!Configs.USE_GLOBAL_SCRIPTS.value) return;
-		Path path = IOUtils.getOrCreateDir(FiguraMod.getFiguraDirectory(),"global_scripts");
+	private static void loadScriptsFromPath(Path path, CompoundTag nbt,String scriptPath) throws IOException {
 		addWatchKey(path, KEYS::put);
 		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
 		if (scripts.size() < 0) return;
@@ -255,7 +254,7 @@ public class LocalAvatarLoader {
 		int pathLength = (path + path.getFileSystem().getSeparator()).length();
 		for (Path script : scripts) {
 			String name = script.toString();
-			name = "global."+name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
+			name = scriptPath+name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
 			scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
 		}
 
