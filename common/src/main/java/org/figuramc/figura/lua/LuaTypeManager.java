@@ -142,7 +142,7 @@ public class LuaTypeManager {
                     } catch (LuaError e) {
                         String methodName = method.getName();
                         String targetType = getTypeName(clazz);
-                        throw new LuaError(String.format("bad argument #1 to %s(expected %s, got %s)\n(try to call with %s:%s instead of %s.%s)",methodName,targetType,args.arg(1).typename(),methodName,targetType,methodName));
+                        throw new LuaError(String.format("bad argument #1 to %s(expected %s, got %s)\n(try to call with %s:%s instead of %s.%s)",methodName,targetType,args.arg(1).typename(),targetType,methodName,targetType,methodName));
                     }
                 }
 				// dirty hack for QOL of ignoring the first argument if the method is static and the arg matches the class type
