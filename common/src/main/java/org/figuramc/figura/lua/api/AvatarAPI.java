@@ -375,12 +375,18 @@ public class AvatarAPI {
     @LuaMethodDoc("avatar.get_tick_count")
     public int getTickCount() {
         return avatar.tick.getTotal();
-    }
+	}
 
-    @LuaWhitelist
-    @LuaMethodDoc("avatar.get_max_tick_count")
-    public int getMaxTickCount() {
-        return avatar.permissions.get(Permissions.TICK_INST);
+	@LuaWhitelist
+	@LuaMethodDoc("avatar.get_size_limit")
+	public int getSizeLimit() {
+		return NetworkStuff.getSizeLimit();
+	}
+
+	@LuaWhitelist
+	@LuaMethodDoc("avatar.get_max_tick_count")
+	public int getMaxTickCount() {
+		return avatar.permissions.get(Permissions.TICK_INST);
     }
 
     @LuaWhitelist

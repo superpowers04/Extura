@@ -102,19 +102,19 @@ public class AvatarManager {
 
         for (UserData user : LOADED_USERS.values()) {
             Avatar avatar = user.getMainAvatar();
-            if (avatar != null) {
-                FiguraMod.pushProfiler(avatar);
-                consumer.accept(avatar);
-                FiguraMod.popProfiler();
-            }
+            if (avatar == null) continue;
+            FiguraMod.pushProfiler(avatar);
+            consumer.accept(avatar);
+            FiguraMod.popProfiler();
+
         }
 
         for (Avatar avatar : LOADED_CEM.values()) {
-            if (avatar != null) {
-                FiguraMod.pushProfiler(avatar);
-                consumer.accept(avatar);
-                FiguraMod.popProfiler();
-            }
+            if (avatar == null) continue;
+            FiguraMod.pushProfiler(avatar);
+            consumer.accept(avatar);
+            FiguraMod.popProfiler();
+
         }
 
         FiguraMod.popProfiler(2);

@@ -89,10 +89,11 @@ public abstract class AvatarRenderer {
             byte[] bytes = src.getByteArray(key);
             if (bytes.length > 0) {
                 textures.put(key, new FiguraTexture(avatar, key, bytes));
-            } else {
-                ListTag size = src.getList(key, Tag.TAG_INT);
-                textures.put(key, new FiguraTexture(avatar, key, size.getInt(0), size.getInt(1)));
+                continue;
             }
+            ListTag size = src.getList(key, Tag.TAG_INT);
+            textures.put(key, new FiguraTexture(avatar, key, size.getInt(0), size.getInt(1)));
+            
         }
 
         // data files
@@ -176,9 +177,7 @@ public abstract class AvatarRenderer {
     public static FiguraMat4 entityToWorldMatrix(Entity e, float delta) {
         double yaw = e instanceof LivingEntity le ? Mth.lerp(delta, le.yBodyRotO, le.yBodyRot) : e.getViewYRot(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true));
         FiguraMat4 result = FiguraMat4.of();
-        result.rotateX(180 - yaw);
-        result.translate(e.getPosition(delta));
-        return result;
+        return FiguraMat4.of().rotateX(180 - yaw).translate(e.getPosition(delta));
     }
 
     public static double getYawOffsetRot(Entity e, float delta) {
@@ -193,17 +192,12 @@ public abstract class AvatarRenderer {
      * @return That matrix.
      */
     public static FiguraMat4 worldToViewMatrix() {
-        Minecraft client = Minecraft.getInstance();
-        Camera camera = client.gameRenderer.getMainCamera();
-        Quaternionf rot = new Quaternionf(camera.rotation());
+        Quaternionf rot = new Quaternionf(Minecraft.getInstance().gameRenderer.getMainCamera().rotation());
         rot.x *= -1;
         rot.z *= -1;
-        Matrix3f cameraMat3f = new Matrix3f().rotate(rot);
-        FiguraMat4 result = FiguraMat4.of();
-        FiguraMat3 cameraMat = FiguraMat3.of().set(cameraMat3f);
-        result.multiply(cameraMat.augmented());
-        result.scale(-1, 1, -1);
-        return result;
+        return FiguraMat4.of()
+        	.multiply(FiguraMat3.of().set(new Matrix3f().rotate(rot)).augmented())
+        	.scale(-1, 1, -1);
     }
 
     /**
@@ -212,12 +206,7 @@ public abstract class AvatarRenderer {
      * @return That matrix.
      */
     public static FiguraMat4 worldToCameraPosMatrix() {
-        Minecraft client = Minecraft.getInstance();
-        Camera camera = client.gameRenderer.getMainCamera();
-        FiguraMat4 result = FiguraMat4.of();
-        Vec3 cameraPos = camera.getPosition().scale(-1);
-        result.translate(cameraPos.x, cameraPos.y, cameraPos.z);
-        return result;
+        return FiguraMat4.of().translate(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().scale(-1));
     }
 
     public void setupRenderer(PartFilterScheme currentFilterScheme, MultiBufferSource bufferSource, PoseStack matrices, float tickDelta, int light, float alpha, int overlay, boolean translucent, boolean glowing) {
@@ -249,16 +238,7 @@ public abstract class AvatarRenderer {
 
     public void setMatrices(double camX, double camY, double camZ, PoseStack matrices) {
         PoseStack.Pose pose = matrices.last();
-
-        // pos
-        Matrix4d posMat = new Matrix4d(pose.pose());
-        posMat.translate(-camX, -camY, -camZ);
-        posMat.scale(-1, -1, 1);
-        this.posMat.set(posMat);
-
-        // normal
-        Matrix3f normalMat = new Matrix3f(pose.normal());
-        normalMat.scale(-1, -1, 1);
-        this.normalMat.set(normalMat);
+        this.posMat.set(new Matrix4d(pose.pose()).translate(-camX, -camY, -camZ).scale(-1, -1, 1));
+        this.normalMat.set(new Matrix3f(pose.normal()).scale(-1, -1, 1));
     }
 }

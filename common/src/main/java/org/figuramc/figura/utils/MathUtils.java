@@ -105,19 +105,17 @@ public class MathUtils {
         return FiguraVec4.of(projectiveCamSpace.x() / w, projectiveCamSpace.y() / w, projectiveCamSpace.z() / w, Math.sqrt(posDiff.dot(posDiff)));
     }
 
-    private static final String[] SIZE_UNITS = {"b", "kb", "mb", "gb"};
+    private static final String[] SIZE_UNITS = {"B", "KIB", "MIB", "GIB","TIB","too big"};
 
     public static String asFileSize(double size) {
         int i = 0;
         while (i < SIZE_UNITS.length) {
-            if (size < 1000) break;
-            size /= 1000;
+            if (size < 1024) break;
+            size /= 1024;
             i++;
         }
 
-        DecimalFormat df = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.US));
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return df.format(size) + SIZE_UNITS[i];
+        return ((int)(size*100)*0.01) + SIZE_UNITS[i];
     }
 
     public static float magicDelta(float speed, float delta) {

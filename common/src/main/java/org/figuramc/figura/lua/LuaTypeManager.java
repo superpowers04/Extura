@@ -37,37 +37,35 @@ public class LuaTypeManager {
         LuaTable metatable = new LuaTable();
 
         LuaTable indexTable = new LuaTable();
-        Class<?> currentClass = clazz;
-        while (currentClass.isAnnotationPresent(LuaWhitelist.class)) {
-            for (Method method : currentClass.getDeclaredMethods()) {
-                if (!method.isAnnotationPresent(LuaWhitelist.class)) {
-                    continue;
-                }
-                String name = method.getName();
-                if (name.startsWith("__")) { // metamethods
-                    if (metatable.rawget(name) == LuaValue.NIL) { // Only add the most recently declared metamethod, in the most specific subclass.
-                        if (name.equals("__index")) {
-                            // Custom __index implementation. First checks the regular __index table, and if it gets NIL, then calls the custom-defined __index function.
-                            metatable.set("__index", new TwoArgFunction() {
-                                final LuaFunction wrappedIndexer = getWrapper(method);
+		Class<?> currentClass = clazz;
+		while (currentClass.isAnnotationPresent(LuaWhitelist.class)) {
+			for (Method method : currentClass.getDeclaredMethods()) {
+				if (!method.isAnnotationPresent(LuaWhitelist.class)) 
+					continue;
+				String name = method.getName();
+				if (name.startsWith("__")) { // metamethods
+					if (metatable.rawget(name) != LuaValue.NIL) continue; // Only add the most recently declared metamethod, in the most specific subclass.
+					if (!name.equals("__index")){
+						metatable.set(name, getWrapper(method));
+						continue;
+					}
+					// Custom __index implementation. First checks the regular __index table, and if it gets NIL, then calls the custom-defined __index function.
+					metatable.set("__index", new TwoArgFunction() {
+						final LuaFunction wrappedIndexer = getWrapper(method);
                                 @Override
                                 public LuaValue call(LuaValue arg1, LuaValue arg2) {
                                     LuaValue result = indexTable.get(arg2);
                                     if (result == LuaValue.NIL)
                                         result = wrappedIndexer.call(arg1, arg2);
-                                    return result;
-                                }
-                            });
-                        } else {
-                            metatable.set(name, getWrapper(method));
-                        }
-                    }
-                } else { // regular methods
-                    indexTable.set(name, getWrapper(method));
-                }
-            }
-            currentClass = currentClass.getSuperclass();
-        }
+							return result;
+						}
+					});
+					continue;
+				} // regular methods
+				indexTable.set(name, getWrapper(method));
+			}
+			currentClass = currentClass.getSuperclass();
+		}
 
         if (metatable.rawget("__index") == LuaValue.NIL)
             metatable.set("__index", indexTable);

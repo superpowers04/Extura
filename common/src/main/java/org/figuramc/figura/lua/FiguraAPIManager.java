@@ -52,6 +52,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import org.figuramc.figura.animation.Keyframe;
 
 /**
  * A set of Globals of which there is only one in the MC instance.
@@ -129,6 +130,8 @@ public class FiguraAPIManager {
 
         add(AnimationAPI.class);
         add(Animation.class);
+		add(Animation.AnimationChannel.class);
+		add(Keyframe.class);
 
         add(HostAPI.class);
 

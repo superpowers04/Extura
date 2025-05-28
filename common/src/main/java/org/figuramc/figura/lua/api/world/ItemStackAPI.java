@@ -127,6 +127,23 @@ public class ItemStackAPI {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc("itemstack.get_food_properties")
+    public Map<String, Object> getFoodProperties() {
+        Map<String, Object> foodPropertiesMap = new HashMap<>();
+        FoodProperties foodProperties = itemStack.getItem().getFoodProperties();
+        if(foodProperties == null) return foodPropertiesMap;
+        
+        foodPropertiesMap.put("nutrition", foodProperties.getNutrition());
+        foodPropertiesMap.put("saturationModifier", foodProperties.getSaturationModifier());
+        foodPropertiesMap.put("isMeat", foodProperties.isMeat());
+        foodPropertiesMap.put("canAlwaysEat", foodProperties.canAlwaysEat());
+        foodPropertiesMap.put("fastFood", foodProperties.isFastFood());
+        
+
+        return foodPropertiesMap;
+    }
+
+    @LuaWhitelist
     @LuaMethodDoc("itemstack.is_food")
     public boolean isFood() {
         return itemStack.getComponents().has(DataComponents.FOOD);
@@ -254,7 +271,7 @@ public class ItemStackAPI {
     public boolean __eq(ItemStackAPI other) {
         ItemStack t = this.itemStack;
         ItemStack o = other.itemStack;
-        if (!t.toString().equals(o.toString()) || !t.is(o.getItem()))
+        if (t.getCount() != o.getCount() && !t.is(o.getItem()) && !t.toString().equals(o.toString()))
             return false;
 
         DataComponentMap tag1 = t.getComponents();
