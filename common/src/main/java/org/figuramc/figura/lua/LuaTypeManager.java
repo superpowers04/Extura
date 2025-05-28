@@ -123,87 +123,89 @@ public class LuaTypeManager {
         return result;
     }
 
-    public VarArgFunction getWrapper(Method method) {
-        return new VarArgFunction() {
 
-            private final boolean isStatic = Modifier.isStatic(method.getModifiers());
-            private Object caller;
+	public VarArgFunction getWrapper(Method method) {
+		return new VarArgFunction() {
+
+			private final boolean isStatic = Modifier.isStatic(method.getModifiers());
+			private Object caller;
 
 
-            private final Class<?> clazz = method.getDeclaringClass();
-            private final Class<?>[] argumentTypes = method.getParameterTypes();
-            private final Object[] actualArgs = new Object[argumentTypes.length];
-            private final boolean[] requiredNotNil = getRequiredNotNil(method);
+			private final Class<?> clazz = method.getDeclaringClass();
+			private final Class<?>[] argumentTypes = method.getParameterTypes();
+			private final Object[] actualArgs = new Object[argumentTypes.length];
+			private final boolean[] requiredNotNil = getRequiredNotNil(method);
 
-            @Override
-            public Varargs invoke(Varargs args) {
+			@Override
+			public Varargs invoke(Varargs args) {
 
-                if (!isStatic)
-                    caller = args.checkuserdata(1, clazz);
-
-                // dirty hack for QOL of ignoring the first argument if the method is static and the arg matches the class type
-                int offset = isStatic && argumentTypes.length > 0 && !argumentTypes[0].isAssignableFrom(clazz) && args.isuserdata(1) && clazz.isAssignableFrom(args.checkuserdata(1).getClass()) ? 1 : 0;
-
-                // Fill in actualArgs from args
-                for (int i = 0; i < argumentTypes.length; i++) {
-                    int argIndex = i + (isStatic ? 1 : 2) + offset;
-                    boolean nil = args.isnil(argIndex);
-                    if (nil && requiredNotNil[i])
-                        throw new LuaError("bad argument: " + method.getName() + " " + argIndex + " do not allow nil values, expected " + FiguraDocsManager.getNameFor(argumentTypes[i]));
-                    if (argIndex <= args.narg() && !nil) {
-                        try {
-                            actualArgs[i] = switch (argumentTypes[i].getName()) {
-                                case "java.lang.Number", "java.lang.Double", "double" -> args.checkdouble(argIndex);
-                                case "java.lang.String" -> args.checkjstring(argIndex);
-                                case "java.lang.Boolean", "boolean" -> args.toboolean(argIndex);
-                                case "java.lang.Float", "float" -> (float) args.checkdouble(argIndex);
-                                case "java.lang.Integer", "int" -> args.checkint(argIndex);
-                                case "java.lang.Long", "long" -> args.checklong(argIndex);
-                                case "org.luaj.vm2.LuaTable" -> args.checktable(argIndex);
-                                case "org.luaj.vm2.LuaFunction" -> args.checkfunction(argIndex);
-                                case "org.luaj.vm2.LuaValue" -> args.arg(argIndex);
-                                case "java.lang.Object" -> luaToJava(args.arg(argIndex));
-                                default -> argumentTypes[i].getName().startsWith("[") ? luaVarargToJava(args, argIndex, argumentTypes[i]) : args.checkuserdata(argIndex, argumentTypes[i]);
-                            };
-                        } catch (LuaError err) {
-                            String expectedType = FiguraDocsManager.getNameFor(argumentTypes[i]);
-                            String actualType;
-                            if (args.arg(argIndex).type() == LuaValue.TUSERDATA)
-                                actualType = FiguraDocsManager.getNameFor(args.arg(argIndex).checkuserdata().getClass());
-                            else
-                                actualType = args.arg(argIndex).typename();
-                            throw new LuaError("Invalid argument " + argIndex + " to function " + method.getName() + ". Expected " + expectedType + ", but got " + actualType);
-                        }
-                    } else {
-                        actualArgs[i] = switch (argumentTypes[i].getName()) {
-                            case "double" -> 0D;
-                            case "int" -> 0;
-                            case "long" -> 0L;
-                            case "float" -> 0f;
-                            case "boolean" -> false;
-                            default -> null;
-                        };
+				if(!isStatic){
+                    try {
+                        caller = args.checkuserdata(1, clazz);
+                    } catch (LuaError e) {
+                        String methodName = method.getName();
+                        String targetType = getTypeName(clazz);
+                        throw new LuaError(String.format("bad argument #1 to %s(expected %s, got %s)\n(try to call with %s:%s instead of %s.%s)",methodName,targetType,args.arg(1).typename(),targetType,methodName,targetType,methodName));
                     }
                 }
+				// dirty hack for QOL of ignoring the first argument if the method is static and the arg matches the class type
+				int offset=(!isStatic || (argumentTypes.length > 0 && !argumentTypes[0].isAssignableFrom(clazz) && args.isuserdata(1) && clazz.isAssignableFrom(args.checkuserdata(1).getClass())) ? 2 : 1);
 
-                // Invoke the wrapped method
-                Object result;
-                try {
-                    result = method.invoke(caller, actualArgs);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw e.getCause() instanceof LuaError l ? l : new LuaError(e.getCause());
-                }
+				// Fill in actualArgs from args
+				for (int i = 0; i < argumentTypes.length; i++) {
+					int argIndex = i + offset;
+					boolean nil = args.isnil(argIndex);
+					if (nil && requiredNotNil[i])
+						throw new LuaError("bad argument: " + method.getName() + " " + argIndex + " do not allow nil values, expected " + FiguraDocsManager.getNameFor(argumentTypes[i]));
+					if (argIndex <= args.narg() && !nil) {
+						try {
+							actualArgs[i] = switch (argumentTypes[i].getName()) {
+								case "java.lang.Number", "java.lang.Double", "double" -> args.checkdouble(argIndex);
+								case "java.lang.String" -> args.checkjstring(argIndex);
+								case "java.lang.Boolean", "boolean" -> args.toboolean(argIndex);
+								case "java.lang.Float", "float" -> (float) args.checkdouble(argIndex);
+								case "java.lang.Integer", "int" -> args.checkint(argIndex);
+								case "java.lang.Long", "long" -> args.checklong(argIndex);
+								case "org.luaj.vm2.LuaTable" -> args.checktable(argIndex);
+								case "org.luaj.vm2.LuaFunction" -> args.checkfunction(argIndex);
+								case "org.luaj.vm2.LuaValue" -> args.arg(argIndex);
+								case "java.lang.Object" -> luaToJava(args.arg(argIndex));
+								default -> argumentTypes[i].getName().startsWith("[") ? luaVarargToJava(args, argIndex, argumentTypes[i]) : args.checkuserdata(argIndex, argumentTypes[i]);
+							};
+						} catch (LuaError err) {
+							String expectedType = FiguraDocsManager.getNameFor(argumentTypes[i]);
+							LuaValue arg = args.arg(argIndex);
+							String actualType = arg.type() == LuaValue.TUSERDATA ? FiguraDocsManager.getNameFor(arg.checkuserdata().getClass()) : arg.typename();
+							throw new LuaError("Invalid argument " + argIndex + " to function " + method.getName() + ". Expected " + expectedType + ", but got " + actualType);
+						}
+					} else {
+						actualArgs[i] = switch (argumentTypes[i].getName()) {
+							case "double" -> 0D;
+							case "int" -> 0;
+							case "long" -> 0L;
+							case "float" -> 0f;
+							case "boolean" -> false;
+							default -> null;
+						};
+					}
+				}
 
-                // Convert the return value
-                return result instanceof Varargs v ? v : javaToLua(result);
-            }
+				try {
+					// Invoke the wrapped method
+					// Convert the return value
+					Object result = method.invoke(caller, actualArgs);
+					return result instanceof Varargs v ? v : javaToLua(result);
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					throw e.getCause() instanceof LuaError l ? l : new LuaError(e.getCause());
+				}
+			}
 
-            @Override
-            public String tojstring() {
-                return "function: " + method.getName();
-            }
-        };
-    }
+			@Override
+			public String tojstring() {
+				return "function: " + method.getName();
+			}
+		};
+	}
 
     private LuaValue wrap(Object instance) {
         Class<?> clazz = instance.getClass();
