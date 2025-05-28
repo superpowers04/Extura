@@ -227,22 +227,22 @@ public class ItemStackAPI {
     public ItemStackAPI copy() {
         return new ItemStackAPI(itemStack.copy(), this.tag);
     }
-    @LuaWhitelist
-    @LuaMethodDoc("itemstack.get_food_properties")
-    public Map<String, Object> getFoodProperties() {
-        Map<String, Object> foodPropertiesMap = new HashMap<>();
-        FoodProperties foodProperties = itemStack.getItem().getFoodProperties();
-        if(foodProperties == null) return foodPropertiesMap;
+    // @LuaWhitelist
+    // @LuaMethodDoc("itemstack.get_food_properties")
+    // public Map<String, Object> getFoodProperties() {
+    //     Map<String, Object> foodPropertiesMap = new HashMap<>();
+    //     FoodProperties foodProperties = itemStack.getItem().getFoodProperties();
+    //     if(foodProperties == null) return foodPropertiesMap;
         
-        foodPropertiesMap.put("nutrition", foodProperties.getNutrition());
-        foodPropertiesMap.put("saturationModifier", foodProperties.getSaturationModifier());
-        foodPropertiesMap.put("isMeat", foodProperties.isMeat());
-        foodPropertiesMap.put("canAlwaysEat", foodProperties.canAlwaysEat());
-        foodPropertiesMap.put("fastFood", foodProperties.isFastFood());
+    //     foodPropertiesMap.put("nutrition", foodProperties.nutrition);
+    //     foodPropertiesMap.put("saturation", foodProperties.saturation);
+    //     foodPropertiesMap.put("canAlwaysEat", foodProperties.canAlwaysEat);
+    //     foodPropertiesMap.put("eatDurationTicks", foodProperties.eatDurationTicks);
+    //     foodPropertiesMap.put("fastFood", false);
         
 
-        return foodPropertiesMap;
-    }
+    //     return foodPropertiesMap;
+    // }
 
     @LuaWhitelist
     @LuaMethodDoc("itemstack.get_blockstate")
