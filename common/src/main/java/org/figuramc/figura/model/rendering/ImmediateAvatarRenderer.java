@@ -148,7 +148,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 					customizationStack.push(part.savedCustomization);
 					part.savedCustomization = null;
 					renderPart(part, remainingComplexity, currentFilterScheme.initialValue);
-					customizationStack.pop()
+					customizationStack.pop();
 
 
 				}
