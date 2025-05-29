@@ -3,6 +3,7 @@ package org.figuramc.figura.server.packets.handlers.c2s;
 import org.figuramc.figura.server.FiguraServer;
 import org.figuramc.figura.server.FiguraUser;
 import org.figuramc.figura.server.packets.c2s.C2SDeleteAvatarPacket;
+import org.figuramc.figura.server.packets.s2c.S2CAvatarDeletedPacket;
 import org.figuramc.figura.server.utils.IFriendlyByteBuf;
 
 public class C2SDeleteAvatarPacketHandler extends AuthorizedC2SPacketHandler<C2SDeleteAvatarPacket> {
@@ -14,6 +15,7 @@ public class C2SDeleteAvatarPacketHandler extends AuthorizedC2SPacketHandler<C2S
     protected void handle(FiguraUser sender, C2SDeleteAvatarPacket packet) {
         sender.removeOwnedAvatar(packet.avatarId());
         sender.removeEquippedAvatar();
+        sender.sendPacket(new S2CAvatarDeletedPacket(packet.avatarId()));
     }
 
     @Override

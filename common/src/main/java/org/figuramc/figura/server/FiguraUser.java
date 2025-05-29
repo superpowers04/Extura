@@ -159,25 +159,41 @@ public final class FiguraUser {
     public void removeOwnedAvatar(String avatarId) {
         if (ownedAvatars.containsKey(avatarId)) {
             EHashPair avatar = ownedAvatars.remove(avatarId);
-            FiguraServer.getInstance().avatarManager().getAvatarMetadata(avatar.hash()).owners().remove(uuid());
+            try {
+                FiguraServer.getInstance().avatarManager().getAvatarMetadata(avatar.hash()).owners().remove(uuid());
+            } catch (RuntimeException re) {
+                FiguraServer.getInstance().logError("Failed to remove owned avatar", re);
+            }
         }
     }
 
     public void removeEquippedAvatar() {
         if (equippedAvatar != null) {
-            FiguraServer.getInstance().avatarManager().getAvatarMetadata(equippedAvatar.right().hash()).equipped().remove(uuid());
-            equippedAvatar = null;
+            try {
+                FiguraServer.getInstance().avatarManager().getAvatarMetadata(equippedAvatar.right().hash()).equipped().remove(uuid());
+                equippedAvatar = null;
+            } catch (RuntimeException re) {
+                FiguraServer.getInstance().logError("Failed to remove equipped avatar", re);
+            }
         }
     }
 
     public void replaceOrAddOwnedAvatar(String avatarId, Hash hash, Hash ehash) {
-        ownedAvatars.put(avatarId, new EHashPair(hash, ehash));
-        FiguraServer.getInstance().avatarManager().getAvatarMetadata(hash).owners().put(uuid(), ehash);
+        try {
+            FiguraServer.getInstance().avatarManager().getAvatarMetadata(hash).owners().put(uuid(), ehash);
+            ownedAvatars.put(avatarId, new EHashPair(hash, ehash));
+        } catch (RuntimeException re) {
+            FiguraServer.getInstance().logError("Failed to replace/add avatar", re);
+        }
     }
 
     public void setEquippedAvatar(String avatarId, Hash hash, Hash ehash) {
-        equippedAvatar = new Pair<>(avatarId, new EHashPair(hash, ehash));
-        FiguraServer.getInstance().avatarManager().getAvatarMetadata(hash).equipped().put(uuid(), ehash);
+        try {
+            FiguraServer.getInstance().avatarManager().getAvatarMetadata(hash).equipped().put(uuid(), ehash);
+            equippedAvatar = new Pair<>(avatarId, new EHashPair(hash, ehash));
+        } catch (RuntimeException re) {
+            FiguraServer.getInstance().logError("Failed to set equipped avatar", re);
+        }
     }
 
     public int getAvatarsCountWithId(String avatarId) {
