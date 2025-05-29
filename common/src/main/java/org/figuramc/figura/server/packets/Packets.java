@@ -24,6 +24,8 @@ public class Packets {
         put(C2SPingPacket.PACKET_ID, desc(CLIENT, C2SPingPacket::new));
         put(C2SUploadAvatarPacket.PACKET_ID, desc(CLIENT, C2SUploadAvatarPacket::new));
 
+        put(S2CAvatarReadyPacket.PACKET_ID, desc(SERVER, S2CAvatarReadyPacket::new));
+        put(S2CAvatarDeletedPacket.PACKET_ID, desc(SERVER, S2CAvatarDeletedPacket::new));
         put(S2CRefusedPacket.PACKET_ID, desc(SERVER, empty(S2CRefusedPacket::new)));
         put(S2CBackendHandshakePacket.PACKET_ID, desc(SERVER, S2CBackendHandshakePacket::new));
         put(S2CConnectedPacket.PACKET_ID, desc(SERVER, S2CConnectedPacket::new));

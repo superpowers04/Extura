@@ -2,7 +2,6 @@ package org.figuramc.figura.server.commands;
 
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.commands.CommandSourceStack;
 import org.figuramc.figura.server.FiguraServer;
 
 import java.util.function.Predicate;
