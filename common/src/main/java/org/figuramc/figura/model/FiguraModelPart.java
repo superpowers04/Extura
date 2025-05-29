@@ -1412,6 +1412,16 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             throw new LuaError("Illegal argument to removeTask(): " + x.getClass().getSimpleName());
         return this;
     }
+
+    @LuaWhitelist
+    @LuaMethodDoc("model_part.remove")
+    public FiguraModelPart remove() {
+        if (parent != null)
+            this.parent.removeChild(this);
+
+        return this;
+    }
+
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = @LuaMethodOverload(
@@ -1451,6 +1461,9 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.move_to"
     )
     public FiguraModelPart moveTo(@LuaNotNil FiguraModelPart part) {
+        if (part == this)
+            throw new LuaError("Fractal, cannot parent part to itself");
+
         if (parent != null) {
             parent.children.remove(this);
             parent.childCache.remove(this.name);
@@ -1474,12 +1487,13 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.add_child"
     )
     public FiguraModelPart addChild(@LuaNotNil FiguraModelPart part) {
+        if (part == this)
+            throw new LuaError("Fractal, cannot parent part to itself");
+
         FiguraModelPart parent = this.parent;
         while (parent != null) {
             if (part == parent)
                 throw new LuaError("Cannot add child that's already parent of this part");
-            if (part == this)
-                throw new LuaError("Fractal, cannot parent part to itself");
             parent = parent.parent;
         }
 
