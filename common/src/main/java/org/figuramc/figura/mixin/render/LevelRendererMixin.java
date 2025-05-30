@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.Deque;
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
@@ -104,9 +105,10 @@ public abstract class LevelRendererMixin {
         float yaw = Mth.lerp(tickDelta, livingEntity.yRotO, livingEntity.getYRot());
         entityRenderer.render(livingEntity, yaw, tickDelta, stack, bufferSource, LightTexture.FULL_BRIGHT);
 
+        Deque<PoseStack.Pose> poseStack = ((PoseStackAccessor)stack).getPoseStack();
         do {
             stack.popPose();
-        } while(((PoseStackAccessor)stack).getPoseStack().size() > size);
+        } while(poseStack.size() > size);
 
         Avatar.firstPerson = false;
     }

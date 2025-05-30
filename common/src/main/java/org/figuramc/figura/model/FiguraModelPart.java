@@ -1413,14 +1413,6 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         return this;
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("model_part.remove")
-    public FiguraModelPart remove() {
-        if (parent != null)
-            this.parent.removeChild(this);
-
-        return this;
-    }
 
     @LuaWhitelist
     @LuaMethodDoc(

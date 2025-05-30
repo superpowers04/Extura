@@ -87,64 +87,74 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         checkEmpty();
 
         this.isRendering = false;
-    }
+	}
 
-    protected int commonRender(double vertOffset) {
-        // flag rendering state
-        this.isRendering = true;
+	protected int commonRender(double vertOffset) {
 
-        // iris fix
-        int irisConfig = UIHelper.paperdoll || !ClientAPI.hasShaderPackMod() ? 0 : Configs.IRIS_COMPATIBILITY_FIX.value;
-        doIrisEmissiveFix = (irisConfig >= 2 && ClientAPI.hasShaderPack()) || (avatar.renderMode != EntityRenderMode.RENDER && avatar.renderMode != EntityRenderMode.WORLD);
-        offsetRenderLayers = irisConfig >= 1;
 
-        // custom textures
-        for (FiguraTextureSet set : textureSets)
-            set.uploadIfNeeded();
-        for (FiguraTexture texture : customTextures.values())
-            texture.uploadIfDirty();
+		// iris fix
+		int irisConfig = UIHelper.paperdoll || !ClientAPI.hasShaderPackMod() ? 0 : Configs.IRIS_COMPATIBILITY_FIX.value;
+		if(irisConfig == 0){
+			doIrisEmissiveFix = (avatar.renderMode != EntityRenderMode.RENDER && avatar.renderMode != EntityRenderMode.WORLD);
+			offsetRenderLayers = false;
+		}else{
+			doIrisEmissiveFix = (irisConfig >= 2 && ClientAPI.hasShaderPack()) || (avatar.renderMode != EntityRenderMode.RENDER && avatar.renderMode != EntityRenderMode.WORLD);
+			offsetRenderLayers = irisConfig >= 1;
+		}
 
-        // Set shouldRenderPivots
-        int config = Configs.RENDER_DEBUG_PARTS_PIVOT.value;
-        if ((!avatar.isHost && config < 2) || !Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes())
-            shouldRenderPivots = 0;
-        else
-            shouldRenderPivots = config;
+		// custom textures
+		for (FiguraTextureSet set : textureSets)
+			set.uploadIfNeeded();
+		for (FiguraTexture texture : customTextures.values())
+			texture.uploadIfDirty();
 
-        // world matrices
-        if (allowMatrixUpdate)
-            VIEW_TO_WORLD_MATRIX.set(AvatarRenderer.worldToViewMatrix().invert());
+		// world matrices
+		if (allowMatrixUpdate) {
+			VIEW_TO_WORLD_MATRIX.set(AvatarRenderer.worldToViewMatrix().invert());
+		}
+		// Set shouldRenderPivots
+		shouldRenderPivots = Configs.RENDER_DEBUG_PARTS_PIVOT.value;
+		if ((!avatar.isHost && shouldRenderPivots < 2) || !Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes())
+			shouldRenderPivots = 0;
 
-        // complexity
-        int prev = avatar.complexity.remaining;
-        int[] remainingComplexity = new int[] {prev};
+		if(!root.customization.visible){
+			if (this.dirty) clean();
+			return Math.max(avatar.complexity.remaining, 0);
+		}
+		// flag rendering state
+		this.isRendering = true;
+		// complexity
+		int prev = avatar.complexity.remaining;
+		int[] remainingComplexity = new int[] {prev};
 
-        // render all model parts
-        if (root.customization.visible) {
-            if (currentFilterScheme.parentType.isSeparate) {
-                List<FiguraModelPart> parts = separatedParts.get(currentFilterScheme.parentType);
-                if (parts != null) {
-                    boolean renderLayer = !currentFilterScheme.parentType.isRenderLayer;
-                    if (renderLayer) {
-                        PartCustomization customization = setupRootCustomization(vertOffset);
-                        customizationStack.push(customization); // push root
-                        customizationStack.push(root.customization); // push "models"
-                    }
+		// render all model parts
+		
+		if (currentFilterScheme.parentType.isSeparate) {
+			List<FiguraModelPart> parts = separatedParts.get(currentFilterScheme.parentType);
+			if (parts != null) {
+				boolean renderLayer = !currentFilterScheme.parentType.isRenderLayer;
+				if (renderLayer) {
+					customizationStack.push(setupRootCustomization(vertOffset)); // push root
+					customizationStack.push(root.customization); // push "models"
+				}
 
-                    for (FiguraModelPart part : parts) {
-                        if (currentFilterScheme.parentType == ParentType.Item && part != itemToRender) continue;
-                        if (part.savedCustomization != null) {
-                            customizationStack.push(part.savedCustomization);
-                            part.savedCustomization = null;
-                            renderPart(part, remainingComplexity, currentFilterScheme.initialValue);
-                            customizationStack.pop();
-                            continue;
-                        }
+				for (FiguraModelPart part : parts) {
+					if (currentFilterScheme.parentType == ParentType.Item && part != itemToRender)
+						continue;
 
-                        renderPart(part, remainingComplexity, currentFilterScheme.initialValue);
-                    }
+					if (part.savedCustomization == null) {
+						renderPart(part, remainingComplexity, currentFilterScheme.initialValue);
+						continue;
+					}
+					customizationStack.push(part.savedCustomization);
+					part.savedCustomization = null;
+					renderPart(part, remainingComplexity, currentFilterScheme.initialValue);
+					customizationStack.pop();
 
-                    if (renderLayer) {
+
+				}
+
+				if (renderLayer) {
                         customizationStack.pop(); // pop "models"
                         customizationStack.pop(); // pop root
                     }
@@ -164,12 +174,12 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
             VERTEX_BUFFER.consume(false, bufferSource);
             FiguraMod.popProfiler(2);
 
-            // finish rendering
-            checkEmpty();
-        }
+		// finish rendering
+		checkEmpty();
+		
 
-        this.isRendering = false;
-        if (this.dirty)
+		this.isRendering = false;
+		if (this.dirty)
             clean();
 
         return prev - Math.max(remainingComplexity[0], 0);
