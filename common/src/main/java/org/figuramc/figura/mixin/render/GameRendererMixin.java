@@ -91,11 +91,9 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
         if (!RenderUtils.vanillaModelAndScript(avatar))
             return;
 
-        float z = 0f;
-
         FiguraVec3 rot = avatar.luaRuntime.renderer.cameraRot;
-        if (rot != null)
-            z = (float) rot.z;
+        float z = rot == null ? 0f : (float) rot.z;
+
 
         FiguraVec3 offset = avatar.luaRuntime.renderer.cameraOffsetRot;
         if (offset != null)
@@ -190,7 +188,7 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
             ), locals = LocalCapture.CAPTURE_FAILSOFT, require = 0)
     private void renderLevelSaveBobbing(float tickDelta, long limitTime, PoseStack matrix, CallbackInfo ci, boolean bl, Camera camera, PoseStack poseStack, double d) {
         if (hasShaders) return;
-        bobbingMatrix = new Matrix4f(poseStack.last().pose());
+        bobbingMatrix = (bobbingMatrix == null ? new Matrix4f() : bobbingMatrix).set(poseStack.last().pose());
         poseStack.popPose();
     }
 
@@ -202,7 +200,7 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
             ), locals = LocalCapture.CAPTURE_FAILSOFT, require = 0)
     private void renderLevelSaveBobbingOF(float tickDelta, long limitTime, PoseStack matrix, CallbackInfo ci, boolean bl, boolean bl2, Camera camera, PoseStack poseStack, double d) {
         if (hasShaders) return;
-        bobbingMatrix = new Matrix4f(poseStack.last().pose());
+        bobbingMatrix = (bobbingMatrix == null ? new Matrix4f() : bobbingMatrix).set(poseStack.last().pose());
         poseStack.popPose();
     }
 

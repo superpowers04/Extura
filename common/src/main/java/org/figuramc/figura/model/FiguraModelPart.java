@@ -84,8 +84,9 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         for (int i = 0; i < facesByTexture.size(); i++) {
             if (remainingComplexity[0] <= 0)
                 return false;
-            remainingComplexity[0] -= facesByTexture.get(i);
-            avatarRenderer.pushFaces(facesByTexture.get(i) + Math.min(remainingComplexity[0], 0), remainingComplexity, textures.get(i), vertices.get(i));
+            int faces = facesByTexture.get(i);
+            remainingComplexity[0] -= faces;
+            avatarRenderer.pushFaces(faces + Math.min(remainingComplexity[0], 0), remainingComplexity, textures.get(i), vertices.get(i));
         }
         return true;
     }
@@ -1411,6 +1412,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             throw new LuaError("Illegal argument to removeTask(): " + x.getClass().getSimpleName());
         return this;
     }
+
+
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = @LuaMethodOverload(
@@ -1450,6 +1453,9 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.move_to"
     )
     public FiguraModelPart moveTo(@LuaNotNil FiguraModelPart part) {
+        if (part == this)
+            throw new LuaError("Fractal, cannot parent part to itself");
+
         if (parent != null) {
             parent.children.remove(this);
             parent.childCache.remove(this.name);
@@ -1473,12 +1479,13 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.add_child"
     )
     public FiguraModelPart addChild(@LuaNotNil FiguraModelPart part) {
+        if (part == this)
+            throw new LuaError("Fractal, cannot parent part to itself");
+
         FiguraModelPart parent = this.parent;
         while (parent != null) {
             if (part == parent)
                 throw new LuaError("Cannot add child that's already parent of this part");
-            if (part == this)
-                throw new LuaError("Fractal, cannot parent part to itself");
             parent = parent.parent;
         }
 
