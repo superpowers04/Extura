@@ -101,6 +101,8 @@ public class EventsAPI {
     @LuaWhitelist
     @LuaFieldDoc("events.upload")
     public final LuaEvent UPLOAD = new LuaEvent();
+    @LuaFieldDoc("events.pre_render")
+    public final LuaEvent PRE_RENDER = new LuaEvent();
 
     private final Map<String, LuaEvent> events = new HashMap<>();
     
@@ -131,6 +133,7 @@ public class EventsAPI {
         events.put("DAMAGE", DAMAGE);
         events.put("TOTEM", TOTEM);
         events.put("UPLOAD", UPLOAD);
+        events.put("PRE_RENDER", PRE_RENDER);
 
         for (FiguraEvent entrypoint : ENTRYPOINTS) {
             String ID = entrypoint.getID().toUpperCase(Locale.US);
