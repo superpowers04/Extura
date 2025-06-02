@@ -215,4 +215,8 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
     public double figura$getFov(Camera camera, float tickDelta, boolean changingFov) {
         return this.getFov(camera, tickDelta, changingFov);
     }
+	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
+	private void preRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
+		AvatarManager.executeAll("preRender", avatar -> avatar.preRenderEvent(tickDelta));
+	}
 }
