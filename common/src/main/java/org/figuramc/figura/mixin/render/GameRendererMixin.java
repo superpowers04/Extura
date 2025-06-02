@@ -224,4 +224,9 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
         Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
         return (!RenderUtils.vanillaModelAndScript(avatar) || hasShaders) ? original.call(instance) : (T) (Object) 0.0;
     }
+	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
+	private void preRender(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+
+		AvatarManager.executeAll("preRender", avatar -> avatar.preRenderEvent(deltaTracker.getGameTimeDeltaTicks()));
+	}
 }

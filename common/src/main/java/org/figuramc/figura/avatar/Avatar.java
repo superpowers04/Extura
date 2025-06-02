@@ -387,6 +387,10 @@ public class Avatar {
 		if (loaded && luaRuntime != null && luaRuntime.getUser() != null)
 			run("RENDER", render, delta, renderMode.name(), poseMatrix);
 	}
+	public void preRenderEvent(float delta) {
+		if (loaded && luaRuntime != null && luaRuntime.getUser() != null)
+			run("PRE_RENDER", render, delta, renderMode.name());
+	}
 
 	public void postRenderEvent(float delta, FiguraMat4 poseMatrix) {
 		if (loaded && luaRuntime != null && luaRuntime.getUser() != null)

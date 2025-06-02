@@ -103,12 +103,14 @@
     "figura.docs.player.get_tablist_display_name": "(Extura) Returns the player's display name on the tab list",
     "figura.docs.player.get_nameplate": "(Extura) Returns the player's nameplate text if they have one, otherwise returns null.\n First argument should be the nameplate type(LIST, CHAT, ENTITY)",
     "figura.docs.living_entity.get_nameplate": "(Extura) Returns the entity's nameplate text if they have one, otherwise returns null.\n First argument should be the nameplate type(LIST, CHAT, ENTITY)",
-     "figura.docs.entity.get_supporting_block_pos": "(Extura) Returns the position of the block supporting the entity",
-   "figura.docs.player.can_be_seen_as_enemy": "(Extura) ???",
+    "figura.docs.entity.get_supporting_block_pos": "(Extura) Returns the position of the block supporting the entity",
+    "figura.docs.player.can_be_seen_as_enemy": "(Extura) ???",
     "figura.permissions.value.printing": "(Extura) Allow Printing",
     "figura.permissions.value.printing.tooltip": "Allows this avatar to print to chat if Log Others is enabled",
 	"figura.config.use_cache": "Use cache",
 	"figura.config.use_cache.tooltip": "Prevents Extura from caching avatars.\n* This enforces you'll always have the latest avatar of someone.\n* This might cause issues since Extura is not entirely designed to be used without caching",
+	"figura.docs.events.pre_render": "(Extura) Runs at the HEAD of Minecraft's render function\nArgument 1 is a number between 0 to 1 for the delta between last tick and the next tick\nArgument 2 is a string with the name of the source of this render event (See /figura docs enums render_modes)",
+
 
 	"figura.docs.extura": "The Extura API",
 	"figura.docs.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
