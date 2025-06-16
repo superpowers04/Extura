@@ -47,6 +47,8 @@ public class PartCustomization {
     public final FiguraVec3 stackScale = FiguraVec3.of(1, 1, 1);
     public final FiguraVec3 color = FiguraVec3.of(1, 1, 1);
     public final FiguraVec3 color2 = FiguraVec3.of(1, 1, 1);
+    public Boolean shade = null;
+
     public Float alpha = null;
     public Integer light = null;
     public Integer overlay = null;
@@ -312,6 +314,13 @@ public class PartCustomization {
         return secondaryRenderType;
     }
 
+    public void shade(boolean shade) {
+        this.shade = shade;
+    }
+    public boolean isShaded() {
+        return shade;
+    }
+
     public void copyTo(PartCustomization target) {
         target.partType = partType;
         target.positionMatrix.set(positionMatrix);
@@ -338,6 +347,7 @@ public class PartCustomization {
         target.setSecondaryRenderType(secondaryRenderType);
         target.primaryTexture = primaryTexture;
         target.secondaryTexture = secondaryTexture;
+        target.shade = shade;
     }
 
     // Modify this object using the information contained in the other object
@@ -368,6 +378,9 @@ public class PartCustomization {
             else
                 alpha = other.alpha;
         }
+
+        if (other.shade != null)
+            shade = other.shade;
 
         stackScale.multiply(other.stackScale);
         color.multiply(other.color);

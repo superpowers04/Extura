@@ -206,6 +206,8 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         customization.primaryTexture = new TextureCustomization(FiguraTextureSet.OverrideType.PRIMARY, null);
         customization.secondaryTexture = new TextureCustomization(FiguraTextureSet.OverrideType.SECONDARY, null);
 
+        customization.shade = shade;
+
         return customization;
     }
 
@@ -540,6 +542,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
         int overlay = customization.overlay;
         int light = vertexData.fullBright ? LightTexture.FULL_BRIGHT : customization.light;
+        boolean shade = customization.shade != null && customization.shade;
         // By copying the data instead of providing direct pointers, this prevents the mod from pushing data to the GPU that later gets overwritten when it's not expecting to
         // In this specific case, I was trying to fix 2 models with the same mesh having conflicting prerender calls
         ToBeConsumedVertexData[] vertexDatas = new ToBeConsumedVertexData[vertCount]; 
@@ -549,8 +552,13 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
             pos.set(vertex.x, vertex.y, vertex.z, 1);
             pos.transform(customization.positionMatrix);
             pos.add(pos.normalized().scale(vertexData.vertexOffset));
-            normal.set(vertex.nx, vertex.ny, vertex.nz);
-            normal.transform(customization.normalMatrix);
+            if(shade){
+	            normal.set(vertex.nx, vertex.ny, vertex.nz);
+
+	            normal.transform(customization.normalMatrix);
+            }else{
+            	normal.set(0f,1f,0f);
+            }
             uv.set(vertex.u, vertex.v, 1);
             uv.divide(uvFixer);
             uv.transform(customization.uvMatrix);
