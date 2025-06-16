@@ -6,6 +6,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.datafixers.util.Pair;
 import dev.tr7zw.firstperson.api.FirstPersonAPI;
 import net.irisshaders.iris.Iris;
+import net.minecraft.util.Mth;
 import net.minecraft.client.*;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
@@ -905,6 +906,41 @@ public class HostAPI {
 	public HostAPI clipboard(@LuaNotNil String text) {
 		return setClipboard(text);
 	}
+
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            value = "host.set_smooth_camera")
+    public HostAPI setSmoothCamera(boolean smoothCamera) {
+    	if(!this.isHost) return this;
+        Minecraft.getInstance().options.smoothCamera = smoothCamera;
+        return this;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("host.get_smooth_camera")
+    public boolean getSmoothCamera() {
+        return this.isHost ? Minecraft.getInstance().options.smoothCamera : false;
+    }
+
+    @LuaMethodDoc(
+            aliases = "sensitivity",
+            value = "host.set_sensitivity"
+    )
+    @LuaWhitelist
+    public HostAPI setSensitivity(Float sensitivity) {
+    	if(!this.isHost) return this;
+        Minecraft.getInstance().options.sensitivity().set(Mth.clamp(sensitivity.doubleValue(), 0D, 1D));
+        return this;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            value = "host.get_sensitivity"
+    )
+    public Double getSensitivity() {
+        return this.isHost ? Minecraft.getInstance().options.sensitivity().get() : 0;
+    }
 
 	@LuaWhitelist
 	@LuaMethodDoc("host.get_attack_charge")

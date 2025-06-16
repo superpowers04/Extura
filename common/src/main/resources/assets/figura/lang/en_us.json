@@ -60,7 +60,7 @@
 	"figura.gui.extura_disclaimer.4":"IMMEDIATELY Remove the version of Extura you have installed and use normal ",
 	"figura.gui.extura_disclaimer.5":"!\nTo enable Extura-insecure's ",
 	"figura.gui.extura_disclaimer.6":"dangerous ",
-	"figura.gui.extura_disclaimer.7":"features and hide this disclaimer, enable Super Secret Enabler.",
+	"figura.gui.extura_disclaimer.7":"features and hide this disclaimer, enable 'Super Secret Enabler'.",
 	"figura.gui.extura_disclaimer.8":"\n\nExtura-insecure, Extura and Figura are NOT responsible for ANY damages caused by this mod!\nFiguraMC does not ENDORSE, provide help for or otherwise have any involvement with Extura or Extura-insecure outside of some loose commits",
 
 
@@ -99,6 +99,11 @@
     "figura.docs.host.iris_reload": "(Extura) Reloads the currently selected shader",
     "figura.docs.host.first_person_model_set_enabled": "(Extura) Sets whether First Person Model is currently enabled",
 
+    "figura.docs.host.set_sensitivity": "(Extura) Sets your sensitivity through your sensitivity option",
+    "figura.docs.host.get_sensitivity": "(Extura) Returns your sensitivity",
+    "figura.docs.host.set_smooth_camera": "(Extura) Sets the 'Smooth Camera' option",
+    "figura.docs.host.get_smooth_camera": "(Extura) Returns the 'Smooth Camera' option",
+
     "figura.docs.client.get_mod_version": "(Extura) Get the Version of a mod as a string. Returns an null if mod isn't loaded",
     "figura.docs.client.get_mod_name": "(Extura) Gets the name of a mod as a string. Returns an empty string if the mod isn't loaded",
     "figura.docs.client.is_using_fsb": "(Extura) Returns true if using FSB",
@@ -135,6 +140,9 @@
 
 	"figura.docs.extura": "The Extura API",
 	"figura.docs.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
+	"figura.docs.extura.get_figura_settings": "Grabs all Figura settings",
+	"figura.docs.extura.get_minecraft_setting": "Grabs a Minecraft setting",
+	"figura.docs.extura.get_minecraft_settings": "Grabs all Minecraft settings",
 	"figura.docs.extura.async_lua_function": "Runs specified lua function in a thread. NOTE: VERY UNSTABLE!",
 	"figura.docs.extura.httpGet": "Makes an http request to a url",
 	"figura": "Extura(Figura Fork)",

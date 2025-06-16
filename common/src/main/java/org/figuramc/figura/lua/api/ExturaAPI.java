@@ -1,5 +1,7 @@
 package org.figuramc.figura.lua.api;
 
+import net.minecraft.client.Options;
+import net.minecraft.client.Minecraft;
 import org.figuramc.figura.config.ConfigType;
 import org.figuramc.figura.config.Configs;
 import org.luaj.vm2.LuaError;
@@ -27,6 +29,8 @@ import java.util.concurrent.CompletableFuture;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaFieldDoc;
 import org.luaj.vm2.LuaFunction;
+
+/* TODO ADD SET_MINECRAFT_SETTING*/
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -59,6 +63,56 @@ public class ExturaAPI {
 		}catch(java.lang.IllegalAccessException ignored){
 			return null;
 		}
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("extura.get_figura_settings")
+	public HashMap<String, Object> getFiguraSettings() {
+		if (!this.isHost) return null;
+		Field[] fieldList= Configs.class.getDeclaredFields();
+		HashMap<String, Object> map = new HashMap<>();
+
+		try {
+			Options options = Minecraft.getInstance().options;
+			for (Field field : fieldList) {
+				map.put(field.getName(), ((ConfigType<?>) field.get(null)).value);
+			}
+			// return ((ConfigType<?>) obj.get(null)).value;
+		}catch(java.lang.IllegalAccessException ignored){
+		}
+		return map;
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("extura.get_minecraft_setting")
+	public Object getMinecraftSetting(String arg) {
+		if (arg == null || !this.isHost) return null;
+		Field obj;
+		try {
+			obj = Options.class.getDeclaredField(arg);
+		}catch(java.lang.NoSuchFieldException ignored){
+			return null;
+		}
+		try {
+			return ((ConfigType<?>) obj.get(Minecraft.getInstance().options)).value;
+		}catch(java.lang.IllegalAccessException ignored){
+			return null;
+		}
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("extura.get_minecraft_settings")
+	public HashMap<String, Object> getMinecraftSettings() {
+		if (!this.isHost) return null;
+		Field[] fieldList= Options.class.getDeclaredFields();
+		HashMap<String, Object> map = new HashMap<>();
+
+		try {
+			Options options = Minecraft.getInstance().options;
+			for (Field field : fieldList) {
+				map.put(field.getName(),field.get(options));
+			}
+			// return ((ConfigType<?>) obj.get(null)).value;
+		}catch(java.lang.IllegalAccessException ignored){
+		}
+		return map;
 	}
 	// @LuaWhitelist
 	// @LuaMethodDoc("extura.get_class")

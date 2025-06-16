@@ -219,4 +219,5 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
 	private void preRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
 		AvatarManager.executeAll("preRender", avatar -> avatar.preRenderEvent(tickDelta));
 	}
+	
 }

@@ -224,11 +224,14 @@ public class RendererAPI {
         return setShadowRadius(shadowRadius);
     }
 
+
     @LuaWhitelist
     @LuaMethodDoc("renderer.get_shadow_radius")
     public Float getShadowRadius() {
         return this.shadowRadius != null ? this.shadowRadius : 0.5f;
     }
+    @LuaMethodDoc("renderer.get_delta_time")
+    public Float getDeltaTime() { return Minecraft.getInstance().getDeltaFrameTime(); }
 
     @LuaWhitelist
     @LuaMethodDoc("renderer.is_first_person")

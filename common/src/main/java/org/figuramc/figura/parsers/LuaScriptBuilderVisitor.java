@@ -15,10 +15,10 @@ public class LuaScriptBuilderVisitor extends Visitor {
 
     static {
         chars[0] = '_';
-        for (int i = 0; i < 26; i++)
+        for (int i = 0; i < 26; i++){
             chars[1 + i] = (char) ('a' + i);
-        for (int i = 0; i < 26; i++)
             chars[27 + i] = (char) ('A' + i);
+        }
         for (int i = 0; i < 10; i++)
             chars[53 + i] = (char) ('0' + i);
     }
@@ -301,11 +301,11 @@ public class LuaScriptBuilderVisitor extends Visitor {
                 if (c == '\"') sdq++;
             }
             char quote = sdq <= 0 ? '"' : '\'';
-            input = input.replaceAll("\\r(?=\\n)", "");
-            input = input.replaceAll("\\r", "\n");
-            input = input.replaceAll("\\\\", "\\\\\\\\");
-            input = input.replaceAll("\\n", "\\\\n");
-            input = input.replaceAll(String.valueOf(quote), "\\\\" + quote);
+            input = input.replaceAll("\\r(?=\\n)", "")
+            	.replaceAll("\\r", "\n")
+            	.replaceAll("\\\\", "\\\\\\\\")
+            	.replaceAll("\\n", "\\\\n")
+            	.replaceAll(String.valueOf(quote), "\\\\" + quote);
             builder.append(quote).append(input).append(quote);
         } else
             spaceIfName(String.valueOf(value));

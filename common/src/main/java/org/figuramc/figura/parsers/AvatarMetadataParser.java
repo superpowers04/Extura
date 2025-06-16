@@ -138,12 +138,12 @@ public class AvatarMetadataParser {
     }
     private static void injectCustomization(String path, Customization customization, CompoundTag models) throws IOException {
         boolean remove = customization.remove != null && customization.remove;
-        CompoundTag modelPart = getTag(models, path, remove);
-
-        // Add more of these later
         if (remove) {
             return;
         }
+        CompoundTag modelPart = getTag(models, path, remove);
+
+        // Add more of these later
         if (customization.primaryRenderType != null) {
             try {
                 modelPart.putString("primary", RenderTypes.valueOf(customization.primaryRenderType.toUpperCase(Locale.US)).name());
@@ -217,7 +217,7 @@ public class AvatarMetadataParser {
 
     // json object class
     public static class Metadata {
-        public String name, description, author, version, color, background, id;
+        public String name, description, author, version, color, background, id, geturl;
         public String[] authors, autoScripts, autoAnims, ignoredTextures, resources;
         public HashMap<String, Customization> customizations;
     }
