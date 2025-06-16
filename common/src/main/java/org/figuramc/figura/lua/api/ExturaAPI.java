@@ -53,14 +53,14 @@ public class ExturaAPI {
 	@LuaMethodDoc("extura.get_figura_setting")
 	public Object getFiguraSetting(String arg) {
 		if (arg == null || !this.isHost) return null;
-		Field obj;
+		Field field;
 		try {
-			obj = Configs.class.getDeclaredField(arg);
+			field = Configs.class.getDeclaredField(arg);
 		}catch(java.lang.NoSuchFieldException ignored){
 			return null;
 		}
 		try {
-			return ((ConfigType<?>) obj.get(null)).value;
+			return ((ConfigType<?>) field.get(null)).value;
 		}catch(java.lang.IllegalAccessException ignored){
 			return null;
 		}
