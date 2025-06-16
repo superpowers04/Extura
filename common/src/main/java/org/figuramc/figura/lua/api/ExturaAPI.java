@@ -54,7 +54,7 @@ public class ExturaAPI {
 		if (arg == null || !this.isHost) return null;
 		Field obj;
 		try {
-				obj = Configs.class.getDeclaredField(arg);
+			obj = Configs.class.getDeclaredField(arg);
 		}catch(java.lang.NoSuchFieldException ignored){
 			return null;
 		}
@@ -71,14 +71,13 @@ public class ExturaAPI {
 		Field[] fieldList= Configs.class.getDeclaredFields();
 		HashMap<String, Object> map = new HashMap<>();
 
-		try {
-			Options options = Minecraft.getInstance().options;
 			for (Field field : fieldList) {
-				map.put(field.getName(), ((ConfigType<?>) field.get(null)).value);
+				try {
+					if(field.get(null) instanceof ConfigType<?> cfg)
+						map.put(field.getName(), cfg.value);
+				}catch(java.lang.IllegalAccessException ignored){}
 			}
 			// return ((ConfigType<?>) obj.get(null)).value;
-		}catch(java.lang.IllegalAccessException ignored){
-		}
 		return map;
 	}
 	@LuaWhitelist
@@ -92,7 +91,7 @@ public class ExturaAPI {
 			return null;
 		}
 		try {
-			return ((ConfigType<?>) obj.get(Minecraft.getInstance().options)).value;
+			return obj.get(Minecraft.getInstance().options);
 		}catch(java.lang.IllegalAccessException ignored){
 			return null;
 		}
