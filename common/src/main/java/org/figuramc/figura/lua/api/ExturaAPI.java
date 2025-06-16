@@ -49,17 +49,32 @@ public class ExturaAPI {
 	@LuaMethodDoc("extura.get_figura_setting")
 	public Object getFiguraSetting(String arg) {
 		if (arg == null || !this.isHost) return null;
-		Field obj;
+		Field field;
 		try {
-				obj = Configs.class.getDeclaredField(arg);
+			field = Configs.class.getDeclaredField(arg);
 		}catch(java.lang.NoSuchFieldException ignored){
 			return null;
 		}
 		try {
-			return ((ConfigType<?>) obj.get(null)).value;
+			return ((ConfigType<?>) field.get(null)).value;
 		}catch(java.lang.IllegalAccessException ignored){
 			return null;
 		}
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("extura.get_figura_settings")
+	public HashMap<String, Object> getFiguraSettings() {
+		if (!this.isHost) return null;
+		Field[] fieldList= Configs.class.getDeclaredFields();
+		HashMap<String, Object> map = new HashMap<>();
+		for (Field field : fieldList) {
+			try {
+				if(field.get(null) instanceof ConfigType<?> cfg)
+					map.put(field.getName(), cfg.value);
+			}catch(Exception ignored){}
+		}
+			// return ((ConfigType<?>) obj.get(null)).value;
+		return map;
 	}
 	// @LuaWhitelist
 	// @LuaMethodDoc("extura.get_class")
