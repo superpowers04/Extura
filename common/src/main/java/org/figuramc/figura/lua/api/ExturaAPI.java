@@ -103,13 +103,13 @@ public class ExturaAPI {
 		Field[] fieldList= Options.class.getDeclaredFields();
 		HashMap<String, Object> map = new HashMap<>();
 
-		try {
 			Options options = Minecraft.getInstance().options;
 			for (Field field : fieldList) {
-				map.put(field.getName(),field.get(options));
+				try {
+					map.put(field.getName(),field.get(options));
+				}catch(java.lang.IllegalAccessException ignored){
 			}
 			// return ((ConfigType<?>) obj.get(null)).value;
-		}catch(java.lang.IllegalAccessException ignored){
 		}
 		return map;
 	}
