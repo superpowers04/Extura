@@ -142,7 +142,7 @@
 	"figura.docs.extura.get_figura_setting": "Grabs a Figura setting and returns the value of it",
 	"figura.docs.extura.get_figura_settings": "Grabs all Figura settings",
 	"figura.docs.extura.get_minecraft_setting": "Grabs a Minecraft setting",
-	"figura.docs.extura.get_minecraft_settings": "Grabs all Minecraft settings",
+	"figura.docs.extura.get_minecraft_settings": "Grabs all Minecraft settings(Currently does not properly map to human readable names!)",
 	"figura.docs.extura.async_lua_function": "Runs specified lua function in a thread. NOTE: VERY UNSTABLE!",
 	"figura.docs.extura.httpGet": "Makes an http request to a url",
 	"figura": "Extura(Figura Fork)",

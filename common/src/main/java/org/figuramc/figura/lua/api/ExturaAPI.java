@@ -9,6 +9,7 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.LuaTable;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.lua.LuaNotNil;
+import org.figuramc.figura.lua.LuaTypeManager;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.permissions.Permissions;
@@ -70,13 +71,12 @@ public class ExturaAPI {
 		if (!this.isHost) return null;
 		Field[] fieldList= Configs.class.getDeclaredFields();
 		HashMap<String, Object> map = new HashMap<>();
-
-			for (Field field : fieldList) {
-				try {
-					if(field.get(null) instanceof ConfigType<?> cfg)
-						map.put(field.getName(), cfg.value);
-				}catch(java.lang.IllegalAccessException ignored){}
-			}
+		for (Field field : fieldList) {
+			try {
+				if(field.get(null) instanceof ConfigType<?> cfg)
+					map.put(field.getName(), cfg.value);
+			}catch(Exception ignored){}
+		}
 			// return ((ConfigType<?>) obj.get(null)).value;
 		return map;
 	}
@@ -103,13 +103,11 @@ public class ExturaAPI {
 		Field[] fieldList= Options.class.getDeclaredFields();
 		HashMap<String, Object> map = new HashMap<>();
 
-			Options options = Minecraft.getInstance().options;
-			for (Field field : fieldList) {
-				try {
-					map.put(field.getName(),field.get(options));
-				}catch(java.lang.IllegalAccessException ignored){
-			}
-			// return ((ConfigType<?>) obj.get(null)).value;
+		Options options = Minecraft.getInstance().options;
+		for (Field field : fieldList) {
+			try {
+				map.put(field.getName(),owner.luaRuntime.typeManager.javaToLua(field.get(options)));
+			}catch(java.lang.IllegalAccessException ignored){}catch(java.lang.RuntimeException ignored){}
 		}
 		return map;
 	}
