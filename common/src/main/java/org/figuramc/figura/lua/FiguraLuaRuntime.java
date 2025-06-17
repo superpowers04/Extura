@@ -233,36 +233,30 @@ public class FiguraLuaRuntime {
 
 	private final ThreeArgFunction addScript = new ThreeArgFunction() {
 		@Override
-		public LuaValue call(LuaValue arg,LuaValue contents,LuaValue errorIfNotReplacing) {
+		public LuaValue call(LuaValue arg,LuaValue contents,LuaValue side) {
 			Path path = PathUtils.getPath(arg.checkjstring());
 			Path dir = PathUtils.getWorkingDirectory(getInfoFunction);
 			String scriptName = PathUtils.computeSafeString(PathUtils.getPath(PathUtils.computeSafeString(
 				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
 			)));
 			String scriptNameNbt = scriptName.replace('/','.');
-			loadedScripts.remove(scriptName);
+			String side = side.isnil() ? "both" : side.tojstring().toLowerCase();
+			if(!(side.equals("both") || side.equals("nbt" || side.equals("runtime")))){
+				throw new LuaError("expected 'both', 'nbt', 'runtime' or nil for argument 2, got "+side);
+			}
+			boolean nbt = !side.equals("runtime");
+			boolean runtime = !side.equals("nbt");
+			if(runtime) loadedScripts.remove(scriptName);
 			if(contents.isnil()){
-				owner.nbt.getCompound("scripts").remove(scriptNameNbt);
-				scripts.remove(scriptName);
+				if(nbt) owner.nbt.getCompound("scripts").remove(scriptNameNbt);
+				if(runtime) scripts.remove(scriptName);
 				return LuaValue.NIL;
 			}
 			String scriptContent = contents.checkjstring();
-			var scriptNbt = owner.nbt.getCompound("scripts");
-			if(errorIfNotReplacing.toboolean()){
-				if(!scripts.containsKey(scriptName)){
-					throw new LuaError("Script " + scriptName + " doesn't exist!");
-				}
-				if(!scriptNbt.contains(scriptNameNbt)){
-					throw new LuaError("Script " + scriptNameNbt + " doesn't exist in the NBT!");
-
-				}
-			}
-			scripts.put(scriptName,scriptContent);
-			// if (loadingScripts.contains(scriptNauiime))
-			// 	throw new LuaError("Detected circular dependency in script " + loadingScripts.peek());
-
-			scriptNbt.put(scriptNameNbt,new ByteArrayTag(scriptContent.getBytes(StandardCharsets.UTF_8)));
-			// owner.nbt.put("scripts",scriptNbt);
+			
+			if(runtime) scripts.put(scriptName,scriptContent);
+			if(nbt) owner.nbt.getCompound("scripts").put(scriptNameNbt,new ByteArrayTag(scriptContent.getBytes(StandardCharsets.UTF_8)));
+			
 			return LuaValue.NIL;
 		}
 		@Override
