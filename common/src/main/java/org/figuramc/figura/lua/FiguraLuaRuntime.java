@@ -252,12 +252,12 @@ public class FiguraLuaRuntime {
 				PathUtils.isAbsolute(path) ? path : dir.resolve(path)
 			)));
 			String scriptNameNbt = scriptName.replace('/','.');
-			String side = side.isnil() ? "both" : side.tojstring().toLowerCase();
-			if(!(side.equals("both") || side.equals("nbt" || side.equals("runtime")))){
+			String sideString = side.isnil() ? "both" : side.tojstring().toLowerCase();
+			if(!(sideString.equals("both") || sideString.equals("nbt") || sideString.equals("runtime"))){
 				throw new LuaError("expected 'both', 'nbt', 'runtime' or nil for argument 2, got "+side);
 			}
-			boolean nbt = !side.equals("runtime");
-			boolean runtime = !side.equals("nbt");
+			boolean nbt = !sideString.equals("runtime");
+			boolean runtime = !sideString.equals("nbt");
 			if(runtime) loadedScripts.remove(scriptName);
 			if(contents.isnil()){
 				if(nbt) owner.nbt.getCompound("scripts").remove(scriptNameNbt);
