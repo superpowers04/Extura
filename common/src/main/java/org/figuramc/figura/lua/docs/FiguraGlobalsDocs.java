@@ -126,6 +126,10 @@ public abstract class FiguraGlobalsDocs {
                     @LuaMethodOverload(
                             argumentTypes = {String.class, String.class},
                             argumentNames = {"scriptName", "scriptContents"}
+                    ),
+                    @LuaMethodOverload(
+                            argumentTypes = {String.class, String.class},
+                            argumentNames = {"scriptName", "scriptContents", "side"}
                     )
             },
             value = "globals.add_script"

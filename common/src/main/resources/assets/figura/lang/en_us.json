@@ -8,8 +8,8 @@
 
 
 	"figura.docs.globals.extura": "The Extura object that contains some random stuff. Only visible if it's enabled in the settings.",
-	"figura.docs.globals.add_script": "Allows you to add, edit or remove scripts from your avatar.\nAccepts 2 strings, if the second string is nil, the script is unloaded. If true is provided as a third argument, an error will be thrown if the script path doesn't already exist. Note this will NOT remove events",
-	"figura.docs.globals.get_scripts": "Returns a table of script names.",
+    "figura.docs.globals.add_script": "Takes a path to the script, and the contents of the script.\nIf the contents are nil, then the script is removed from the avatar.\nIf side is nil or 'both', then both the NBT and runtime avatar are edited. If 'nbt' then only the NBT is edited. If 'runtime' then only the runtime avatar is edited",
+    "figura.docs.globals.get_scripts": "Returns a table of script names.",
 	"figura.docs.globals.get_script": "Returns the contents of a script or nil if the script doesn't exist.",
 
 	"figura.config.use_secure_cloud": "(Extura) Secure Cloud",
