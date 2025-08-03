@@ -6,7 +6,12 @@
 	"figura.gui.status.uploaded.3": "Avatar loaded from cloud\n* No file auto-reload\n* Everyone else will see the avatar you're using\n* Pings will be synced",
 	"figura.gui.status.uploaded.4": "Avatar loaded from FSB\n* No file auto-reload\n* Anyone using FSB will see the avatar you're using\n* Pings will be synced to other FSB users",
 
-
+    "figura.gui.status.version.0": "none",
+    "figura.gui.status.version.1": "Avatar expects newer version",
+    "figura.gui.status.version.2": "Avatar expects older version",
+    "figura.gui.status.version.3": "Same version",
+	"figura.gui.status.version": "Avatar Version Status",
+	"figura.gui.status.version.tooltip": "Expects Figura Version %s",
 	"figura.docs.globals.extura": "The Extura object that contains some random stuff. Only visible if it's enabled in the settings.",
 	"figura.docs.globals.add_script": "(Extura) Allows you to add, edit or remove scripts from your avatar.\nAccepts 2 strings, if the second string is nil, the script is unloaded. If true is provided as a third argument, an error will be thrown if the script path doesn't already exist. Note this will NOT remove events",
 	"figura.docs.globals.get_scripts": "(Extura) Returns a table of script names.",

@@ -38,6 +38,7 @@ public class StatusWidget implements FiguraWidget, FiguraTickable, GuiEventListe
     protected int script;
     protected int backend;
     protected int uploaded;
+
     private Component scriptError, disconnectedReason;
 
     private int x, y;
@@ -71,7 +72,7 @@ public class StatusWidget implements FiguraWidget, FiguraTickable, GuiEventListe
         texture = empty || !avatar.hasTexture ? 0 : 3;
         
 
-        script = empty ? 0 : avatar.scriptError ? 1 : avatar.luaRuntime == null ? 0 : avatar.versionStatus > 0 ? 2 : 3;
+        script = empty ? 0 : avatar.scriptError ? 1 : avatar.luaRuntime == null ? 0 : 3;
         scriptError = script == 1 ? avatar.errorText.copy() : null;
 
         backend = FSB.instance().connected() ? 4 : NetworkStuff.backendStatus;

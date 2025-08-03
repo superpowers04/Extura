@@ -55,7 +55,7 @@ allprojects {
 	archivesBaseName = rootProject.archives_base_name
 	group = rootProject.maven_group
 	version = rootProject.mod_version + "+" + rootProject.minecraft_version
-	jarVersion = rootProject.mod_version + "-" + new Date().getTime() + "+" + rootProject.minecraft_version
+	jarVersion = rootProject.mod_version + "." + new Date().getTime() + "+" + rootProject.minecraft_version
 
 	repositories {
 		// Add repositories to retrieve artifacts from in here.

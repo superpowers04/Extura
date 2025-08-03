@@ -144,12 +144,12 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Inject(method = "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void shouldShowName(T livingEntity, CallbackInfoReturnable<Boolean> cir) {
-        if (UIHelper.paperdoll)
+    	if(AvatarManager.panic) 
+        	return;
+        else if (UIHelper.paperdoll)
             cir.setReturnValue(Configs.PREVIEW_NAMEPLATE.value);
         else if (!Minecraft.renderNames() || livingEntity.getUUID().equals(PopupMenu.getEntityId()))
             cir.setReturnValue(false);
-        else if (AvatarManager.panic) 
-        	return;
         else if (Configs.SELF_NAMEPLATE.value && livingEntity == Minecraft.getInstance().player)
             cir.setReturnValue(true);
 		else if (Configs.NAMEPLATE_RENDER.value == 2 || (Configs.NAMEPLATE_RENDER.value == 1 && livingEntity != FiguraMod.extendedPickEntity))
