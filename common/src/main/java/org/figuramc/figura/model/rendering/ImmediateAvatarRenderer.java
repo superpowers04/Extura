@@ -3,6 +3,7 @@ package org.figuramc.figura.model.rendering;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.BlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -17,6 +18,7 @@ import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.lua.api.ClientAPI;
 import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.math.matrix.FiguraMat4;
+import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.model.*;
@@ -35,8 +37,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 	protected final PartCustomization.PartCustomizationStack customizationStack = new PartCustomization.PartCustomizationStack();
 
-	public static final FiguraMat4 CAMERA_POS_TO_WORLD_MATRIX = FiguraMat4.of();
-
+	public static final FiguraMat4 VIEW_TO_WORLD_MATRIX = FiguraMat4.of();
 	private static final PartCustomization pivotOffsetter = new PartCustomization();
 	protected static final VertexBuffer VERTEX_BUFFER = new VertexBuffer();
 
@@ -76,7 +77,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 		customizationStack.push(customization);
 
 		// world matrices
-		CAMERA_POS_TO_WORLD_MATRIX.set(AvatarRenderer.worldToCameraPosMatrix().invert());
+		VIEW_TO_WORLD_MATRIX.set(AvatarRenderer.worldToViewMatrix().invert());
 
 		// calculate each part matrices
 		calculatePartMatrices(root);
@@ -109,7 +110,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 		// world matrices
 		if (allowMatrixUpdate) {
-			CAMERA_POS_TO_WORLD_MATRIX.set(AvatarRenderer.worldToCameraPosMatrix().invert());
+			VIEW_TO_WORLD_MATRIX.set(AvatarRenderer.worldToViewMatrix().invert());
 		}
 		// Set shouldRenderPivots
 		shouldRenderPivots = Configs.RENDER_DEBUG_PARTS_PIVOT.value;
@@ -154,9 +155,9 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 				}
 
 				if (renderLayer) {
-					customizationStack.pop(); // pop "models"
-					customizationStack.pop(); // pop root
-				}
+						customizationStack.pop(); // pop "models"
+						customizationStack.pop(); // pop root
+					}
 			}
 		} else {
 			PartCustomization customization = setupRootCustomization(vertOffset);
@@ -190,8 +191,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 		customization.setPrimaryRenderType(RenderTypes.TRANSLUCENT);
 		customization.setSecondaryRenderType(RenderTypes.EMISSIVE);
 
-		double s = 1.0 / 16;
-		customization.positionMatrix.scale(s, s, s);
+		customization.positionMatrix.scale(0.0625, 0.0625, 0.0625); // Literally just 1/16
 		customization.positionMatrix.rotateZ(180);
 		customization.positionMatrix.translate(0, vertOffset, 0);
 		customization.normalMatrix.rotateZ(180);
@@ -206,6 +206,8 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 		customization.primaryTexture = new TextureCustomization(FiguraTextureSet.OverrideType.PRIMARY, null);
 		customization.secondaryTexture = new TextureCustomization(FiguraTextureSet.OverrideType.SECONDARY, null);
 
+		customization.shade = shade;
+
 		return customization;
 	}
 
@@ -217,7 +219,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 		// test the current filter scheme
 		FiguraMod.pushProfiler("predicate");
 		Boolean thisPassedPredicate = currentFilterScheme.test(part.parentType, prevPredicate);
-		if (thisPassedPredicate == null || (!custom.visible)) {
+		if (thisPassedPredicate == null || !custom.visible) {
 			if (part.parentType.isRenderLayer)
 				part.savedCustomization = customizationStack.peek();
 			FiguraMod.popProfiler(2);
@@ -277,29 +279,17 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 		if (thisPassedPredicate) {
 			// recalculate world matrices
 			FiguraMod.popPushProfiler("worldMatrices");
-			if (allowMatrixUpdate) {
-				FiguraMat4 mat = partToWorldMatrices(custom);
-				part.savedPartToWorldMat.set(mat);
-			}
+			if (allowMatrixUpdate) part.savedPartToWorldMat.set(partToWorldMatrices(custom));
 
 			// recalculate light
 			FiguraMod.popPushProfiler("calculateLight");
 			Level l;
-			if (custom.light != null) {
+			if (custom.light != null)
 				updateLight = false;
-				pivotOffsetter.light = custom.light;
-			}
 			else if (updateLight && (l = Minecraft.getInstance().level) != null) {
-				FiguraVec3 pos = part.savedPartToWorldMat.apply(0d, 0d, 0d);
-				int block = l.getBrightness(LightLayer.BLOCK, pos.asBlockPos());
-				int sky = l.getBrightness(LightLayer.SKY, pos.asBlockPos());
-				customizationStack.peek().light = LightTexture.pack(block, sky);
+				BlockPos pos = part.savedPartToWorldMat.apply(0d, 0d, 0d).asBlockPos();
+				customizationStack.peek().light = LightTexture.pack(l.getBrightness(LightLayer.BLOCK, pos), l.getBrightness(LightLayer.SKY, pos));
 			}
-
-			if (custom.alpha != null)
-				pivotOffsetter.alpha = custom.alpha;
-			if (custom.overlay != null)
-				pivotOffsetter.overlay = custom.overlay;
 		}
 
 		// mid render function
@@ -357,7 +347,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 				}
 
 				// render pivot parts
-				if (renderPivotParts && part.parentType.isPivot) {
+				if (renderPivotParts) {
 					FiguraMod.popPushProfiler("savePivotParts");
 					savePivotTransform(part.parentType, peek);
 				}
@@ -416,8 +406,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 	protected FiguraMat4 partToWorldMatrices(PartCustomization cust) {
 		FiguraMat4 customizePeek = customizationStack.peek().positionMatrix.copy();
-		// Translate by the inverse matrix of the camera position, as of 1.20.5 it is no longer dependent on camera rot.
-		customizePeek.multiply(CAMERA_POS_TO_WORLD_MATRIX);
+		customizePeek.multiply(VIEW_TO_WORLD_MATRIX);
 		FiguraVec3 piv = cust.getPivot();
 
 		FiguraMat4 translation = FiguraMat4.of();
@@ -497,11 +486,11 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 	private VertexData getTexture(PartCustomization customization, FiguraTextureSet textureSet, boolean primary) {
 		RenderTypes types = primary ? customization.getPrimaryRenderType() : customization.getSecondaryRenderType();
-		TextureCustomization texture = primary ? customization.primaryTexture : customization.secondaryTexture;
 		VertexData ret = new VertexData();
-
 		if (types == RenderTypes.NONE)
 			return ret;
+
+		TextureCustomization texture = primary ? customization.primaryTexture : customization.secondaryTexture;
 
 		// get texture
 		ResourceLocation id = textureSet.getOverrideTexture(avatar.owner, texture);
@@ -552,31 +541,39 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 		int overlay = customization.overlay;
 		int light = vertexData.fullBright ? LightTexture.FULL_BRIGHT : customization.light;
-
+		boolean shade = customization.shade == true;
+		Float alpha = customization.alpha;
+		float r = (float) vertexData.color.x;
+		float g = (float) vertexData.color.y;
+		float b = (float) vertexData.color.z;
+		if(!shade) normal.set(0f,1f,0f);
 		VERTEX_BUFFER.getBufferFor(vertexData.renderType, vertexData.primary, vertexConsumer -> {
-			for (int i = 0; i < vertCount; i++) {
+			int i = 0;
+			while (i < vertCount) {
 				Vertex vertex = vertices.get(i);
 
 				pos.set(vertex.x, vertex.y, vertex.z, 1);
 				pos.transform(customization.positionMatrix);
 				pos.add(pos.normalized().scale(vertexData.vertexOffset));
-				normal.set(vertex.nx, vertex.ny, vertex.nz);
-				normal.transform(customization.normalMatrix);
+				if(shade){
+					normal.set(vertex.nx, vertex.ny, vertex.nz);
+					normal.transform(customization.normalMatrix);
+				}
 				uv.set(vertex.u, vertex.v, 1);
 				uv.divide(uvFixer);
 				uv.transform(customization.uvMatrix);
-
 				vertexConsumer
-						.addVertex((float) pos.x, (float) pos.y, (float) pos.z)
-						.setColor((float) vertexData.color.x, (float) vertexData.color.y, (float) vertexData.color.z, customization.alpha)
-						.setUv((float) uv.x, (float) uv.y)
-						.setOverlay(overlay)
-						.setLight(light)
-						.setNormal((float) normal.x, (float) normal.y, (float) normal.z);
+					.vertex((float) pos.x,(float) pos.y,(float) pos.z)
+					.color(r, g, b, alpha)
+					.uv((float) uv.x,(float) uv.y)
+					.overlayCoords(overlay)
+					.uv2(light)
+					.normal((float) normal.x,(float) normal.y,(float) normal.z)
+					.endVertex();
+				i++;
 			}
 		});
 	}
-
 	private static class VertexData {
 		public RenderType renderType;
 		public boolean fullBright;
