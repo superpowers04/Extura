@@ -541,7 +541,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 		int overlay = customization.overlay;
 		int light = vertexData.fullBright ? LightTexture.FULL_BRIGHT : customization.light;
-		boolean shade = customization.shade != null && customization.shade;
+		boolean shade = customization.shade == true;
 		Float alpha = customization.alpha;
 		float r = (float) vertexData.color.x;
 		float g = (float) vertexData.color.y;
