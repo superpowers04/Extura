@@ -227,6 +227,6 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
 	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
 	private void preRender(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
 
-		AvatarManager.executeAll("preRender", avatar -> avatar.preRenderEvent(deltaTracker.getGameTimeDeltaTicks()));
+		AvatarManager.executeAll("preRender", avatar -> avatar.preRenderEvent(deltaTracker.getGameTimeDeltaPartialTick(true)));
 	}
 }
