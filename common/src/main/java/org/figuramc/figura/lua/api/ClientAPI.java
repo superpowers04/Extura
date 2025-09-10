@@ -58,6 +58,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.io.IOException;
+import java.awt.Toolkit;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -252,7 +253,12 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_mouse_pos")
 	public static FiguraVec2 getMousePos() {
 		MouseHandler mouse = Minecraft.getInstance().mouseHandler;
-		return FiguraVec2.of(mouse.xpos(), mouse.ypos());
+		Object retinaMod = Toolkit.getDefaultToolkit().getDesktopProperty("apple.awt.contentScaleFactor");
+		int mod = 1;
+		if (retinaMod != null) {
+			mod = (int) retinaMod;
+		}
+		return FiguraVec2.of(mouse.xpos()*mod, mouse.ypos()*mod);
 	}
 
 	@LuaWhitelist
