@@ -58,6 +58,8 @@ public class AvatarMetadataParser {
         if (metadata.background != null) nbt.putString("bg", metadata.background);
         if (metadata.id != null) nbt.putString("id", metadata.id);
 
+        if (metadata.allow_uploads != null) nbt.putBoolean("allow_uploads", metadata.allow_uploads);
+
         if (metadata.authors != null) {
             StringBuilder authors = new StringBuilder();
 
@@ -219,6 +221,7 @@ public class AvatarMetadataParser {
     public static class Metadata {
         public String name, description, author, version, color, background, id, geturl;
         public String[] authors, autoScripts, autoAnims, ignoredTextures, resources;
+        public Boolean allow_uploads;
         public HashMap<String, Customization> customizations;
     }
 

@@ -395,7 +395,7 @@ public class NetworkStuff {
 
 	// TODO: multiple modes of upload (Backend, FSB, Backend + FSB)
 	public static void uploadAvatar(Avatar avatar, Destination destination) {
-		if (avatar == null || avatar.nbt == null)
+		if (avatar == null || avatar.nbt == null || !avatar.allowUploads)
 			return;
 
 		String id = avatar.id == null || true ? "avatar" : avatar.id; //TODO - profile screen
@@ -444,6 +444,7 @@ public class NetworkStuff {
 	}
 
 	public static void uploadAvatar(Avatar avatar) {
+		if(!avatar.allowUploads) return;
 		uploadAvatar(avatar, Destination.FSB_OR_BACKEND);
 	}
 
@@ -663,7 +664,8 @@ public class NetworkStuff {
 	}
 
 	public static boolean canUpload() {
-		return fsb().connected() || isConnected() && uploadRate.check();
+		Avatar ava =AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+		return (ava != null && ava.allowUploads) && (fsb().connected() || isConnected() && uploadRate.check());
 	}
 
 	public static int getSizeLimit() {
