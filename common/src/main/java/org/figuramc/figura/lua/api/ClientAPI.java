@@ -255,8 +255,7 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_mouse_pos")
 	public static FiguraVec2 getMousePos() {
 		MouseHandler mouse = Minecraft.getInstance().mouseHandler;
-		AffineTransform displayOffset = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getDefaultTransform();
-		return FiguraVec2.of(mouse.xpos()*displayOffset.getScaleX(), mouse.ypos()*displayOffset.getScaleY());
+		return FiguraVec2.of(mouse.xpos(), mouse.ypos());
 	}
 
 	@LuaWhitelist
