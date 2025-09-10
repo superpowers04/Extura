@@ -148,17 +148,7 @@ public class HostAPI {
 			));
 	}
 	public Boolean canExturaCheat() {
-		if(!this.isHost) return false;
-		LocalPlayer player = this.minecraft.player;
-		if(player == null) return false;
-		if(player.hasPermissions(2)  || 
-				this.minecraft.isLocalServer() ||
-				(player.getScoreboard().hasObjective("extura_can_cheat"))
-			) return true;
-		if(!owner.noPermissions.contains(Permissions.EXTURA_CHEATING)){
-			owner.noPermissions.add(Permissions.EXTURA_CHEATING);
-		}
-		return false;
+		return true;
 	}
 	@LuaWhitelist
 	@LuaMethodDoc(
@@ -1136,6 +1126,11 @@ public class HostAPI {
 		return null;
 	}
 
+	@LuaWhitelist
+	@LuaMethodDoc("host.getOS")
+	public String getOS() {
+		return System.getProperty("os.name");
+	}
 
 	@LuaWhitelist
 	@LuaMethodDoc(
