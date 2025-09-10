@@ -210,7 +210,13 @@ public class AvatarAPI {
 
 
 	@LuaWhitelist
-	@LuaMethodDoc("avatar.forcePings")
+	@LuaMethodDoc("avatar.allow_uploads")
+	public AvatarAPI allowUploads(boolean allow) {
+		avatar.allowUploads = allow;
+		return this;
+	}
+	@LuaWhitelist
+	@LuaMethodDoc("avatar.force_pings")
 	public AvatarAPI forcePings(boolean backend,boolean fsb) {
 		avatar.forcePings = Destination.fromBool(backend,fsb);
 		return this;

@@ -198,10 +198,9 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
         } else {
             prevPartToView.rightMultiply(FiguraMat4.of().rotateY(180));
         }
-        FiguraVec3 scale = currentTransforms.stackScale.scaled(s);
         FiguraVec3 piv = customization.getPivot();
         FiguraVec3 piv2 = customization.getOffsetPivot().add(piv);
-        prevPartToView.scale(scale);
+        prevPartToView.scale(currentTransforms.stackScale.scaled(s));
         prevPartToView.v14 = prevPartToView.v24 = prevPartToView.v34 = 0;
         prevPartToView.translateFirst(-piv2.x, -piv2.y, -piv2.z);
         prevPartToView.translate(piv2.x, piv2.y, piv2.z);
