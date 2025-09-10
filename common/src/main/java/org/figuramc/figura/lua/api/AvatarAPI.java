@@ -329,6 +329,12 @@ public class AvatarAPI {
     }
 
 	@LuaWhitelist
+	@LuaMethodDoc("avatar.allow_uploads")
+	public AvatarAPI allowUploads(boolean allow) {
+		avatar.allowUploads = allow;
+		return this;
+	}
+	@LuaWhitelist
 	@LuaMethodDoc("avatar.get_size")
 	public double getSize() {
 		return avatar.getFileSize();

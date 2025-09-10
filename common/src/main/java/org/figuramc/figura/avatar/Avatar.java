@@ -108,6 +108,7 @@ public class Avatar {
     public String color;
 	public Map<String, String> badgeToColor = new HashMap<>();
 	public Map<String, byte[]> resources = new HashMap<>();
+	public boolean allowUploads = true;
 
 	public boolean minify;
 

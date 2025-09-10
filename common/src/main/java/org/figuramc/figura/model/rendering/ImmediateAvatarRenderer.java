@@ -218,8 +218,8 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
 		// test the current filter scheme
 		FiguraMod.pushProfiler("predicate");
-		Boolean thisPassedPredicate = currentFilterScheme.test(part.parentType, prevPredicate);
-		if (thisPassedPredicate == null || !custom.visible) {
+		Boolean thisPassedPredicate;
+		if (!custom.visible || (thisPassedPredicate = currentFilterScheme.test(part.parentType, prevPredicate)) == null) {
 			if (part.parentType.isRenderLayer)
 				part.savedCustomization = customizationStack.peek();
 			FiguraMod.popProfiler(2);
