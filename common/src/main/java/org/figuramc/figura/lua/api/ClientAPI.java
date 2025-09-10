@@ -50,15 +50,17 @@ import org.joml.Vector3f;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
 
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.io.IOException;
-import java.awt.Toolkit;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -253,12 +255,8 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_mouse_pos")
 	public static FiguraVec2 getMousePos() {
 		MouseHandler mouse = Minecraft.getInstance().mouseHandler;
-		Object retinaMod = Toolkit.getDefaultToolkit().getDesktopProperty("apple.awt.contentScaleFactor");
-		int mod = 1;
-		if (retinaMod != null) {
-			mod = (int) retinaMod;
-		}
-		return FiguraVec2.of(mouse.xpos()*mod, mouse.ypos()*mod);
+		AffineTransform displayOffset = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getDefaultTransform();
+		return FiguraVec2.of(mouse.xpos()*displayOffset.getScaleX(), mouse.ypos()*displayOffset.getScaleY());
 	}
 
 	@LuaWhitelist
