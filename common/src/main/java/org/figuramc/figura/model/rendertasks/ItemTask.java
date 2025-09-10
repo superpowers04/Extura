@@ -128,4 +128,8 @@ public class ItemTask extends RenderTask {
     public String toString() {
         return name + " (Item Render Task)";
     }
+
+    public ItemStack getItem() {
+        return item;
+    }
 }
