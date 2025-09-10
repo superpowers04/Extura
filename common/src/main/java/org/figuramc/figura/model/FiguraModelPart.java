@@ -96,8 +96,8 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
 
     private void walkCollections(Map<String, List<FiguraModelPart>> root, String names[]) {
         if (collectionInfo != null)
-        for (byte b: collectionInfo)
-        root.get(names[b]).add(this);
+            for (byte b: collectionInfo)
+                root.get(names[b]).add(this);
         for (var c: children) c.walkCollections(root, names);
     }
 
@@ -1543,17 +1543,60 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
 
     @LuaWhitelist
     @LuaMethodDoc(
-            overloads = @LuaMethodOverload(
+            overloads = {
+                @LuaMethodOverload(
                     argumentTypes = String.class,
                     argumentNames = "name"
-            ),
+                ),
+                @LuaMethodOverload(
+                        argumentTypes = {String.class, Boolean.class},
+                        argumentNames = {"name", "deepCopy"}
+                ),
+                @LuaMethodOverload(
+                        argumentTypes = {Boolean.class},
+                        argumentNames = {"deepCopy"}
+                )
+            },
             value = "model_part.copy"
     )
-    public FiguraModelPart copy(String name) {
+    public FiguraModelPart copy(Object obj, Boolean deepP) {
+        String name = obj instanceof String ? (String) obj : null;
+        Boolean deep = obj instanceof Boolean ? (Boolean) obj : deepP;
+        if (deep != null && deep) return deepCopy(name);
 		if (name == null) name = this.name;
         PartCustomization customization = new PartCustomization();
         this.customization.copyTo(customization);
         FiguraModelPart result = new FiguraModelPart(owner, name, uuid != null ? UUID.nameUUIDFromBytes((uuid + ":" + cloneSeed++).getBytes(StandardCharsets.UTF_8)).toString() : null, customization, copyVertices(), new ArrayList<>(children), null, null);
+        result.facesByTexture = new ArrayList<>(facesByTexture);
+        result.textures = new ArrayList<>(textures);
+        result.parentType = parentType;
+        result.textureHeight = textureHeight;
+        result.textureWidth = textureWidth;
+
+        if (parentType.isSeparate)
+            owner.renderer.sortParts();
+
+        return result;
+    }
+
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = @LuaMethodOverload(
+                    argumentTypes = String.class,
+                    argumentNames = "name"
+            ),
+            value = "model_part.deep_copy"
+    )
+    public FiguraModelPart deepCopy(String name) {
+        if (name == null) name = this.name;
+        PartCustomization customization = new PartCustomization();
+        this.customization.copyTo(customization);
+        List<FiguraModelPart> figuraModelParts = new ArrayList<>();
+        for (FiguraModelPart child : children) {
+            figuraModelParts.add(child.deepCopy(child.name));
+        }
+        FiguraModelPart result = new FiguraModelPart(owner, name, uuid != null ? UUID.nameUUIDFromBytes((uuid + ":" + cloneSeed++).getBytes(StandardCharsets.UTF_8)).toString() : null, customization, copyVertices(), figuraModelParts, null, null);
         result.facesByTexture = new ArrayList<>(facesByTexture);
         result.textures = new ArrayList<>(textures);
         result.parentType = parentType;
