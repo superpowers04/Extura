@@ -1,10 +1,8 @@
 package org.figuramc.figura.lua;
 
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import org.figuramc.figura.lua.docs.FiguraDocsManager;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
-import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.*;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
@@ -24,6 +22,8 @@ public class LuaTypeManager {
     private final Map<Class<?>, LuaTable> metatables = new HashMap<>();
 
     public void generateMetatableFor(Class<?> clazz) {
+        if (clazz == null || clazz == Object.class)
+            return;
         if (metatables.containsKey(clazz))
             return;
         if (!clazz.isAnnotationPresent(LuaWhitelist.class))
@@ -32,40 +32,14 @@ public class LuaTypeManager {
         // Ensure that all whitelisted superclasses are loaded before this one
         try {
             generateMetatableFor(clazz.getSuperclass());
+            for (Class<?> iface : clazz.getInterfaces())
+                generateMetatableFor(iface);
         } catch (IllegalArgumentException ignored) {}
 
         LuaTable metatable = new LuaTable();
 
         LuaTable indexTable = new LuaTable();
-		Class<?> currentClass = clazz;
-		while (currentClass.isAnnotationPresent(LuaWhitelist.class)) {
-			for (Method method : currentClass.getDeclaredMethods()) {
-				if (!method.isAnnotationPresent(LuaWhitelist.class)) 
-					continue;
-				String name = method.getName();
-				if (name.startsWith("__")) { // metamethods
-					if (metatable.rawget(name) != LuaValue.NIL) continue; // Only add the most recently declared metamethod, in the most specific subclass.
-					if (!name.equals("__index")){
-						metatable.set(name, getWrapper(method));
-						continue;
-					}
-					// Custom __index implementation. First checks the regular __index table, and if it gets NIL, then calls the custom-defined __index function.
-					metatable.set("__index", new TwoArgFunction() {
-						final LuaFunction wrappedIndexer = getWrapper(method);
-                                @Override
-                                public LuaValue call(LuaValue arg1, LuaValue arg2) {
-                                    LuaValue result = indexTable.get(arg2);
-                                    if (result == LuaValue.NIL)
-                                        result = wrappedIndexer.call(arg1, arg2);
-							return result;
-						}
-					});
-					continue;
-				} // regular methods
-				indexTable.set(name, getWrapper(method));
-			}
-			currentClass = currentClass.getSuperclass();
-		}
+        extracted(clazz, metatable, indexTable);
 
         if (metatable.rawget("__index") == LuaValue.NIL)
             metatable.set("__index", indexTable);
@@ -92,6 +66,41 @@ public class LuaTypeManager {
         }
 
         metatables.put(clazz, metatable);
+    }
+
+    private void extracted(Class<?> clazz, LuaTable metatable, LuaTable indexTable) {
+        Class<?> currentClass = clazz;
+        while (currentClass != null && currentClass.isAnnotationPresent(LuaWhitelist.class)) {
+            for (Method method : currentClass.getDeclaredMethods()) {
+                if (!method.isAnnotationPresent(LuaWhitelist.class)) {
+                    continue;
+                }
+                String name = method.getName();
+                if (name.startsWith("__")) { // metamethods
+                    if (metatable.rawget(name) == LuaValue.NIL) { // Only add the most recently declared metamethod, in the most specific subclass.
+                        if (name.equals("__index")) {
+                            // Custom __index implementation. First checks the regular __index table, and if it gets NIL, then calls the custom-defined __index function.
+                            metatable.set("__index", new TwoArgFunction() {
+                                final LuaFunction wrappedIndexer = getWrapper(method);
+                                @Override
+                                public LuaValue call(LuaValue arg1, LuaValue arg2) {
+                                    LuaValue result = indexTable.get(arg2);
+                                    if (result == LuaValue.NIL)
+                                        result = wrappedIndexer.call(arg1, arg2);
+                                    return result;
+                                }
+                            });
+                        } else {
+                            metatable.set(name, getWrapper(method));
+                        }
+                    }
+                } else { // regular methods
+                    indexTable.set(name, getWrapper(method));
+                }
+            }
+            for (Class<?> iface: currentClass.getInterfaces()) extracted(iface, metatable, indexTable);
+            currentClass = currentClass.getSuperclass();
+        }
     }
 
     public void dumpMetatables(LuaTable table) {
@@ -123,89 +132,97 @@ public class LuaTypeManager {
         return result;
     }
 
+    public VarArgFunction getWrapper(Method method) {
+        return new VarArgFunction() {
 
-	public VarArgFunction getWrapper(Method method) {
-		return new VarArgFunction() {
-
-			private final boolean isStatic = Modifier.isStatic(method.getModifiers());
-			private Object caller;
+            private final boolean isStatic = Modifier.isStatic(method.getModifiers());
+            private Object caller;
 
 
-			private final Class<?> clazz = method.getDeclaringClass();
-			private final Class<?>[] argumentTypes = method.getParameterTypes();
-			private final Object[] actualArgs = new Object[argumentTypes.length];
-			private final boolean[] requiredNotNil = getRequiredNotNil(method);
+            private final Class<?> clazz = method.getDeclaringClass();
+            private final Class<?>[] argumentTypes = method.getParameterTypes();
+            private final Object[] actualArgs = new Object[argumentTypes.length];
+            private final boolean[] requiredNotNil = getRequiredNotNil(method);
 
-			@Override
-			public Varargs invoke(Varargs args) {
+            @Override
+            public Varargs invoke(Varargs args) {
 
-				if(!isStatic){
+                if (!isStatic) {
                     try {
                         caller = args.checkuserdata(1, clazz);
                     } catch (LuaError e) {
                         String methodName = method.getName();
                         String targetType = getTypeName(clazz);
-                        throw new LuaError(String.format("bad argument #1 to %s(expected %s, got %s)\n(try to call with %s:%s instead of %s.%s)",methodName,targetType,args.arg(1).typename(),targetType,methodName,targetType,methodName));
+                        throw new LuaError(String.format(
+                                "Use a colon (:) to call %s on a %s, instead of a dot.\nFor example, change .%s( to :%s(",
+                                methodName, targetType, methodName, methodName
+                        ));
                     }
                 }
-				// dirty hack for QOL of ignoring the first argument if the method is static and the arg matches the class type
-				int offset=(!isStatic || (argumentTypes.length > 0 && !argumentTypes[0].isAssignableFrom(clazz) && args.isuserdata(1) && clazz.isAssignableFrom(args.checkuserdata(1).getClass())) ? 2 : 1);
 
-				// Fill in actualArgs from args
-				for (int i = 0; i < argumentTypes.length; i++) {
-					int argIndex = i + offset;
-					boolean nil = args.isnil(argIndex);
-					if (nil && requiredNotNil[i])
-						throw new LuaError("bad argument: " + method.getName() + " " + argIndex + " do not allow nil values, expected " + FiguraDocsManager.getNameFor(argumentTypes[i]));
-					if (argIndex <= args.narg() && !nil) {
-						try {
-							actualArgs[i] = switch (argumentTypes[i].getName()) {
-								case "java.lang.Number", "java.lang.Double", "double" -> args.checkdouble(argIndex);
-								case "java.lang.String" -> args.checkjstring(argIndex);
-								case "java.lang.Boolean", "boolean" -> args.toboolean(argIndex);
-								case "java.lang.Float", "float" -> (float) args.checkdouble(argIndex);
-								case "java.lang.Integer", "int" -> args.checkint(argIndex);
-								case "java.lang.Long", "long" -> args.checklong(argIndex);
-								case "org.luaj.vm2.LuaTable" -> args.checktable(argIndex);
-								case "org.luaj.vm2.LuaFunction" -> args.checkfunction(argIndex);
-								case "org.luaj.vm2.LuaValue" -> args.arg(argIndex);
-								case "java.lang.Object" -> luaToJava(args.arg(argIndex));
-								default -> argumentTypes[i].getName().startsWith("[") ? luaVarargToJava(args, argIndex, argumentTypes[i]) : args.checkuserdata(argIndex, argumentTypes[i]);
-							};
-						} catch (LuaError err) {
-							String expectedType = FiguraDocsManager.getNameFor(argumentTypes[i]);
-							LuaValue arg = args.arg(argIndex);
-							String actualType = arg.type() == LuaValue.TUSERDATA ? FiguraDocsManager.getNameFor(arg.checkuserdata().getClass()) : arg.typename();
-							throw new LuaError("Invalid argument " + argIndex + " to function " + method.getName() + ". Expected " + expectedType + ", but got " + actualType);
-						}
-					} else {
-						actualArgs[i] = switch (argumentTypes[i].getName()) {
-							case "double" -> 0D;
-							case "int" -> 0;
-							case "long" -> 0L;
-							case "float" -> 0f;
-							case "boolean" -> false;
-							default -> null;
-						};
-					}
-				}
+                // dirty hack for QOL of ignoring the first argument if the method is static and the arg matches the class type
+                int offset = isStatic && argumentTypes.length > 0 && !argumentTypes[0].isAssignableFrom(clazz) && args.isuserdata(1) && clazz.isAssignableFrom(args.checkuserdata(1).getClass()) ? 1 : 0;
 
-				try {
-					// Invoke the wrapped method
-					// Convert the return value
-					Object result = method.invoke(caller, actualArgs);
-					return result instanceof Varargs v ? v : javaToLua(result);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					throw e.getCause() instanceof LuaError l ? l : new LuaError(e.getCause());
-				}
-			}
+                // Fill in actualArgs from args
+                for (int i = 0; i < argumentTypes.length; i++) {
+                    int argIndex = i + (isStatic ? 1 : 2) + offset;
+                    boolean nil = args.isnil(argIndex);
+                    if (nil && requiredNotNil[i])
+                        throw new LuaError("bad argument: " + method.getName() + " " + argIndex + " does not allow nil values, expected " + FiguraDocsManager.getNameFor(argumentTypes[i]));
+                    if (argIndex <= args.narg() && !nil) {
+                        try {
+                            actualArgs[i] = switch (argumentTypes[i].getName()) {
+                                case "java.lang.Number", "java.lang.Double", "double" -> args.checkdouble(argIndex);
+                                case "java.lang.String" -> args.checkjstring(argIndex);
+                                case "java.lang.Boolean", "boolean" -> args.toboolean(argIndex);
+                                case "java.lang.Float", "float" -> (float) args.checkdouble(argIndex);
+                                case "java.lang.Integer", "int" -> args.checkint(argIndex);
+                                case "java.lang.Long", "long" -> args.checklong(argIndex);
+                                case "org.luaj.vm2.LuaTable" -> args.checktable(argIndex);
+                                case "org.luaj.vm2.LuaFunction" -> args.checkfunction(argIndex);
+                                case "org.luaj.vm2.LuaValue" -> args.arg(argIndex);
+                                case "java.lang.Object" -> luaToJava(args.arg(argIndex));
+                                default -> argumentTypes[i].getName().startsWith("[") ? luaVarargToJava(args, argIndex, argumentTypes[i]) : args.checkuserdata(argIndex, argumentTypes[i]);
+                            };
+                        } catch (LuaError err) {
+                            String expectedType = FiguraDocsManager.getNameFor(argumentTypes[i]);
+                            String actualType;
+                            if (args.arg(argIndex).type() == LuaValue.TUSERDATA)
+                                actualType = FiguraDocsManager.getNameFor(args.arg(argIndex).checkuserdata().getClass());
+                            else
+                                actualType = args.arg(argIndex).typename();
+                            throw new LuaError("Invalid argument " + argIndex + " to function " + method.getName() + ". Expected " + expectedType + ", but got " + actualType);
+                        }
+                    } else {
+                        actualArgs[i] = switch (argumentTypes[i].getName()) {
+                            case "double" -> 0D;
+                            case "int" -> 0;
+                            case "long" -> 0L;
+                            case "float" -> 0f;
+                            case "boolean" -> false;
+                            default -> null;
+                        };
+                    }
+                }
 
-			@Override
-			public String tojstring() {
-				return "function: " + method.getName();
-			}
-		};
-	}
+                // Invoke the wrapped method
+                Object result;
+                try {
+                    result = method.invoke(caller, actualArgs);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw e.getCause() instanceof LuaError l ? l : new LuaError(e.getCause());
+                }
+
+                // Convert the return value
+                return result instanceof Varargs v ? v : javaToLua(result);
+            }
+
+            @Override
+            public String tojstring() {
+                return "function: " + method.getName();
+            }
+        };
+    }
 
     private LuaValue wrap(Object instance) {
         Class<?> clazz = instance.getClass();
@@ -332,12 +349,8 @@ public class LuaTypeManager {
             return wrapCollection(collection);
         else if (val.getClass().isArray())
             return wrapArray(val);
-        else if (val instanceof Component c) {
-            TextUtils.allowScriptEvents = true;
-            LuaValue ret = LuaValue.valueOf(Component.Serializer.toJson(c, RegistryAccess.EMPTY));
-            TextUtils.allowScriptEvents = false;
-            return ret;
-        }
+        else if (val instanceof Component c)
+            return LuaValue.valueOf(Component.Serializer.toJson(c));
         else
             return wrap(val);
     }

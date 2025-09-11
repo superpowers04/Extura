@@ -45,14 +45,12 @@ import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.model.FiguraModelPart;
 import org.figuramc.figura.model.rendering.Vertex;
 import org.figuramc.figura.model.rendering.texture.FiguraTexture;
-import org.figuramc.figura.config.Configs;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import org.figuramc.figura.animation.Keyframe;
 
 /**
  * A set of Globals of which there is only one in the MC instance.
@@ -83,7 +81,9 @@ public class FiguraAPIManager {
         add(LuaEvent.class);
 
         add(Vertex.class);
+        add(MutablePart.class);
         add(FiguraModelPart.class);
+        add(PartCollection.class);
         add(RenderTask.class);
         add(ItemTask.class);
         add(BlockTask.class);
@@ -125,13 +125,13 @@ public class FiguraAPIManager {
         add(PingAPI.class);
         add(PingFunction.class);
 
+        add(ServerPacketsAPI.class);
+
         add(TextureAPI.class);
         add(FiguraTexture.class);
 
         add(AnimationAPI.class);
         add(Animation.class);
-		add(Animation.AnimationChannel.class);
-		add(Keyframe.class);
 
         add(HostAPI.class);
 
@@ -144,7 +144,6 @@ public class FiguraAPIManager {
         add(ConfigAPI.class);
 
         add(TextureAtlasAPI.class);
-		add(ExturaAPI.class);
 
         add(FiguraInputStream.class);
         add(FiguraOutputStream.class);
@@ -191,9 +190,9 @@ public class FiguraAPIManager {
         put("matrices", r -> MatricesAPI.INSTANCE);
         put("world", r -> WorldAPI.INSTANCE);
         put("pings", r -> r.ping = new PingAPI(r.owner));
+        put("server_packets", r -> r.serverPackets = new ServerPacketsAPI(r.owner));
         put("textures", r -> r.texture = new TextureAPI(r.owner));
         put("config", r -> new ConfigAPI(r.owner));
-		if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
         put("data", r -> new DataAPI(r.owner));
         put("file", r -> new FileAPI(r.owner));
         put("json", r -> JsonAPI.INSTANCE);
