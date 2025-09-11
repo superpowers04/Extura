@@ -1,6 +1,7 @@
 package org.figuramc.figura.lua.api;
 
 import com.google.common.base.Suppliers;
+import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
@@ -49,11 +50,13 @@ import org.figuramc.figura.utils.*;
 import org.joml.Vector3f;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.lang.reflect.Field;
+import java.nio.FloatBuffer;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -256,14 +259,18 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_mouse_pos")
 	public static FiguraVec2 getMousePos() {
 		MouseHandler mouse = Minecraft.getInstance().mouseHandler;
-		return FiguraVec2.of(mouse.xpos(), mouse.ypos());
+		FloatBuffer xScale = BufferUtils.createFloatBuffer(1);
+		FloatBuffer yScale = BufferUtils.createFloatBuffer(1);
+		GLFW.glfwGetWindowContentScale( (long) Minecraft.getInstance().getWindow().getWindow(), xScale, yScale);
+		return FiguraVec2.of(mouse.xpos() * xScale.get(0), mouse.ypos() * yScale.get(0));
 	}
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_scaled_window_size")
 	public static FiguraVec2 getScaledWindowSize() {
+
 		Window window = Minecraft.getInstance().getWindow();
-		return FiguraVec2.of(window.getGuiScaledWidth() * window.getGuiScaledWidth(), window.getGuiScaledHeight() * window.getGuiScaledHeight());
+		return FiguraVec2.of(window.getGuiScaledWidth(), window.getGuiScaledHeight());
 	}
 
 	@LuaWhitelist
