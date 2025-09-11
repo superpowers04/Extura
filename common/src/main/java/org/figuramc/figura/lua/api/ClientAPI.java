@@ -49,6 +49,7 @@ import org.figuramc.figura.utils.*;
 import org.joml.Vector3f;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -262,7 +263,7 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_scaled_window_size")
 	public static FiguraVec2 getScaledWindowSize() {
 		Window window = Minecraft.getInstance().getWindow();
-		return FiguraVec2.of(window.getGuiScaledWidth(), window.getGuiScaledHeight());
+		return FiguraVec2.of(window.getGuiScaledWidth() * window.getGuiScaledWidth(), window.getGuiScaledHeight() * window.getGuiScaledHeight());
 	}
 
 	@LuaWhitelist
