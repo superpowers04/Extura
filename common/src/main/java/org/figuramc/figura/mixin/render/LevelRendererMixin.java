@@ -1,6 +1,6 @@
 package org.figuramc.figura.mixin.render;
 
-import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -16,7 +16,6 @@ import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.config.Configs;
-import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.model.rendering.EntityRenderMode;
 import org.figuramc.figura.utils.ColorUtils;
@@ -29,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.Deque;
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
@@ -108,9 +108,10 @@ public abstract class LevelRendererMixin {
         float yaw = Mth.lerp(tickDelta, livingEntity.yRotO, livingEntity.getYRot());
         entityRenderer.render(livingEntity, yaw, tickDelta, stack, bufferSource, LightTexture.FULL_BRIGHT);
 
+        Deque<PoseStack.Pose> poseStack = ((PoseStackAccessor)stack).getPoseStack();
         do {
             stack.popPose();
-        } while(((PoseStackAccessor)stack).getPoseStack().size() > size);
+        } while(poseStack.size() > size);
 
         Avatar.firstPerson = false;
     }

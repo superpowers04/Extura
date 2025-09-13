@@ -63,15 +63,13 @@ public class RendererAPI {
     @LuaFieldDoc("renderer.render_jump_meter")
     public boolean renderJumpMeter = true;
     @LuaWhitelist
-    @LuaFieldDoc("renderer.render_effects")
+    @LuaFieldDoc("renderer.render_Effects")
     public boolean renderEffects = true;
     @LuaWhitelist
     @LuaFieldDoc("renderer.render_gui")
     public boolean renderGUI = true;
-    @LuaFieldDoc("renderer.render_tab_list")
-    public boolean renderTabList = true;
-    @LuaFieldDoc("renderer.render_view_bobbing")
-    public boolean renderViewBobbing = true;
+    @LuaFieldDoc("renderer.render_first_person")
+    public boolean renderFirstPerson = false;
 
     public FiguraVec3 cameraPos;
     public FiguraVec3 cameraPivot, cameraOffsetPivot;
@@ -187,15 +185,24 @@ public class RendererAPI {
         this.renderHUD = renderHUD;
         return this;
     }
+
+    @LuaWhitelist
+    @LuaMethodDoc("renderer.should_render_first_person")
+    public boolean shouldRenderFirstPerson() {
+        return renderFirstPerson;
+    }
+
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = @LuaMethodOverload(
                     argumentTypes = Boolean.class,
-                    argumentNames = "renderTabList"
+                    argumentNames = "bool"
             ),
-            value = "renderer.set_render_tab_list")
-    public RendererAPI setRenderTabList(boolean renderTabList) {
-        this.renderTabList = renderTabList;
+            aliases = "renderFirstPerson",
+            value = "renderer.set_render_first_person"
+    )
+    public RendererAPI setRenderFirstPerson(Boolean bool) {
+        this.renderFirstPerson = bool;
         return this;
     }
 
@@ -803,8 +810,7 @@ public class RendererAPI {
 			case "renderJumpMeter" -> renderJumpMeter;
 			case "renderEffects" -> renderEffects;
 			case "renderGUI" -> renderGUI;
-			case "renderTabList" -> renderTabList;
-			case "renderViewBobbing" -> renderViewBobbing;
+            case "renderFirstPerson" -> renderFirstPerson;
             default -> null;
         };
     }
@@ -824,8 +830,7 @@ public class RendererAPI {
 			case "renderJumpMeter" -> renderJumpMeter = value;
 			case "renderEffects" -> renderEffects = value;
 			case "renderGUI" -> renderGUI = value;
-			case "renderTabList" -> renderTabList = value;
-			case "renderViewBobbing" -> renderViewBobbing = value;
+            case "renderFirstPerson" -> renderFirstPerson = value;
             default -> throw new LuaError("Cannot assign value on key \"" + key + "\"");
         }
     }
