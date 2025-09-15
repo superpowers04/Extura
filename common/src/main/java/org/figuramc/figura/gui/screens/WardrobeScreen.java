@@ -349,12 +349,12 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		// panic visible
 		delete.setActive(NetworkStuff.canUpload() && AvatarManager.localUploaded);
 		if(AvatarManager.panic){
-			panic.setVisible(false);
+			panic.setVisible(true);
 			upload.setActive(false);
 			upload.setTooltip(FiguraText.of("figura.gui.panic"));
 		}else{
 
-			panic.setVisible(true);
+			panic.setVisible(false);
 
 			// backend buttons
 			Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
