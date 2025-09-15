@@ -29,8 +29,8 @@ public abstract class LivingEntityMixin extends Entity {
         if (avatar != null && avatar.useItemEvent(ItemStackAPI.verify(stack), stack.getUseAnimation().name(), particleCount))
             ci.cancel();
     }
-    @Inject(at = @At("HEAD"), method = "handleDamageEvent")
-    private void handleDamageEvent(DamageSource source, CallbackInfo ci, cancellable = true) {
+    @Inject(at = @At("HEAD"), method = "handleDamageEvent", cancellable = true)
+    private void handleDamageEvent(DamageSource source, CallbackInfo ci) {
         //Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
         Avatar avatar = AvatarManager.getAvatar(this);
         if (avatar != null) {

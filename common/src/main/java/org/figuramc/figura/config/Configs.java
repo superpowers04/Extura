@@ -262,7 +262,6 @@ public class Configs {
 			this.tooltip = FiguraText.of("config.default_to_backend.tooltip");
 		}
 	};
-	ALLOW_UPLOADING_ERRORED_AVATARS = new ConfigType.BoolConfig("allow_uploading_errored_avatars", DEV, false);
 	// public static final ConfigType.BoolConfig ALLOW_BOTH_PINGS = new ConfigType.BoolConfig("allow_both_pings", MISC, false) {
 	// 	{
 	// 		this.name = this.name.copy().withStyle(ChatFormatting.AQUA);
@@ -296,7 +295,7 @@ public class Configs {
 			.append(FiguraText.of(tooltip + "2").withStyle(ChatFormatting.RED))
 			.append("\n\n")
 			.append(FiguraText.of(tooltip + "3").withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
-	}};
+	}}, ALLOW_UPLOADING_ERRORED_AVATARS = new ConfigType.BoolConfig("allow_uploading_errored_avatars", DEV, false);
 	public static final ConfigType.FolderConfig MAIN_DIR = new ConfigType.FolderConfig("main_dir", DEV, "") {
 		@Override
 		public void onChange() {

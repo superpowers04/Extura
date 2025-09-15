@@ -347,24 +347,32 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		super.tick();
 
 		// panic visible
-		panic.setVisible(AvatarManager.panic);
-
-		// backend buttons
-		Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
-		boolean isErrorBlockingUpload = avatar != null && avatar.scriptError && !Configs.ALLOW_UPLOADING_ERRORED_AVATARS.value;
-		upload.setActive(
-			NetworkStuff.canUpload() && 
-			!AvatarManager.localUploaded && 
-			avatar != null && 
-			avatar.nbt != null && 
-			!(avatar.scriptError && !Configs.ALLOW_UPLOADING_ERRORED_AVATARS.value)
-			avatar.loaded);
 		delete.setActive(NetworkStuff.canUpload() && AvatarManager.localUploaded);
-		upload.setTooltip(
-				isErrorBlockingUpload
-						? FiguraText.of("gui.wardrobe.upload.errored", avatar.errorText).withStyle(ChatFormatting.RED)
-						: FiguraText.of("gui.wardrobe.upload.tooltip")
-				);
+		if(AvatarManager.panic){
+			panic.setVisible(false);
+			upload.setActive(false);
+			upload.setTooltip(FiguraText.of("figura.gui.panic"));
+		}else{
+
+			panic.setVisible(true);
+
+			// backend buttons
+			Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+			boolean avatarExists = avatar != null && avatar.nbt != null;
+			boolean isErrorBlockingUpload = avatarExists && avatar.scriptError && !Configs.ALLOW_UPLOADING_ERRORED_AVATARS.value;
+			upload.setActive(
+				NetworkStuff.canUpload() && !AvatarManager.localUploaded && 
+				avatarExists &&
+				!isErrorBlockingUpload &&
+				avatar.loaded
+			);
+			upload.setTooltip(
+				upload.isActive() ? FiguraText.of("gui.wardrobe.upload.tooltip")
+				: AvatarManager.localUploaded ? FiguraText.of("gui.wardrobe.upload.uploaded_already").withStyle(ChatFormatting.RED)
+				: isErrorBlockingUpload ? FiguraText.of("gui.wardrobe.upload.errored", avatar.errorText).withStyle(ChatFormatting.RED)
+				: FiguraText.of("gui.wardrobe.upload.tooltip")
+			);
+		}
 
 		updateMotdWidget();
 	}

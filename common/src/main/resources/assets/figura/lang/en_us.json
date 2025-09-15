@@ -411,6 +411,7 @@
     "figura.gui.wardrobe.minimize_wardrobe.tooltip": "Minimize wardrobe list",
     "figura.gui.wardrobe.upload.tooltip": "Upload avatar\nOther players only see you as your uploaded avatar",
     "figura.gui.wardrobe.upload.errored": "Fix your avatar's errors before sharing it with other players!\n\n%s",
+    "figura.gui.wardrobe.upload.uploaded_already": "Your avatar is currently uploaded already!",
     "figura.gui.wardrobe.upload_backend": "Upload avatar to the Main Cloud",
     "figura.gui.wardrobe.upload_backend.tooltip": "Players that are not connected to Server Cloud will see this avatar",
     "figura.gui.wardrobe.upload_fsb": "Upload avatar to Server Cloud",
