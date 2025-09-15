@@ -503,7 +503,7 @@ public class Avatar {
 
 
 	public boolean damageEvent(String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect, FiguraVec3 sourcePosition) {
-		if (loaded) run("DAMAGE", tick, sourceType, sourceCause, sourceDirect, sourcePosition);
+		return isCancelled(loaded ? run("DAMAGE", tick, sourceType, sourceCause, sourceDirect, sourcePosition) : null);
 	}
 	public void attackEvent(String sourceType, EntityAPI<?> loser, FiguraVec3 sourcePosition) {
 		if (loaded) run("ATTACK", tick, sourceType, loser, sourcePosition);
