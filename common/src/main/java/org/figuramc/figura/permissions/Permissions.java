@@ -41,7 +41,8 @@ public class Permissions {
             BUFFERS_COUNT = new Permissions("BUFFERS_COUNT", 0, 32, 0, 2, 4, 16, 32),
             NETWORKING = new Permissions("NETWORKING", 0,0,0,1,1),
             PRINTING = new Permissions("PRINTING", 0,0,0,1,1),
-            EXTURA_CHEATING = new Permissions("EXTURA_CHEATING", 0,0,0,1,1);
+            EXTURA_CHEATING = new Permissions("EXTURA_CHEATING", 0,0,0,1,1),
+            CANCEL_DAMAGE = new Permissions("CANCEL_DAMAGE", 0, 0, 1, 1, 1);
 
     public static final List<Permissions> DEFAULT = List.of(
             INIT_INST,
@@ -61,6 +62,7 @@ public class Permissions {
             OFFSCREEN_RENDERING,
             CUSTOM_SOUNDS,
             CANCEL_SOUNDS,
+            CANCEL_DAMAGE,
             CUSTOM_SKULL,
             BUFFER_SIZE,
             BUFFERS_COUNT,
