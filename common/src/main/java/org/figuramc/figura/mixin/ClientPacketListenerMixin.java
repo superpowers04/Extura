@@ -31,14 +31,11 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleEntityEvent", at = @At(value = "FIELD", target = "Lnet/minecraft/core/particles/ParticleTypes;TOTEM_OF_UNDYING:Lnet/minecraft/core/particles/SimpleParticleType;"), cancellable = true)
     private void handleTotem(ClientboundEntityEventPacket packet, CallbackInfo ci) {
         Avatar avatar = AvatarManager.getAvatar(packet.getEntity(this.getLevel()));
-        if (avatar != null) {
-            boolean cancel = avatar.totemEvent();
+        if (avatar != null && avatar.totemEvent()) {
             if (avatar.permissions.get(Permissions.CANCEL_DAMAGE) >= 1) {
                 avatar.noPermissions.remove(Permissions.CANCEL_DAMAGE);
-                if (cancel) {
-                    ci.cancel();
-                }
-            } else if (cancel) {
+                ci.cancel();
+            } else {
                 avatar.noPermissions.add(Permissions.CANCEL_DAMAGE);
             }
         }
