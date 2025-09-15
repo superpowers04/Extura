@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
@@ -26,6 +27,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.lua.LuaNotNil;
@@ -339,7 +341,7 @@ public class ClientAPI {
 			},
 			value = "client.get_text_dimensions"
 	)
-	public static FiguraVec2 getTextDimensions(@LuaNotNil String text, int maxWidth, Boolean wrap) {
+	public static FiguraVec2 getTextDimensions(@LuaNotNil String text, int maxWidth, Boolean wrap, Integer lineSpacing) {
 		Component component = TextUtils.tryParseJson(text);
 		Font font = Minecraft.getInstance().font;
 		List<Component> list = TextUtils.formatInBounds(component, font, maxWidth, wrap == null || wrap);
