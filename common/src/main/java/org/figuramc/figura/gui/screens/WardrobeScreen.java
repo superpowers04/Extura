@@ -321,9 +321,21 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		panic.setVisible(AvatarManager.panic);
 
 		// backend buttons
-		Avatar avatar;
-		upload.setActive(NetworkStuff.canUpload() && !AvatarManager.localUploaded && (avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID())) != null && avatar.nbt != null && avatar.loaded);
+		Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+		boolean isErrorBlockingUpload = avatar != null && avatar.scriptError && !Configs.ALLOW_UPLOADING_ERRORED_AVATARS.value;
+		upload.setActive(
+			NetworkStuff.canUpload() && 
+			!AvatarManager.localUploaded && 
+			avatar != null && 
+			avatar.nbt != null && 
+			!(avatar.scriptError && !Configs.ALLOW_UPLOADING_ERRORED_AVATARS.value)
+			avatar.loaded);
 		delete.setActive(NetworkStuff.canUpload() && AvatarManager.localUploaded);
+		upload.setTooltip(
+				isErrorBlockingUpload
+						? FiguraText.of("gui.wardrobe.upload.errored", avatar.errorText).withStyle(ChatFormatting.RED)
+						: FiguraText.of("gui.wardrobe.upload.tooltip")
+				);
 
 		updateMotdWidget();
 	}

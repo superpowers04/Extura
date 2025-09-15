@@ -262,6 +262,7 @@ public class Configs {
 			this.tooltip = FiguraText.of("config.default_to_backend.tooltip");
 		}
 	};
+	ALLOW_UPLOADING_ERRORED_AVATARS = new ConfigType.BoolConfig("allow_uploading_errored_avatars", DEV, false);
 	// public static final ConfigType.BoolConfig ALLOW_BOTH_PINGS = new ConfigType.BoolConfig("allow_both_pings", MISC, false) {
 	// 	{
 	// 		this.name = this.name.copy().withStyle(ChatFormatting.AQUA);
