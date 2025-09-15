@@ -285,7 +285,11 @@ public class Avatar {
 		if (scriptError || luaRuntime == null || !loaded)
 			return;
 
-		render.reset(permissions.get(Permissions.RENDER_INST));
+        // Instruction count resetting happens in GameRenderMixin with pre_render event
+        // If there isn't an entity loaded, that event never runs. Fallback to resetting instruction count here
+        if (luaRuntime.getUser() == null)
+            render.reset(permissions.get(Permissions.RENDER_INST));
+            
 		worldRender.reset(permissions.get(Permissions.WORLD_RENDER_INST));
 		run("WORLD_RENDER", worldRender, delta);
 	}
