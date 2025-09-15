@@ -150,7 +150,7 @@ public class Avatar {
 		this.complexity = new Instructions(permissions.get(Permissions.COMPLEXITY));
 		this.init = new Instructions(permissions.get(Permissions.INIT_INST));
 		this.render = new Instructions(permissions.get(Permissions.RENDER_INST));
-		this.prerender = new Instructions(permissions.get(Permissions.RENDER_INST));
+		this.preRender = new Instructions(permissions.get(Permissions.RENDER_INST));
 		this.worldRender = new Instructions(permissions.get(Permissions.WORLD_RENDER_INST));
 		this.tick = new Instructions(permissions.get(Permissions.TICK_INST));
 		this.worldTick = new Instructions(permissions.get(Permissions.WORLD_TICK_INST));
@@ -506,7 +506,7 @@ public class Avatar {
 	}
 
 
-	public void damageEvent(String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect, FiguraVec3 sourcePosition) {
+	public boolean damageEvent(String sourceType, EntityAPI<?> sourceCause, EntityAPI<?> sourceDirect, FiguraVec3 sourcePosition) {
 		if (loaded) run("DAMAGE", tick, sourceType, sourceCause, sourceDirect, sourcePosition);
 	}
 	public void attackEvent(String sourceType, EntityAPI<?> loser, FiguraVec3 sourcePosition) {
