@@ -137,7 +137,7 @@ public class Avatar {
 	// limits
 	public int animationComplexity;
 	public final Instructions complexity;
-	public final Instructions init, prerender, render, worldRender, tick, worldTick, animation;
+	public final Instructions init, preRender, render, worldRender, tick, worldTick, animation;
 	public final Map<String, Instructions> customInstructions = new HashMap<>();
 	public final RefilledNumber particlesRemaining, soundsRemaining;
 	private Avatar(UUID owner, EntityType<?> type, String name) {

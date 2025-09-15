@@ -21,5 +21,6 @@ extendable class net/minecraft/resources/ResourceLocation
 accessible method net/minecraft/resources/ResourceLocation <init> (Ljava/lang/String;Ljava/lang/String;)V
 
 accessible class net/minecraft/client/gui/components/SubtitleOverlay$Subtitle
+accessible field net/minecraft/client/KeyMapping clickCount I
 accessible method com/mojang/blaze3d/platform/NativeImage checkAllocated ()V
 accessible field com/mojang/blaze3d/platform/NativeImage pixels J

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
@@ -17,28 +18,33 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.scores.*;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.Scoreboard;
 import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.config.Configs;
+import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.entity.ViewerAPI;
-import org.figuramc.figura.lua.api.world.WorldAPI;
 import org.figuramc.figura.lua.docs.FiguraListDocs;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
+import org.figuramc.figura.mixin.gui.BossHealthOverlayAccessor;
 import org.figuramc.figura.mixin.gui.GuiAccessor;
 import org.figuramc.figura.mixin.gui.PlayerTabOverlayAccessor;
 import org.figuramc.figura.mixin.render.ModelManagerAccessor;
+import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.backend2.HttpAPI;
 import org.figuramc.figura.utils.*;
@@ -49,8 +55,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -140,19 +144,19 @@ public class ClientAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_server_brand")
 	public static String getServerBrand() {
-        if (Minecraft.getInstance().player == null)
-            return null;
+		if (Minecraft.getInstance().player == null)
+			return null;
 
-        return Minecraft.getInstance().getSingleplayerServer() == null ? Minecraft.getInstance().player.connection.serverBrand() : "Integrated";
-    }
+		return Minecraft.getInstance().getSingleplayerServer() == null ? Minecraft.getInstance().player.getServerBrand() : "Integrated";
+	}
 
-    @LuaWhitelist
-    @LuaMethodDoc("client.get_chunk_statistics")
-    public static String getChunkStatistics() {
-        return Minecraft.getInstance().levelRenderer.getSectionStatistics();
-    }
+	@LuaWhitelist
+	@LuaMethodDoc("client.get_chunk_statistics")
+	public static String getChunkStatistics() {
+		return Minecraft.getInstance().levelRenderer.getChunkStatistics();
+	}
 
-    @LuaWhitelist
+	@LuaWhitelist
 	@LuaMethodDoc("client.get_entity_statistics")
 	public static String getEntityStatistics() {
 		return Minecraft.getInstance().levelRenderer.getEntityStatistics();
@@ -224,13 +228,13 @@ public class ClientAPI {
 		return Minecraft.renderNames();
 	}
 
-    @LuaWhitelist
-    @LuaMethodDoc("client.is_debug_overlay_enabled")
-    public static boolean isDebugOverlayEnabled() {
-        return Minecraft.getInstance().getDebugOverlay().showDebugScreen();
-    }
+	@LuaWhitelist
+	@LuaMethodDoc("client.is_debug_overlay_enabled")
+	public static boolean isDebugOverlayEnabled() {
+		return Minecraft.getInstance().options.renderDebug;
+	}
 
-    @LuaWhitelist
+	@LuaWhitelist
 	@LuaMethodDoc("client.get_window_size")
 	public static FiguraVec2 getWindowSize() {
 		Window window = Minecraft.getInstance().getWindow();
@@ -285,22 +289,13 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_camera_rot")
 	public static FiguraVec3 getCameraRot() {
 		var quaternion = Minecraft.getInstance().gameRenderer.getMainCamera().rotation();
-        Vector3f vec = new Vector3f();
-        quaternion.getEulerAnglesYXZ(vec);
-        double f = 180d / Math.PI;
-        // Before when the player faced 0, the value was actually 180, we must revert to this or avatars break
-        // Thanks Mojang...
-        vec.y = (float) (Math.PI - vec.y);
+		Vector3f vec = new Vector3f();
+		quaternion.getEulerAnglesYXZ(vec);
+		double f = 180d / Math.PI;
+		return FiguraVec3.fromVec3f(vec).multiply(f, -f, f); // degrees, and negate y
+	}
 
-        if (vec.y > Math.PI) {
-            vec.y -= (float) (Math.PI*2);
-        } else if (vec.y < -Math.PI) {
-            vec.y += (float) (Math.PI*2);
-        } // I hate that this works, rotating Y by 2*PI didn't, i tried, if someone has a better solution, feel free to open a PR
-        return FiguraVec3.fromVec3f(vec).multiply(-f, f, f);
-    }
-
-    @LuaWhitelist
+	@LuaWhitelist
 	@LuaMethodDoc("client.get_camera_dir")
 	public static FiguraVec3 getCameraDir() {
 		return FiguraVec3.fromVec3f(Minecraft.getInstance().gameRenderer.getMainCamera().getLookVector());
@@ -346,7 +341,7 @@ public class ClientAPI {
 			},
 			value = "client.get_text_dimensions"
 	)
-	public static FiguraVec2 getTextDimensions(@LuaNotNil String text, int maxWidth, Boolean wrap) {
+	public static FiguraVec2 getTextDimensions(@LuaNotNil String text, int maxWidth, Boolean wrap, Integer lineSpacing) {
 		Component component = TextUtils.tryParseJson(text);
 		Font font = Minecraft.getInstance().font;
 		List<Component> list = TextUtils.formatInBounds(component, font, maxWidth, wrap == null || wrap);
@@ -440,26 +435,22 @@ public class ClientAPI {
 				if (shaderClass == String.class)
 					return (String) shaderNameField.get(null);
 			}
-        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
-           try {
-               return net.irisshaders.iris.Iris.getCurrentPackName();
-           }catch (Exception ignored1) {
-           }
+		}catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {
 		}
 		return "";
 	}
 
-	// @LuaWhitelist
-	// @LuaMethodDoc("client.first_person_model_enabled")
-	// public static Boolean fpmIsEnabled() {
-	// 	return HAS_FIRSTPERSONMOD && dev.tr7zw.firstperson.api.FirstPersonAPI.isEnabled();
-	// }
+	@LuaWhitelist
+	@LuaMethodDoc("client.first_person_model_enabled")
+	public static Boolean fpmIsEnabled() {
+		return HAS_FIRSTPERSONMOD && dev.tr7zw.firstperson.api.FirstPersonAPI.isEnabled();
+	}
 
-	// @LuaWhitelist
-	// @LuaMethodDoc("client.first_person_model_is_rendering_player")
-	// public static Boolean fpmIsRenderingPlayer() {
-	// 	return HAS_FIRSTPERSONMOD && dev.tr7zw.firstperson.api.FirstPersonAPI.isRenderingPlayer();
-	// }
+	@LuaWhitelist
+	@LuaMethodDoc("client.first_person_model_is_rendering_player")
+	public static Boolean fpmIsRenderingPlayer() {
+		return HAS_FIRSTPERSONMOD && dev.tr7zw.firstperson.api.FirstPersonAPI.isRenderingPlayer();
+	}
 
 	@LuaWhitelist
 	@LuaMethodDoc(
@@ -627,13 +618,13 @@ public class ClientAPI {
 		return map;
 	}
 
-    @LuaWhitelist
-    @LuaMethodDoc("client.get_frame_time")
-    public static double getFrameTime() {
-        return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
-    }
+	@LuaWhitelist
+	@LuaMethodDoc("client.get_frame_time")
+	public static double getFrameTime() {
+		return Minecraft.getInstance().getFrameTime();
+	}
 
-    @LuaWhitelist
+	@LuaWhitelist
 	@LuaMethodDoc("client.get_actionbar")
 	public static Component getActionbar() {
 		Gui gui = Minecraft.getInstance().gui;
@@ -667,19 +658,19 @@ public class ClientAPI {
 		// sidebars for different team colours
 		assert Minecraft.getInstance().player != null;
 		PlayerTeam playerTeam = scoreboard.getPlayersTeam(Minecraft.getInstance().player.getScoreboardName());
-        if (playerTeam != null) {
-            int id = playerTeam.getColor().getId();
-            if (id >= 0) {
-                objectives.put("sidebar_team_" + playerTeam.getColor().getName(), scoreboard.getDisplayObjective(DisplaySlot.BY_ID.apply(3 + id)));
-            }
-        }
+		if (playerTeam != null) {
+			int id = playerTeam.getColor().getId();
+			if (id >= 0) {
+				objectives.put("sidebar_team_" + playerTeam.getColor().getName(), scoreboard.getDisplayObjective(3 + id));
+			}
+		}
 
-        objectives.put("list", scoreboard.getDisplayObjective(DisplaySlot.LIST));
-        objectives.put("sidebar", scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR));
-        objectives.put("below_name", scoreboard.getDisplayObjective(DisplaySlot.BELOW_NAME));
+		objectives.put("list", scoreboard.getDisplayObjective(0));
+		objectives.put("sidebar", scoreboard.getDisplayObjective(1));
+		objectives.put("below_name", scoreboard.getDisplayObjective(2));
 
-        for (Map.Entry<String, Objective> entry : objectives.entrySet()) {
-            String key = entry.getKey();
+		for (Map.Entry<String, Objective> entry : objectives.entrySet()) {
+			String key = entry.getKey();
 			Objective objective = entry.getValue();
 
 			if (objective != null) {
@@ -688,14 +679,14 @@ public class ClientAPI {
 				objectiveMap.put("name", objective.getName());
 				objectiveMap.put("display_name", objective.getFormattedDisplayName());
 				objectiveMap.put("criteria", objective.getCriteria().getName());
-                objectiveMap.put("render_type", objective.getRenderType().getSerializedName());
+				objectiveMap.put("render_type", objective.getRenderType().getSerializedName());
 
-                Map<String, Integer> scoreMap = new HashMap<>();
-                for (PlayerScoreEntry score : scoreboard.listPlayerScores(objective)) {
-                    scoreMap.put(score.owner(), score.value());
-                }
+				Map<String, Integer> scoreMap = new HashMap<>();
+				for (Score score : scoreboard.getPlayerScores(objective)) {
+					scoreMap.put(score.getOwner(), score.getScore());
+				}
 
-                objectiveMap.put("scores", scoreMap);
+				objectiveMap.put("scores", scoreMap);
 
 				map.put(key, objectiveMap);
 			}
@@ -707,7 +698,7 @@ public class ClientAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("client.is_using_fsb")
 	public static boolean isUsingFSB() {
-		return false;
+		return FSB.instance().connected();
 	}
 	@LuaWhitelist
 	@LuaMethodDoc("client.is_backend_connected")
@@ -722,30 +713,40 @@ public class ClientAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_current_backend")
 	public static String getCurrentBackend(boolean skipFSB) {
+		if(!skipFSB && FSB.instance().connected()){
+			IntegratedServer iServer = Minecraft.getInstance().getSingleplayerServer();
+			if (iServer != null) {
+				return iServer.getLocalIp();
+			}
+			ServerData mServer = Minecraft.getInstance().getCurrentServer();
+			if (mServer != null) {
+				return mServer.ip;
+			}
+		}
 		return NetworkStuff.isConnected() ? HttpAPI.getBackendAddress() : "" ;
 	}
 
-	// @LuaWhitelist
-	// @LuaMethodDoc("client.get_bossbars")
-	// public static Map<String, Object> getBossbars() {
-	// 	BossHealthOverlay bossBars = Minecraft.getInstance().gui.getBossOverlay();
-	// 	Map<String, Object> bosses = new HashMap<String, Object>();
-	// 	for (Map.Entry<UUID, LerpingBossEvent> entry : ((BossHealthOverlayAccessor) bossBars).getBossEvents().entrySet()) {
-	// 		Map<String, Object> contents = new HashMap<String, Object>();
+	@LuaWhitelist
+	@LuaMethodDoc("client.get_bossbars")
+	public static Map<String, Object> getBossbars() {
+		BossHealthOverlay bossBars = Minecraft.getInstance().gui.getBossOverlay();
+		Map<String, Object> bosses = new HashMap<String, Object>();
+		for (Map.Entry<UUID, LerpingBossEvent> entry : ((BossHealthOverlayAccessor) bossBars).getBossEvents().entrySet()) {
+			Map<String, Object> contents = new HashMap<String, Object>();
 
-	// 		BossEvent event = entry.getValue();
-	// 		contents.put("name",event.getName());
-	// 		contents.put("progress",event.getProgress());
-	// 		contents.put("color",event.getColor().getName());
-	// 		contents.put("style",event.getOverlay().getName());
-	// 		contents.put("darkenscreen", event.shouldDarkenScreen());
-	// 		contents.put("bossmusic",event.shouldPlayBossMusic());
-	// 		contents.put("fog",event.shouldCreateWorldFog());
+			BossEvent event = entry.getValue();
+			contents.put("name",event.getName());
+			contents.put("progress",event.getProgress());
+			contents.put("color",event.getColor().getName());
+			contents.put("style",event.getOverlay().getName());
+			contents.put("darkenscreen", event.shouldDarkenScreen());
+			contents.put("bossmusic",event.shouldPlayBossMusic());
+			contents.put("fog",event.shouldCreateWorldFog());
 
-	// 		bosses.put(entry.getKey().toString(),contents);
-	// 	}
-	// 	return bosses;
-	// }
+			bosses.put(entry.getKey().toString(),contents);
+		}
+		return bosses;
+	}
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.list_atlases")
@@ -775,20 +776,20 @@ public class ClientAPI {
     @LuaWhitelist
     @LuaMethodDoc("client.fsb_connected")
     public static boolean fsbConnected() {
-        return false;
+        return FSB.instance().connected();
     }
 
-    // @LuaWhitelist
-    // @LuaMethodDoc("client.ping_rate_limit")
-    // public static int pingRateLimit() {
-    //     return NetworkStuff.pingsRateLimit();
-    // }
+    @LuaWhitelist
+    @LuaMethodDoc("client.ping_rate_limit")
+    public static int pingRateLimit() {
+        return NetworkStuff.pingsRateLimit();
+    }
 
-    // @LuaWhitelist
-    // @LuaMethodDoc("client.ping_size_limit")
-    // public static int pingSizeLimit() {
-    //     return NetworkStuff.pingsSizeLimit();
-    // }
+    @LuaWhitelist
+    @LuaMethodDoc("client.ping_size_limit")
+    public static int pingSizeLimit() {
+        return NetworkStuff.pingsSizeLimit();
+    }
 
     @LuaWhitelist
     @LuaMethodDoc("client.get_uuid_from_player")
@@ -941,28 +942,22 @@ public class ClientAPI {
 			overloads = {
 					@LuaMethodOverload(argumentTypes = String.class, argumentNames = "registryName"),
 			},
-            value = "client.get_registry"
-    )
-    public static List<String> getRegistry(@LuaNotNil String registryName) {
-        Registry<?> registry;
-        try {
-            registry = BuiltInRegistries.REGISTRY.get(ResourceLocation.parse(registryName));
-        } catch (Error e) {
-            throw new LuaError("Registry " + registryName + " does not exist");
-        }
+			value = "client.get_registry"
+	)
+	public static List<String> getRegistry(@LuaNotNil String registryName) {
+		Registry<?> registry = BuiltInRegistries.REGISTRY.get(new ResourceLocation(registryName));
 
-        if (registry != null) {
-            return registry.asLookup().filterFeatures(WorldAPI.getCurrentWorld().enabledFeatures()).listElementIds().map(ResourceKey::location)
-                    .map(ResourceLocation::toString)
-                    .collect(Collectors.toList());
-        } else {
-            throw new LuaError("Registry " + registryName + " does not exist");
-        }
-    }
-
-    @LuaWhitelist
-    @LuaMethodDoc(
-            overloads = {
+		if (registry != null) {
+			return registry.keySet().stream()
+					.map(ResourceLocation::toString)
+					.collect(Collectors.toList());
+		} else {
+			throw new LuaError("Registry " + registryName + " does not exist");
+		}
+	}
+	@LuaWhitelist
+	@LuaMethodDoc(
+			overloads = {
 					@LuaMethodOverload(argumentTypes = String.class, argumentNames = "enumName"),
 			},
 			value = "client.getEnum"
