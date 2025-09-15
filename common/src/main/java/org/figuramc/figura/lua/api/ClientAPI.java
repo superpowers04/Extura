@@ -322,7 +322,7 @@ public class ClientAPI {
             },
 			value = "client.get_text_height"
 	)
-	public static int getTextHeight(@LuaNotNil String text, Integer lineSpacing) {
+	public static int getTextHeight(String text, Integer lineSpacing) {
 		return TextUtils.getHeight(TextUtils.splitText(TextUtils.tryParseJson(text), "\n"), Minecraft.getInstance().font, (lineSpacing == null ? 1 : lineSpacing));
 	}
 
