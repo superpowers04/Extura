@@ -176,8 +176,13 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
     public double figura$getFov(Camera camera, float tickDelta, boolean changingFov) {
         return this.getFov(camera, tickDelta, changingFov);
     }
-	@Inject(method = "render", at = @At("HEAD"))
-	private void preRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
-		AvatarManager.executeAll("preRender", avatar -> avatar.preRenderEvent(tickDelta));
-	}
+    @Inject(method = "render", at = @At("HEAD"))
+    private void preRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
+        Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity());
+        if (avatar == null)
+            return;
+        avatar.preRender.reset(avatar.permissions.get(Permissions.RENDER_INST));
+
+        AvatarManager.executeAll("preRender", renderedAvatar -> renderedAvatar.preRenderEvent(tickDelta));
+    }
 }
