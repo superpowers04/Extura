@@ -137,7 +137,7 @@ public class Avatar {
 	// limits
 	public int animationComplexity;
 	public final Instructions complexity;
-	public final Instructions init, render, worldRender, tick, worldTick, animation;
+	public final Instructions init, prerender, render, worldRender, tick, worldTick, animation;
 	public final Map<String, Instructions> customInstructions = new HashMap<>();
 	public final RefilledNumber particlesRemaining, soundsRemaining;
 	private Avatar(UUID owner, EntityType<?> type, String name) {
@@ -148,6 +148,7 @@ public class Avatar {
 		this.complexity = new Instructions(permissions.get(Permissions.COMPLEXITY));
 		this.init = new Instructions(permissions.get(Permissions.INIT_INST));
 		this.render = new Instructions(permissions.get(Permissions.RENDER_INST));
+		this.prerender = new Instructions(permissions.get(Permissions.RENDER_INST));
 		this.worldRender = new Instructions(permissions.get(Permissions.WORLD_RENDER_INST));
 		this.tick = new Instructions(permissions.get(Permissions.TICK_INST));
 		this.worldTick = new Instructions(permissions.get(Permissions.WORLD_TICK_INST));
@@ -285,11 +286,8 @@ public class Avatar {
 		if (scriptError || luaRuntime == null || !loaded)
 			return;
 
-        // Instruction count resetting happens in GameRenderMixin with pre_render event
-        // If there isn't an entity loaded, that event never runs. Fallback to resetting instruction count here
-        if (luaRuntime.getUser() == null)
-            render.reset(permissions.get(Permissions.RENDER_INST));
-            
+        render.reset(permissions.get(Permissions.RENDER_INST));
+        render.use(permissions.get(Permissions.RENDER_INST) - preRender.remaining);
 		worldRender.reset(permissions.get(Permissions.WORLD_RENDER_INST));
 		run("WORLD_RENDER", worldRender, delta);
 	}
@@ -394,7 +392,7 @@ public class Avatar {
 	}
 	public void preRenderEvent(float delta) {
 		if (loaded && luaRuntime != null && luaRuntime.getUser() != null)
-			run("PRE_RENDER", render, delta, renderMode.name());
+			run("PRE_RENDER", preRender, delta, renderMode.name());
 	}
 
 	public void postRenderEvent(float delta, FiguraMat4 poseMatrix) {

@@ -79,15 +79,9 @@ public class WardrobeScreen extends AbstractPanelScreen {
 
 		int buttX = entity.getX() + entity.getWidth() / 2;
 		int buttY = entity.getY() + entity.getHeight() + 4;
-
-        // upload
-        addRenderableWidget(upload = new Button(buttX - 48, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/upload.png"), 72, 24, FiguraText.of("gui.wardrobe.upload.tooltip"), button -> {
-            Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
-            try {
-                LocalAvatarLoader.loadAvatar(null, null);
-            } catch (Exception ignored) {}
-            NetworkStuff.uploadAvatar(avatar);
-            AvatarList.selectedEntry = null;
+		// upload
+		addRenderableWidget(upload = new Button(buttX - 48, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/upload.png"), 72, 24, FiguraText.of(fsbOnly ? "gui.wardrobe.upload_fsb.tooltip" : "gui.wardrobe.upload.tooltip"), button -> {
+			uploadAvatar();
 		}));
 		upload.setActive(false);
 
@@ -102,11 +96,11 @@ public class WardrobeScreen extends AbstractPanelScreen {
 			NetworkStuff.auth();
 		}));
 
-        // delete
-        addRenderableWidget(delete = new Button(buttX + 24, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/delete.png"), 72, 24, FiguraText.of("gui.wardrobe.delete.tooltip"), button ->
-                NetworkStuff.deleteAvatar(null))
-        );
-        delete.setActive(false);
+		// delete
+		addRenderableWidget(delete = new Button(buttX + 24, buttY, 24, 24, 0, 0, 24, new FiguraIdentifier("textures/gui/delete.png"), 72, 24, FiguraText.of(fsbOnly ? "gui.wardrobe.delete_fsb.tooltip" : "gui.wardrobe.delete.tooltip"), button -> {
+			deleteAvatar();
+		}));
+		delete.setActive(false);
 
 		StatusWidget statusWidget = new StatusWidget(entity.getX() + entity.getWidth() - 64, 0, 64);
 		statusWidget.setY(entity.getY() - statusWidget.getHeight() - 4);
@@ -203,12 +197,27 @@ public class WardrobeScreen extends AbstractPanelScreen {
 				middle, version.getRawY(), TextUtils.Alignment.CENTER, 0)
 		);
 		panic.setY(panic.getRawY() - panic.getHeight());
-        panic.setVisible(false);
-    }
+		panic.setVisible(false);
+	}
 
-    private int getPanels() {
-        return Math.min(width / 3, 256) - 8;
-    }
+	private void uploadAvatar() {
+		Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+		try {
+			LocalAvatarLoader.loadAvatar(null, null);
+		} catch (Exception ignored) {}
+		NetworkStuff.uploadAvatar(avatar);
+		AvatarList.selectedEntry = null;
+	}
+
+
+	private void deleteAvatar() {
+		NetworkStuff.deleteAvatar(null);
+	}
+
+
+	private int getPanels() {
+		return Math.min(width / 3, 256) - 8;
+	}
 
 	private void updateMotdWidget() {
 		int panels = getPanels();
@@ -247,26 +256,35 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		super.tick();
 
 		// panic visible
-		panic.setVisible(AvatarManager.panic);
-
-		// backend buttons
-		Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
-		boolean isErrorBlockingUpload = avatar != null && avatar.scriptError && !Configs.ALLOW_UPLOADING_ERRORED_AVATARS.value;
-		upload.setActive(
-			NetworkStuff.canUpload() && 
-			!AvatarManager.localUploaded && 
-			avatar != null && 
-			avatar.nbt != null && 
-			!(avatar.scriptError && !Configs.ALLOW_UPLOADING_ERRORED_AVATARS.value)
-			avatar.loaded);
 		delete.setActive(NetworkStuff.canUpload() && AvatarManager.localUploaded);
-		upload.setTooltip(
-				isErrorBlockingUpload
-						? FiguraText.of("gui.wardrobe.upload.errored", avatar.errorText).withStyle(ChatFormatting.RED)
-						: FiguraText.of("gui.wardrobe.upload.tooltip")
-				);
-        updateMotdWidget();
-    }
+		if(AvatarManager.panic){
+			panic.setVisible(false);
+			upload.setActive(false);
+			upload.setTooltip(FiguraText.of("figura.gui.panic"));
+		}else{
+
+			panic.setVisible(true);
+
+			// backend buttons
+			Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+			boolean avatarExists = avatar != null && avatar.nbt != null;
+			boolean isErrorBlockingUpload = avatarExists && avatar.scriptError && !Configs.ALLOW_UPLOADING_ERRORED_AVATARS.value;
+			upload.setActive(
+				NetworkStuff.canUpload() && !AvatarManager.localUploaded && 
+				avatarExists &&
+				!isErrorBlockingUpload &&
+				avatar.loaded
+			);
+			upload.setTooltip(
+				upload.isActive() ? FiguraText.of("gui.wardrobe.upload.tooltip")
+				: AvatarManager.localUploaded ? FiguraText.of("gui.wardrobe.upload.uploaded_already").withStyle(ChatFormatting.RED)
+				: isErrorBlockingUpload ? FiguraText.of("gui.wardrobe.upload.errored", avatar.errorText).withStyle(ChatFormatting.RED)
+				: FiguraText.of("gui.wardrobe.upload.tooltip")
+			);
+		}
+
+		updateMotdWidget();
+	}
 
 	@Override
 	public void removed() {

@@ -246,7 +246,7 @@ public class FiguraListDocs {
                                     .append(Component.literal(s).withStyle(ChatFormatting.GRAY));
                         }
                     } else {
-                        component = Component.literal(o.toString()).withStyle(ChatFormatting.WHITE);
+                        component = Component.literal(o.toString()).withStyle(style -> this == COLORS ? ColorUtils.Colors.valueOf(o.toString()).style : style.withColor(ChatFormatting.WHITE));
                     }
 
                     text.append(i % split == 0 ? "\n\t" : "\t");

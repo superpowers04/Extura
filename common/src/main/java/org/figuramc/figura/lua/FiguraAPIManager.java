@@ -1,6 +1,7 @@
 package org.figuramc.figura.lua;
 
 import org.figuramc.figura.animation.Animation;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.entries.FiguraAPI;
 import org.figuramc.figura.lua.api.*;
 import org.figuramc.figura.lua.api.data.*;
@@ -14,6 +15,10 @@ import org.figuramc.figura.lua.api.action_wheel.ActionWheelAPI;
 import org.figuramc.figura.lua.api.action_wheel.Page;
 import org.figuramc.figura.lua.api.event.EventsAPI;
 import org.figuramc.figura.lua.api.event.LuaEvent;
+import org.figuramc.figura.lua.api.java.ClassAPI;
+import org.figuramc.figura.lua.api.java.FieldAPI;
+import org.figuramc.figura.lua.api.java.InstanceAPI;
+import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.keybind.FiguraKeybind;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
 import org.figuramc.figura.lua.api.math.MatricesAPI;
@@ -51,6 +56,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import org.figuramc.figura.animation.Keyframe;
+import org.figuramc.figura.parsers.BlockbenchModel;
 
 /**
  * A set of Globals of which there is only one in the MC instance.
@@ -58,167 +65,181 @@ import java.util.function.Function;
  */
 public class FiguraAPIManager {
 
-    /**
-     * Addon mods simply need to add their classes to the WHITELISTED_CLASSES set,
-     * and whichever global vars they want to set into the API_GETTERS map.
-     */
-    public static final Set<Class<?>> WHITELISTED_CLASSES = new HashSet<>() {{
-        add(FiguraVec2.class);
-        add(FiguraVec3.class);
-        add(FiguraVec4.class);
+	/**
+	 * Addon mods simply need to add their classes to the WHITELISTED_CLASSES set,
+	 * and whichever global vars they want to set into the API_GETTERS map.
+	 */
+	public static final Set<Class<?>> WHITELISTED_CLASSES = new HashSet<>() {{
+		add(FiguraVec2.class);
+		add(FiguraVec3.class);
+		add(FiguraVec4.class);
 
-        add(FiguraMat2.class);
-        add(FiguraMat3.class);
-        add(FiguraMat4.class);
+		add(FiguraMat2.class);
+		add(FiguraMat3.class);
+		add(FiguraMat4.class);
 
-        add(NullEntity.class);
-        add(EntityAPI.class);
-        add(LivingEntityAPI.class);
-        add(PlayerAPI.class);
-        add(ViewerAPI.class);
+		add(NullEntity.class);
+		add(EntityAPI.class);
+		add(LivingEntityAPI.class);
+		add(PlayerAPI.class);
+		add(ViewerAPI.class);
 
-        add(EventsAPI.class);
-        add(LuaEvent.class);
+		add(EventsAPI.class);
+		add(LuaEvent.class);
 
-        add(Vertex.class);
+		add(JavaAPI.class);
         add(MutablePart.class);
-        add(FiguraModelPart.class);
-        add(PartCollection.class);
-        add(RenderTask.class);
-        add(ItemTask.class);
-        add(BlockTask.class);
-        add(EntityTask.class);
-        add(TextTask.class);
-        add(SpriteTask.class);
+		add(ClassAPI.class);
+		add(InstanceAPI.class);
+		add(FieldAPI.class);
 
-        add(SoundAPI.class);
-        add(LuaSound.class);
+		add(Vertex.class);
+		add(FiguraModelPart.class);
+		add(RenderTask.class);
+		add(ItemTask.class);
+		add(BlockTask.class);
+		add(EntityTask.class);
+		add(TextTask.class);
+		add(SpriteTask.class);
 
-        add(ParticleAPI.class);
-        add(LuaParticle.class);
+		add(SoundAPI.class);
+		add(LuaSound.class);
 
-        add(VanillaModelAPI.class);
-        add(VanillaPart.class);
-        add(VanillaGroupPart.class);
-        add(VanillaModelPart.class);
+		add(ParticleAPI.class);
+		add(LuaParticle.class);
 
-        add(KeybindAPI.class);
-        add(FiguraKeybind.class);
+		add(VanillaModelAPI.class);
+		add(VanillaPart.class);
+		add(VanillaGroupPart.class);
+		add(VanillaModelPart.class);
 
-        add(NameplateAPI.class);
-        add(NameplateCustomization.class);
-        add(EntityNameplateCustomization.class);
-        add(NameplateCustomizationGroup.class);
+		add(KeybindAPI.class);
+		add(FiguraKeybind.class);
 
-        add(ActionWheelAPI.class);
-        add(Page.class);
-        add(Action.class);
+		add(NameplateAPI.class);
+		add(NameplateCustomization.class);
+		add(EntityNameplateCustomization.class);
+		add(NameplateCustomizationGroup.class);
 
-        add(VectorsAPI.class);
-        add(MatricesAPI.class);
+		add(ActionWheelAPI.class);
+		add(Page.class);
+		add(Action.class);
+		add(ServerPacketsAPI.class);
 
-        add(WorldAPI.class);
-        add(BiomeAPI.class);
-        add(BlockStateAPI.class);
-        add(ItemStackAPI.class);
+		add(VectorsAPI.class);
+		add(MatricesAPI.class);
 
-        add(PingAPI.class);
-        add(PingFunction.class);
+		add(WorldAPI.class);
+		add(BiomeAPI.class);
+		add(BlockStateAPI.class);
+		add(ItemStackAPI.class);
 
-        add(ServerPacketsAPI.class);
+		add(PingAPI.class);
+		add(PingFunction.class);
 
-        add(TextureAPI.class);
-        add(FiguraTexture.class);
+		add(TextureAPI.class);
+		add(FiguraTexture.class);
 
-        add(AnimationAPI.class);
-        add(Animation.class);
+		add(AnimationAPI.class);
+		add(Animation.class);
+		add(Animation.AnimationChannel.class);
+		add(Keyframe.class);
 
-        add(HostAPI.class);
+		add(HostAPI.class);
 
-        add(RendererAPI.class);
+		add(RendererAPI.class);
 
-        add(ClientAPI.class);
+		add(ClientAPI.class);
 
-        add(AvatarAPI.class);
+		add(AvatarAPI.class);
 
-        add(ConfigAPI.class);
+		add(ConfigAPI.class);
 
-        add(TextureAtlasAPI.class);
+		add(TextureAtlasAPI.class);
+		add(ExturaAPI.class);
 
-        add(FiguraInputStream.class);
-        add(FiguraOutputStream.class);
+		add(FiguraInputStream.class);
+		add(FiguraOutputStream.class);
 
-        add(DataAPI.class);
+		add(DataAPI.class);
 
-        add(FiguraBuffer.class);
+		add(FiguraBuffer.class);
 
-        add(FileAPI.class);
 
-        add(JsonAPI.class);
-        add(FiguraJsonBuilder.class);
-        add(FiguraJsonSerializer.class);
-        add(FiguraJsonArray.class);
-        add(FiguraJsonObject.class);
+		add(JsonAPI.class);
+		add(FiguraJsonBuilder.class);
+		add(FiguraJsonSerializer.class);
+		add(FiguraJsonArray.class);
+		add(FiguraJsonObject.class);
 
-        add(ResourcesAPI.class);
+		add(ResourcesAPI.class);
 
-        add(NetworkingAPI.class);
 
-        add(HttpRequestsAPI.class);
-        add(HttpRequestsAPI.HttpRequestBuilder.class);
-        add(HttpRequestsAPI.HttpResponse.class);
+		add(FiguraFuture.class);
 
-        add(FiguraFuture.class);
+		add(RaycastAPI.class);
+		add(NetworkingAPI.class);
+		add(FileAPI.class);
+		add(DisabledAPI.class);
 
-        add(RaycastAPI.class);
-    }};
+		add(HttpRequestsAPI.class);
+		add(HttpRequestsAPI.HttpRequestBuilder.class);
+		add(HttpRequestsAPI.HttpResponse.class);
 
-    public static final Map<String, Function<FiguraLuaRuntime, Object>> API_GETTERS = new LinkedHashMap<>() {{
-        put("events", r -> r.events = new EventsAPI());
-        put("sounds", r -> new SoundAPI(r.owner));
-        put("vanilla_model", r -> r.vanilla_model = new VanillaModelAPI(r.owner));
-        put("keybinds", r -> r.keybinds = new KeybindAPI(r.owner));
-        put("host", r -> r.host = new HostAPI(r.owner));
-        put("nameplate", r -> r.nameplate = new NameplateAPI());
-        put("renderer", r -> r.renderer = new RendererAPI(r.owner));
-        put("action_wheel", r -> r.action_wheel = new ActionWheelAPI(r.owner));
-        put("animations", r -> new AnimationAPI(r.owner));
-        put("client", r -> ClientAPI.INSTANCE);
-        put("particles", r -> new ParticleAPI(r.owner));
-        put("avatar", r -> r.avatar_meta = new AvatarAPI(r.owner));
-        put("vectors", r -> VectorsAPI.INSTANCE);
-        put("matrices", r -> MatricesAPI.INSTANCE);
-        put("world", r -> WorldAPI.INSTANCE);
-        put("pings", r -> r.ping = new PingAPI(r.owner));
+		add(KeyMappingAPI.class);
+		
+	}};
+
+	public static final Map<String, Function<FiguraLuaRuntime, Object>> API_GETTERS = new LinkedHashMap<>() {{
+		put("events", r -> r.events = new EventsAPI());
+		put("sounds", r -> new SoundAPI(r.owner));
+		put("vanilla_model", r -> r.vanilla_model = new VanillaModelAPI(r.owner));
+		put("keybinds", r -> r.keybinds = new KeybindAPI(r.owner));
+		put("host", r -> r.host = new HostAPI(r.owner));
+		
+		put("nameplate", r -> r.nameplate = new NameplateAPI());
+		put("renderer", r -> r.renderer = new RendererAPI(r.owner));
+		put("action_wheel", r -> r.action_wheel = new ActionWheelAPI(r.owner));
+		put("animations", r -> new AnimationAPI(r.owner));
+		put("client", r -> ClientAPI.INSTANCE);
+		put("particles", r -> new ParticleAPI(r.owner));
+		put("avatar", r -> r.avatar_meta = new AvatarAPI(r.owner));
+		put("vectors", r -> VectorsAPI.INSTANCE);
+		put("matrices", r -> MatricesAPI.INSTANCE);
+		put("world", r -> WorldAPI.INSTANCE);
+		put("pings", r -> r.ping = new PingAPI(r.owner));
+		put("textures", r -> r.texture = new TextureAPI(r.owner));
+		put("config", r -> new ConfigAPI(r.owner));
+		if(Configs.EXPOSE_EXTURA_API.value) put("extura", r -> new ExturaAPI(r.owner));
+		if(Configs.EXPOSE_JAVA_API.value) put("java", r -> r.java = new JavaAPI(r.owner));
         put("server_packets", r -> r.serverPackets = new ServerPacketsAPI(r.owner));
-        put("textures", r -> r.texture = new TextureAPI(r.owner));
-        put("config", r -> new ConfigAPI(r.owner));
-        put("data", r -> new DataAPI(r.owner));
-        put("file", r -> new FileAPI(r.owner));
-        put("json", r -> JsonAPI.INSTANCE);
-        put("resources", r -> new ResourcesAPI(r.owner));
-        put("net", r -> new NetworkingAPI(r.owner));
-        put("raycast", r -> new RaycastAPI(r.owner));
-    }};
 
-    private static final Set<FiguraAPI> ENTRYPOINTS = new HashSet<>();
+		put("data", r -> new DataAPI(r.owner));
+		put("json", r -> JsonAPI.INSTANCE);
+		put("resources", r -> new ResourcesAPI(r.owner));
+		put("raycast", r -> new RaycastAPI(r.owner));
+		put("file", r -> (r.owner.isHost ? new FileAPI(r.owner) : new DisabledAPI("FileAPI"," is only usable on host avatars. Add a check for if you're on host by using `host:isHost()`") ));
+		put("net", r -> (r.owner.isHost ? new NetworkingAPI(r.owner) : new DisabledAPI("NetworkingAPI"," is only usable on host avatars. Add a check for if you're on host by using `host:isHost()`")));
+	}};
 
-    public static void initEntryPoints(Set<FiguraAPI> set) {
-        for (FiguraAPI api : set) {
-            ENTRYPOINTS.add(api);
-            WHITELISTED_CLASSES.addAll(api.getWhitelistedClasses());
-        }
-    }
+	private static final Set<FiguraAPI> ENTRYPOINTS = new HashSet<>();
 
-    public static void setupTypesAndAPIs(FiguraLuaRuntime runtime) {
-        for (Class<?> clazz : WHITELISTED_CLASSES)
-            runtime.registerClass(clazz);
-        for (Map.Entry<String, Function<FiguraLuaRuntime, Object>> entry : API_GETTERS.entrySet())
-            runtime.setGlobal(entry.getKey(), entry.getValue().apply(runtime));
-        for (FiguraAPI api : ENTRYPOINTS) {
-            String name = api.getName();
-            if (name != null)
-                runtime.setGlobal(name, api.build(runtime.owner));
-        }
-    }
+	public static void initEntryPoints(Set<FiguraAPI> set) {
+		for (FiguraAPI api : set) {
+			ENTRYPOINTS.add(api);
+			WHITELISTED_CLASSES.addAll(api.getWhitelistedClasses());
+		}
+	}
+
+	public static void setupTypesAndAPIs(FiguraLuaRuntime runtime) {
+		for (Class<?> clazz : WHITELISTED_CLASSES)
+			runtime.registerClass(clazz);
+		for (Map.Entry<String, Function<FiguraLuaRuntime, Object>> entry : API_GETTERS.entrySet())
+			runtime.setGlobal(entry.getKey(), entry.getValue().apply(runtime));
+		for (FiguraAPI api : ENTRYPOINTS) {
+			String name = api.getName();
+			if (name != null)
+				runtime.setGlobal(name, api.build(runtime.owner));
+		}
+	}
 }
