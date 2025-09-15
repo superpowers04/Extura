@@ -29,18 +29,27 @@ public abstract class LivingEntityMixin extends Entity {
         if (avatar != null && avatar.useItemEvent(ItemStackAPI.verify(stack), stack.getUseAnimation().name(), particleCount))
             ci.cancel();
     }
-
-    @Inject(at = @At("TAIL"), method = "handleDamageEvent")
-    private void handleDamageEvent(DamageSource source, CallbackInfo ci) {
+    @Inject(at = @At("HEAD"), method = "handleDamageEvent")
+    private void handleDamageEvent(DamageSource source, CallbackInfo ci, cancellable = true) {
+        //Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
         Avatar avatar = AvatarManager.getAvatar(this);
-        if (avatar != null){
-        	
-	        avatar.damageEvent(
-	                source.typeHolder().unwrapKey().get().location().toString(),
-	                EntityAPI.wrap(source.getEntity()),
-	                EntityAPI.wrap(source.getDirectEntity()),
-	                source.getSourcePosition() != null ? FiguraVec3.fromVec3(source.getSourcePosition()) : null
-	        );
+        if (avatar != null) {
+            boolean cancel = avatar.damageEvent(
+                    source.typeHolder().unwrapKey().get().location().toString(),
+                    EntityAPI.wrap(source.getEntity()),
+                    EntityAPI.wrap(source.getDirectEntity()),
+                    source.getSourcePosition() != null ? FiguraVec3.fromVec3(source.getSourcePosition()) : null
+            );
+
+            if (avatar.permissions.get(Permissions.CANCEL_DAMAGE) >= 1) {
+                avatar.noPermissions.remove(Permissions.CANCEL_DAMAGE);
+                if (cancel) {
+                    ci.cancel();
+                }
+
+            } else if (cancel) {
+                avatar.noPermissions.add(Permissions.CANCEL_DAMAGE);
+            }
         }
         Avatar avatar2 = AvatarManager.getAvatar(source.getEntity());
         if (avatar2 != null){
