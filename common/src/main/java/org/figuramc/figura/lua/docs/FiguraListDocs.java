@@ -63,6 +63,7 @@ public class FiguraListDocs {
         for (FiguraTextureSet.OverrideType value : FiguraTextureSet.OverrideType.values())
             add(value.name());
     }};
+    private static final Set<String> KEY_IDS = KeyMappingAccessor.getAll().keySet();
     private static final LinkedHashSet<String> ENTITY_POSES = new LinkedHashSet<>() {{
         for (Pose value : Pose.values())
             add(value.name());
@@ -119,7 +120,7 @@ public class FiguraListDocs {
         for (ResourceLocation resourceLocation : BuiltInRegistries.REGISTRY.keySet())
             add(resourceLocation.getPath());
     }};
-    public static final HashMap<String, Object> FIGURA_CONFIGS = new HashMap<>();
+    private static final Set<String> FIGURA_CONFIGS = Configs.REGISTRY.keySet();
     private static final LinkedHashSet<String> SOUND_SOURCES = new LinkedHashSet<>() {{
         for (SoundSource value : SoundSource.values())
             add(value.name());
