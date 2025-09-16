@@ -287,7 +287,7 @@ public class Avatar {
 			return;
 
         render.reset(permissions.get(Permissions.RENDER_INST));
-        render.use(permissions.get(Permissions.RENDER_INST));
+        render.use(permissions.get(Permissions.RENDER_INST) - preRender.remaining);
 		worldRender.reset(permissions.get(Permissions.WORLD_RENDER_INST));
 		run("WORLD_RENDER", worldRender, delta);
 	}
@@ -392,7 +392,7 @@ public class Avatar {
 	}
 	public void preRenderEvent(float delta) {
 		if (loaded && luaRuntime != null && luaRuntime.getUser() != null)
-			run("PRE_RENDER", render, delta, renderMode.name());
+			run("PRE_RENDER", preRender, delta, renderMode.name());
 	}
 
 	public void postRenderEvent(float delta, FiguraMat4 poseMatrix) {
