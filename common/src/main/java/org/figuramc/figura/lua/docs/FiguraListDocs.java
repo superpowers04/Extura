@@ -120,7 +120,7 @@ public class FiguraListDocs {
         for (ResourceLocation resourceLocation : BuiltInRegistries.REGISTRY.keySet())
             add(resourceLocation.getPath());
     }};
-    private static final Set<String> FIGURA_CONFIGS = Configs.REGISTRY.keySet();
+    public static final HashMap<String, Object> FIGURA_CONFIGS = new HashMap<>();
     private static final LinkedHashSet<String> SOUND_SOURCES = new LinkedHashSet<>() {{
         for (SoundSource value : SoundSource.values())
             add(value.name());
