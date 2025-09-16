@@ -19,6 +19,7 @@ import org.figuramc.figura.resources.FiguraRuntimeResources;
 import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.FiguraText;
 import org.figuramc.figura.entries.EntryPointManager;
+import org.figuramc.figura.lua.docs.FiguraListDocs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ public class Configs {
 	// config update hashmap; <version number, <actual config, old config name>>
 	public static final HashMap<Integer, HashMap<ConfigType<?>, String>> CONFIG_UPDATES = new HashMap<>();
 
-    public static HashMap<String, Object> REGISTRY = new HashMap<>();
+    public static HashMap<String, Object> REGISTRY = FiguraListDocs.FIGURA_CONFIGS;
 	// code to run when the config is initialized
 	public static void init() {
 		// test for unused configs
