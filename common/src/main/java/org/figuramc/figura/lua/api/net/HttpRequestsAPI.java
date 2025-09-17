@@ -228,7 +228,7 @@ public class HttpRequestsAPI {
 
         @LuaWhitelist
         @LuaMethodDoc(
-                value = "http_request_builder.get_data",
+                value = "http_request_builder.get_body",
                 overloads = @LuaMethodOverload(
                         returnType = Objects.class
                 )
