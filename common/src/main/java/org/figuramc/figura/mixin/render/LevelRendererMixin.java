@@ -170,12 +170,8 @@ public abstract class LevelRendererMixin {
 
     @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"))
     private boolean forceModelRender(boolean original) {
+    	if (original) return original;
         Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity());
-
-        if (avatar == null || avatar.luaRuntime == null) {
-            return original;
-        }
-
-        return original || avatar.luaRuntime.renderer.renderFirstPerson;
+        return avatar == null && avatar.luaRuntime == null && avatar.luaRuntime.renderer.renderFirstPerson;
     }
 }
