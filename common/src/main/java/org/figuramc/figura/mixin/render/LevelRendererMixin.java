@@ -172,6 +172,6 @@ public abstract class LevelRendererMixin {
     private boolean forceModelRender(boolean original) {
     	if (original) return original;
         Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity());
-        return avatar == null && avatar.luaRuntime == null && avatar.luaRuntime.renderer.renderFirstPerson;
+        return avatar != null && avatar.luaRuntime != null && avatar.luaRuntime.renderer.renderFirstPerson;
     }
 }
