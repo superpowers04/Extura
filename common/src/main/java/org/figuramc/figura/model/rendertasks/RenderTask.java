@@ -308,10 +308,6 @@ public abstract class RenderTask {
         return setMatrix(mat);
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("render_task.copy")
-    public abstract RenderTask copy();
-
     @Override
     public String toString() {
         return name + " (Render Task)";
