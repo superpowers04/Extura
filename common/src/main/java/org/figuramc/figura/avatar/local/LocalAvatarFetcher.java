@@ -169,7 +169,8 @@ public class LocalAvatarFetcher {
 
 		Path metadata = path.resolve("avatar.jsonc");
 		if(Files.exists(metadata) && !Files.isDirectory(metadata)) return true;
-		return Files.exists(metadata = path.resolve("avatar.json")) && !Files.isDirectory(metadata);
+		metadata = path.resolve("avatar.json");
+		return Files.exists(metadata) && !Files.isDirectory(metadata);
 	}
 
 	public static void loadExternal(List<Path> paths) throws IOException {
