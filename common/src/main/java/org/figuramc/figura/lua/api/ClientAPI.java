@@ -244,9 +244,9 @@ public class ClientAPI {
 			),
 			value = "client.get_window_size"
 	)
-	public static FiguraVec2 getWindowSize(@LuaNotNil Boolean originalSize) {
+	public static FiguraVec2 getWindowSize(Boolean originalSize) {
 		Window window = Minecraft.getInstance().getWindow();
-		if (originalSize == true) {
+		if (Boolean.TRUE.equals(originalSize)) {
 			return FiguraVec2.of(window.getWidth(), window.getWidth());
 		} else {
 			return FiguraVec2.of(window.getScreenWidth(), window.getScreenHeight());
