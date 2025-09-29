@@ -133,6 +133,10 @@ public class FiguraListDocs {
         for (FiguraTexture.BlendMode mode : FiguraTexture.BlendMode.values())
             add(mode.name);
     }};
+    private static final LinkedHashSet<String> EMOJI_CATEGORIES = new LinkedHashSet<>() {{
+        for (String name : Emojis.getCategoryNames())
+            add(name);
+    }};
 
     private enum ListDoc {
         KEYBINDS(() -> FiguraListDocs.KEYBINDS, "Keybinds", "keybinds", 2),

@@ -28,6 +28,7 @@ import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.config.Configs;
+import org.figuramc.figura.font.Emojis;
 import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.lua.LuaNotNil;
@@ -280,8 +281,7 @@ public class ClientAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_camera_pos")
 	public static FiguraVec3 getCameraPos() {
-		Vec3 pos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-		return FiguraVec3.fromVec3(pos);
+		return FiguraVec3.fromVec3(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
 	}
 
 	@LuaWhitelist
@@ -309,7 +309,7 @@ public class ClientAPI {
 			value = "client.get_text_width"
 	)
 	public static int getTextWidth(@LuaNotNil String text) {
-		return TextUtils.getWidth(TextUtils.splitText(TextUtils.tryParseJson(text), "\n"), Minecraft.getInstance().font);
+        return TextUtils.getWidth(TextUtils.splitText(Emojis.applyEmojis(TextUtils.tryParseJson(text)), "\n"), Minecraft.getInstance().font);
 	}
 
 	@LuaWhitelist
@@ -341,7 +341,8 @@ public class ClientAPI {
 			value = "client.get_text_dimensions"
 	)
 	public static FiguraVec2 getTextDimensions(@LuaNotNil String text, int maxWidth, Boolean wrap, Integer lineSpacing) {
-		Component component = TextUtils.tryParseJson(text);
+		Component component = Emojis.applyEmojis(TextUtils.tryParseJson(text));
+
 		Font font = Minecraft.getInstance().font;
 		List<Component> list = TextUtils.formatInBounds(component, font, maxWidth, wrap == null || wrap);
 		int x = TextUtils.getWidth(list, font);
@@ -919,22 +920,61 @@ public class ClientAPI {
         // 1 -> 320
         return Math.floor(40 + 280 * Minecraft.getInstance().options.chatWidth().get());
     }
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = Boolean.class, argumentNames = "focused"),
+            },
+            value = "client.get_chat_height"
+    )
+    public static Double getChatHeight(Boolean focused) {
+        // 0 -> 20
+        // 1 -> 180
+        if (focused)
+            return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightFocused().get());
 
+        return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightUnfocused().get());
+ 
+    }
     @LuaWhitelist
-    @LuaMethodDoc("client.get_focused_chat_height")
+    // @LuaMethodDoc("client.get_focused_chat_height")
     public static Double getFocusedChatHeight() {
         // 0 -> 20
         // 1 -> 180
+        if(Configs.HELPER_ERRORS.value) throw(new LuaError("client.getFocusedChatHeight is deprecated!"));
         return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightFocused().get());
     }
 
     @LuaWhitelist
-    @LuaMethodDoc("client.get_unfocused_chat_height")
+    // @LuaMethodDoc("client.get_unfocused_chat_height")
     public static Double getUnfocusedChatHeight() {
         // 0 -> 20
         // 1 -> 180
+        if(Configs.HELPER_ERRORS.value) throw(new LuaError("client.getUnfocusedChatHeight is deprecated!"));
         return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightUnfocused().get());
     }
+
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = String.class, argumentNames = "category"),
+            },
+            value = "client.get_emojis"
+    )
+    public static List<String> getEmojis(String category) {
+        List<String> emojis = new ArrayList<>();
+
+        if (category == null)
+            Emojis.getCategoryNames().forEach(name -> {
+                Emojis.getCategory(name).getLookup().getNames().stream().forEach(emojis::add);
+            });
+        else {
+            try {
+                Emojis.getCategory(category).getLookup().getNames().stream().forEach(emojis::add);
+            } catch (Exception e) {
+                throw new LuaError("\"" + category + "\" is not a valid emoji category");
+            }
+        }
+
+        return emojis;
 
 	@LuaWhitelist
 	@LuaMethodDoc(
