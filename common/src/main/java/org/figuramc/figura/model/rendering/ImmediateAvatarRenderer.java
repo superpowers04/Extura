@@ -130,7 +130,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
         // Set shouldRenderPivots
         int config = Configs.RENDER_DEBUG_PARTS_PIVOT.value;
-        if (!Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes() || (!avatar.isHost && config < 2))
+        if ((config < 2 && !avatar.isHost) || !Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes())
             shouldRenderPivots = 0;
         else
             shouldRenderPivots = config;
@@ -235,8 +235,10 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
         // test the current filter scheme
         FiguraMod.pushProfiler("predicate");
-        Boolean thisPassedPredicate = currentFilterScheme.test(part.parentType, prevPredicate);
-        if (thisPassedPredicate == null || (!custom.visible)) {
+        Boolean thisPassedPredicate;
+        if (!custom.visible || 
+            (thisPassedPredicate = currentFilterScheme.test(part.parentType, prevPredicate)) == null
+        ) {
             if (part.parentType.isRenderLayer)
                 part.savedCustomization = customizationStack.peek();
             FiguraMod.popProfiler(2);
@@ -309,10 +311,9 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
                 pivotOffsetter.light = custom.light;
             }
             else if (updateLight && (l = Minecraft.getInstance().level) != null) {
-                FiguraVec3 pos = part.savedPartToWorldMat.apply(0d, 0d, 0d);
-                int block = l.getBrightness(LightLayer.BLOCK, pos.asBlockPos());
-                int sky = l.getBrightness(LightLayer.SKY, pos.asBlockPos());
-                customizationStack.peek().light = LightTexture.pack(block, sky);
+                var pos = part.savedPartToWorldMat.apply(0d, 0d, 0d).asBlockPos();
+                customizationStack.peek().light = LightTexture.pack(l.getBrightness(LightLayer.BLOCK, pos), l.getBrightness(LightLayer.SKY, pos));
+ 
             }
 
             if (custom.alpha != null)
@@ -336,13 +337,19 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         if (!breakRender && thisPassedPredicate) {
             boolean renderPivot = shouldRenderPivots > 0;
             boolean renderTasks = !part.renderTasks.isEmpty();
-            boolean renderPivotParts = part.parentType.isPivot && allowPivotParts;
+            boolean renderPivotParts = allowPivotParts && part.parentType.isPivot;
 
             if (renderPivot || renderTasks || renderPivotParts) {
                 // fix pivots
                 FiguraMod.pushProfiler("fixMatricesPivot");
 
+                // Store calculated light level and current overlay effect before pushing pose stack
+                PartCustomization oldPeek = customizationStack.peek();
+                int light = oldPeek.light;
+                int overlay = oldPeek.overlay;
+
                 FiguraVec3 pivot = custom.getPivot().copy().add(custom.getOffsetPivot());
+
                 pivotOffsetter.setPos(pivot);
                 pivotOffsetter.recalculate();
                 customizationStack.push(pivotOffsetter);
@@ -358,8 +365,6 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
                 // render tasks
                 if (renderTasks) {
                     FiguraMod.popPushProfiler("renderTasks");
-                    int light = peek.light;
-                    int overlay = peek.overlay;
                     interceptRendersIntoFigura = false;
                     for (RenderTask task : part.renderTasks.values()) {
                         if (!task.shouldRender())
@@ -389,10 +394,10 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         // render children
         FiguraMod.popPushProfiler("children");
         for (FiguraModelPart child : List.copyOf(part.children)) {
-            if (!renderPart(child, remainingComplexity, thisPassedPredicate)) {
-                breakRender = true;
-                break;
-            }
+            if (renderPart(child, remainingComplexity, thisPassedPredicate)) continue;
+            breakRender = true;
+            break;
+            
         }
 
         // reset the parent
@@ -565,16 +570,16 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
     private void pushToBuffer(int faceCount, VertexData vertexData, PartCustomization customization, FiguraTextureSet textureSet, List<Vertex> vertices) {
         int vertCount = faceCount * 4;
 
-        FiguraVec3 uvFixer = FiguraVec3.of();
-        uvFixer.set(textureSet.getWidth(), textureSet.getHeight(), 1); // Dividing by this makes uv 0 to 1
+        FiguraVec3 uvFixer = FiguraVec3.of(textureSet.getWidth(), textureSet.getHeight(), 1); // Dividing by this makes uv 0 to 1
 
         int overlay = customization.overlay;
         int light = vertexData.fullBright ? LightTexture.FULL_BRIGHT : customization.light;
-        boolean shade = customization.shade != null && customization.shade;
+        boolean shade = customization.shade == true;
 
         VERTEX_BUFFER.getBufferFor(vertexData.renderType, vertexData.primary, vertexConsumer -> {
+            Vertex vertex = 
             for (int i = 0; i < vertCount; i++) {
-                Vertex vertex = vertices.get(i);
+                vertex = vertices.get(i);
 
                 pos.set(vertex.x, vertex.y, vertex.z, 1);
                 pos.transform(customization.positionMatrix);
