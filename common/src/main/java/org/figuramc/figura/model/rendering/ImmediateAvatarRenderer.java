@@ -577,7 +577,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         boolean shade = customization.shade == true;
 
         VERTEX_BUFFER.getBufferFor(vertexData.renderType, vertexData.primary, vertexConsumer -> {
-            Vertex vertex = 
+            Vertex vertex;
             for (int i = 0; i < vertCount; i++) {
                 vertex = vertices.get(i);
 

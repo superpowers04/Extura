@@ -170,6 +170,7 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
     private void renderLevelResetProjectionMatrix(float tickDelta, long limitTime, PoseStack matrix, CallbackInfo ci) {
         if (hasShaders) return;
         matrix.last().pose().mul(bobbingMatrix);
+        bobbingMatrix = null;
     }
 
     @Override @Intrinsic
