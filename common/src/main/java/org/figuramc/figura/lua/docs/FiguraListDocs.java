@@ -21,6 +21,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.animation.Animation;
 import org.figuramc.figura.config.Configs;
+import org.figuramc.figura.font.Emojis;
 import org.figuramc.figura.mixin.input.KeyMappingAccessor;
 import org.figuramc.figura.ducks.GameEffects;
 import org.figuramc.figura.model.ParentType;
