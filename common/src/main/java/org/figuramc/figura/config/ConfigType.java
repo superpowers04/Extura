@@ -31,7 +31,6 @@ public abstract class ConfigType<T> {
     public T tempValue; // settings screen "undo"
     public final T defaultValue;
     public boolean disabled;
-
     public ConfigType(String name, T value) {
         this(name, value, false);
     }
@@ -46,8 +45,17 @@ public abstract class ConfigType<T> {
 
         // values
         this.value = this.defaultValue = this.tempValue = value;
+        commitToRegistry();
     }
 
+    public void commitToRegistry(){
+        try{
+            Configs.REGISTRY.put(id, value);
+        }catch(Exception e){
+            FiguraMod.LOGGER.warn("Failed to save to registry for config \"" + id + "\"", e);
+        }
+
+    }
     public abstract T parseValue(String newVal);
 
     public void setValue(String newVal) {
@@ -65,6 +73,7 @@ public abstract class ConfigType<T> {
         if (change) {
             try {
                 onChange();
+                commitToRegistry();
             } catch (Exception e) {
                 FiguraMod.LOGGER.warn("Failed to run onChange for config \"" + id + "\"", e);
             }
@@ -81,6 +90,7 @@ public abstract class ConfigType<T> {
 
     public void setDefault() {
         value = defaultValue;
+        commitToRegistry();
     }
 
     public void resetTemp() {

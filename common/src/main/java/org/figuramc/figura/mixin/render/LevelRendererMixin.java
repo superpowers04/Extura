@@ -1,5 +1,6 @@
 package org.figuramc.figura.mixin.render;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -165,5 +166,12 @@ public abstract class LevelRendererMixin {
             return w;
 
         return (float) color.w;
+    }
+
+    @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"))
+    private boolean forceModelRender(boolean original) {
+    	if (original) return original;
+        Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity());
+        return avatar != null && avatar.luaRuntime != null && avatar.luaRuntime.renderer.renderFirstPerson;
     }
 }

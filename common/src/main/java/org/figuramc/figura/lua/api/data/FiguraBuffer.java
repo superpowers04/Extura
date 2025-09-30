@@ -607,7 +607,7 @@ public class FiguraBuffer implements AutoCloseable {
     }
 
     @LuaWhitelist
-    @LuaMethodDoc("clear")
+    @LuaMethodDoc("buffer.clear")
     public void clear() {
         checkIsClosed();
         position = 0;

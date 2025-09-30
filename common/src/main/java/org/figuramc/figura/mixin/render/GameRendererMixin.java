@@ -13,6 +13,7 @@ import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.GameRendererAccessor;
 import org.figuramc.figura.lua.api.ClientAPI;
+import org.figuramc.figura.permissions.Permissions;
 import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.math.matrix.FiguraMat4;
 import org.figuramc.figura.math.vector.FiguraVec3;
@@ -176,8 +177,13 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
     public double figura$getFov(Camera camera, float tickDelta, boolean changingFov) {
         return this.getFov(camera, tickDelta, changingFov);
     }
-	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
-	private void preRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
-		AvatarManager.executeAll("preRender", avatar -> avatar.preRenderEvent(tickDelta));
-	}
+    @Inject(method = "render", at = @At("HEAD"))
+    private void preRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
+        Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity());
+        if (avatar == null)
+            return;
+        avatar.preRender.reset(avatar.permissions.get(Permissions.RENDER_INST));
+
+        AvatarManager.executeAll("preRender", renderedAvatar -> renderedAvatar.preRenderEvent(tickDelta));
+    }
 }

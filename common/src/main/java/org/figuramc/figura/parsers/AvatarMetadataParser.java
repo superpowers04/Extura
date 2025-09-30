@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // parses a metadata json
 // and return a nbt compound of it
@@ -25,7 +27,31 @@ public class AvatarMetadataParser {
     private static final Gson GSON = new GsonBuilder().create();
     private static final Map<String, String> PARTS_TO_MOVE = new HashMap<>();
 
+    // Remove comments from jsonc string
+    public static String removeComments(String json) {
+        // If you break this I will steal your kneecaps
+        
+        // https://stackoverflow.com/questions/28411032/java-regex-remove-comments
+        String regex = "((['\\\"])(?:(?!\\2|\\\\).|\\\\.)*\\2)|\\/\\/[^\\n]*|\\/\\*(?:[^*]|\\*(?!\\/))*\\*\\/";
+        
+        // regex101's codegen <3
+        Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        Matcher matcher = pattern.matcher(json);
+
+        StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            String match = matcher.group();
+            Boolean matchedString = match.startsWith("\"") || match.startsWith("'");
+            matcher.appendReplacement(sb, matchedString ? Matcher.quoteReplacement(match) : "");
+        }
+        matcher.appendTail(sb);
+
+        return sb.toString();
+    }
+
     public static Metadata read(String json) {
+        json = removeComments(json);
         Metadata metadata = GSON.fromJson(json, Metadata.class);
         return metadata == null ? new Metadata() : metadata;
     }
@@ -57,6 +83,8 @@ public class AvatarMetadataParser {
         if (metadata.color != null) nbt.putString("color", metadata.color);
         if (metadata.background != null) nbt.putString("bg", metadata.background);
         if (metadata.id != null) nbt.putString("id", metadata.id);
+
+        if (metadata.allow_uploads != null) nbt.putBoolean("allow_uploads", metadata.allow_uploads);
 
         if (metadata.authors != null) {
             StringBuilder authors = new StringBuilder();
@@ -219,6 +247,7 @@ public class AvatarMetadataParser {
     public static class Metadata {
         public String name, description, author, version, color, background, id;
         public String[] authors, autoScripts, autoAnims, ignoredTextures, resources;
+        public Boolean allow_uploads;
         public HashMap<String, Customization> customizations;
     }
 
