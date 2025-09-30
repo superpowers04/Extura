@@ -91,6 +91,7 @@ public class ClientAPI {
 		}
 	});
 	public static boolean hasOptifineShader() {
+		if(!OPTIFINE_LOADED) return false;
 		try
 		{
 			Field shaderPackLoadedField = Class.forName("net.optifine.shaders.Shaders").getField("shaderPackLoaded");
@@ -1002,6 +1003,7 @@ public class ClientAPI {
         }
 
         return emojis;
+    }
 
 	@LuaWhitelist
 	@LuaMethodDoc(

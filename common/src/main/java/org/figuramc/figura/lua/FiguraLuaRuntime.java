@@ -352,7 +352,7 @@ public class FiguraLuaRuntime {
 				Path scriptPath = PathUtils.getPath(s);
 
 				// Add to table only if the beginning of the path matches
-				if (!(scriptPath.startsWith(targetPath)))
+				if (!scriptPath.startsWith(targetPath))
 					continue;
 				// remove the common parent
 				Path result = targetPath.relativize(scriptPath);
