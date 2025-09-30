@@ -170,7 +170,6 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
     private void renderLevelResetProjectionMatrix(float tickDelta, long limitTime, PoseStack matrix, CallbackInfo ci) {
         if (hasShaders) return;
         matrix.last().pose().mul(bobbingMatrix);
-        bobbingMatrix = null;
     }
 
     @Override @Intrinsic
@@ -185,5 +184,9 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
         avatar.preRender.reset(avatar.permissions.get(Permissions.RENDER_INST));
 
         AvatarManager.executeAll("preRender", renderedAvatar -> renderedAvatar.preRenderEvent(tickDelta));
+    }
+
+    public Matrix4f figura$getBobbingMatrix() {
+        return this.bobbingMatrix;
     }
 }

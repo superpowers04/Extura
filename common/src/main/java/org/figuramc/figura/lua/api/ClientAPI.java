@@ -31,6 +31,7 @@ import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.font.Emojis;
 import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.ducks.GameRendererAccessor;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.api.entity.EntityAPI;
@@ -39,6 +40,7 @@ import org.figuramc.figura.lua.docs.FiguraListDocs;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
+import org.figuramc.figura.math.matrix.FiguraMat4;
 import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.mixin.gui.BossHealthOverlayAccessor;
@@ -49,6 +51,7 @@ import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.backend2.HttpAPI;
 import org.figuramc.figura.utils.*;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
@@ -236,17 +239,44 @@ public class ClientAPI {
 	}
 
 	@LuaWhitelist
-	@LuaMethodDoc("client.get_window_size")
-	public static FiguraVec2 getWindowSize() {
+    @LuaMethodDoc(
+            overloads = @LuaMethodOverload(
+                    argumentTypes = Boolean.class,
+                    argumentNames = "originalSize"
+            ),
+            value = "client.get_window_size"
+    )
+    public static FiguraVec2 getWindowSize(Boolean originalSize) {
 		Window window = Minecraft.getInstance().getWindow();
+        if (Boolean.TRUE.equals(originalSize)) {
+            return FiguraVec2.of(window.getWidth(), window.getWidth());
+        }
 		return FiguraVec2.of(window.getWidth(), window.getHeight());
 	}
 
-	@LuaWhitelist
-	@LuaMethodDoc("client.get_fov")
-	public static double getFOV() {
-		return Minecraft.getInstance().options.fov().get();
-	}
+    @LuaMethodDoc(
+        overloads = @LuaMethodOverload(
+                    argumentTypes = boolean.class,
+                    argumentNames = "trueFOV"
+            ),
+            value = "client.get_fov"
+    )
+    public static double getFOV(boolean trueFOV) {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        // Fallback to getting options FOV (Working fallback as passing false into $getFov's changingFov returns 70 instead of client fov)
+        if (!trueFOV)
+            return minecraft.options.fov().get();
+
+        return ((GameRendererAccessor) minecraft.gameRenderer).figura$getFov(minecraft.gameRenderer.getMainCamera(), minecraft.getFrameTime(), true);
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("client.get_view_bobbing_matrix")
+    public static FiguraMat4 getViewBobbingMatrix() {
+        Matrix4f bobbingMatrix = ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).figura$getBobbingMatrix();
+        return FiguraMat4.of().set(bobbingMatrix);
+    }
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_system_time")
@@ -257,12 +287,9 @@ public class ClientAPI {
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_mouse_pos")
 	public static FiguraVec2 getMousePos() {
-		MouseHandler mouse = Minecraft.getInstance().mouseHandler;
-		FloatBuffer xScale = BufferUtils.createFloatBuffer(1);
-		FloatBuffer yScale = BufferUtils.createFloatBuffer(1);
-		GLFW.glfwGetWindowContentScale( (long) Minecraft.getInstance().getWindow().getWindow(), xScale, yScale);
-		return FiguraVec2.of(mouse.xpos() * xScale.get(0), mouse.ypos() * yScale.get(0));
-	}
+        MouseHandler mouse = Minecraft.getInstance().mouseHandler;
+        return FiguraVec2.of(mouse.xpos(), mouse.ypos());
+    }
 
 
 	@LuaWhitelist
