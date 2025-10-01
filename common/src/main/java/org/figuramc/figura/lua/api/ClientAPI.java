@@ -524,9 +524,9 @@ public class ClientAPI {
 		Version v2 = new Version(ver2);
 
 		if (v1.invalid)
-			throw new LuaError("Cannot parse version " + "\"" + ver1 + "\"");
+			throw new LuaError("Cannot parse version \"" + ver1 + "\"");
 		if (v2.invalid)
-			throw new LuaError("Cannot parse version " + "\"" + ver2 + "\"");
+			throw new LuaError("Cannot parse version \"" + ver2 + "\"");
 
 		return v1.compareTo(v2);
 	}
@@ -947,36 +947,36 @@ public class ClientAPI {
         // 1 -> 320
         return Math.floor(40 + 280 * Minecraft.getInstance().options.chatWidth().get());
     }
-    @LuaMethodDoc(
-            overloads = {
-                    @LuaMethodOverload(argumentTypes = Boolean.class, argumentNames = "focused"),
-            },
-            value = "client.get_chat_height"
-    )
-    public static Double getChatHeight(Boolean focused) {
-        // 0 -> 20
-        // 1 -> 180
-        if (focused)
-            return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightFocused().get());
+    // @LuaMethodDoc(
+    //         overloads = {
+    //                 @LuaMethodOverload(argumentTypes = Boolean.class, argumentNames = "focused"),
+    //         },
+    //         value = "client.get_chat_height"
+    // )
+    // public static Double getChatHeight(Boolean focused) {
+    //     // 0 -> 20
+    //     // 1 -> 180
+    //     if (focused)
+    //         return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightFocused().get());
 
-        return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightUnfocused().get());
+    //     return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightUnfocused().get());
  
-    }
+    // }
     @LuaWhitelist
-    // @LuaMethodDoc("client.get_focused_chat_height")
+    @LuaMethodDoc("client.get_focused_chat_height")
     public static Double getFocusedChatHeight() {
         // 0 -> 20
         // 1 -> 180
-        if(Configs.HELPER_ERRORS.value) throw(new LuaError("client.getFocusedChatHeight is deprecated!"));
+        // if(Configs.HELPER_ERRORS.value) throw(new LuaError("client.getFocusedChatHeight is deprecated!"));
         return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightFocused().get());
     }
 
     @LuaWhitelist
-    // @LuaMethodDoc("client.get_unfocused_chat_height")
+    @LuaMethodDoc("client.get_unfocused_chat_height")
     public static Double getUnfocusedChatHeight() {
         // 0 -> 20
         // 1 -> 180
-        if(Configs.HELPER_ERRORS.value) throw(new LuaError("client.getUnfocusedChatHeight is deprecated!"));
+        // if(Configs.HELPER_ERRORS.value) throw(new LuaError("client.getUnfocusedChatHeight is deprecated!"));
         return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightUnfocused().get());
     }
 
