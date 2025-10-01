@@ -1357,8 +1357,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart>, MutablePart
     public Object getTask(String name) {
         if (name != null)
             return this.renderTasks.get(name);
-        else
-            return this.renderTasks;
+        return this.renderTasks;
     }
 
     @LuaWhitelist
@@ -1402,11 +1401,10 @@ public class FiguraModelPart implements Comparable<FiguraModelPart>, MutablePart
         int index = -1;
         for (int i = 0; i < textures.size(); i++) {
             if (textureID.equals(textures.get(i).name)) {
-                index = i;
-                break;
+                return vertices.get(i);
             }
         }
-        return vertices.get(index);
+        return null;
     }
 
     @LuaWhitelist
