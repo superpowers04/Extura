@@ -71,6 +71,7 @@ public abstract class ItemInHandRendererMixin {
         boolean main = hand ==InteractionHand.MAIN_HAND;
         HumanoidArm arm = main ? player.getMainArm() : player.getMainArm().getOpposite();
         Boolean armVisible = arm == HumanoidArm.LEFT ? avatar.luaRuntime.renderer.renderLeftArm : avatar.luaRuntime.renderer.renderRightArm;
+        Boolean itemVisible = arm == HumanoidArm.LEFT ? avatar.luaRuntime.renderer.renderLeftItem : avatar.luaRuntime.renderer.renderRightItem;
 
         boolean willRenderItem = !item.isEmpty();
         boolean willRenderArm = (!willRenderItem && main) || item.is(Items.FILLED_MAP) || (!willRenderItem && this.mainHandItem.is(Items.FILLED_MAP));
@@ -87,6 +88,10 @@ public abstract class ItemInHandRendererMixin {
             matrices.popPose();
         }
 
+        if (itemVisible != null && !itemVisible) {
+            ci.cancel();
+            return;
+        }
         // hide item
         VanillaModelPart part = arm == HumanoidArm.LEFT ? avatar.luaRuntime.vanilla_model.LEFT_ITEM : avatar.luaRuntime.vanilla_model.RIGHT_ITEM;
         if (willRenderItem && !part.checkVisible()) {
