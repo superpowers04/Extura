@@ -80,7 +80,7 @@ public class RendererAPI {
     public FiguraVec2 crosshairOffset;
     public FiguraVec3 outlineColor;
     public ResourceLocation fireLayer1, fireLayer2;
-    public Boolean renderLeftArm, renderRightArm;
+    public Boolean renderLeftArm, renderRightArm, renderLeftItem, renderRightItem;
     public FiguraVec3 eyeOffset;
     public FiguraVec4 blockOutlineColor;
     public Boolean upsideDown;
@@ -678,6 +678,32 @@ public class RendererAPI {
         return this.renderLeftArm;
     }
 
+
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = @LuaMethodOverload(
+                    argumentTypes = Boolean.class,
+                    argumentNames = "bool"
+            ),
+            aliases = "renderLeftItem",
+            value = "renderer.set_render_left_item"
+    )
+    public RendererAPI setRenderLeftItem(Boolean bool) {
+        this.renderLeftItem = bool;
+        return this;
+    }
+
+    @LuaWhitelist
+    public RendererAPI renderLeftItem(Boolean bool) {
+        return setRenderLeftItem(bool);
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("renderer.get_render_left_item")
+    public Boolean getRenderLeftItem() {
+        return renderLeftItem;
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = @LuaMethodOverload(
@@ -703,6 +729,31 @@ public class RendererAPI {
         return renderRightArm;
     }
 
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = @LuaMethodOverload(
+                    argumentTypes = Boolean.class,
+                    argumentNames = "bool"
+            ),
+            aliases = "renderRightItem",
+            value = "renderer.set_render_right_item"
+    )
+    public RendererAPI setRenderRightItem(Boolean bool) {
+        this.renderRightItem = bool;
+        return this;
+    }
+
+    @LuaWhitelist
+    public RendererAPI renderRightItem(Boolean bool) {
+        return setRenderRightItem(bool);
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("renderer.get_render_right_arm")
+    public Boolean getRenderRightItem() {
+        return renderRightItem;
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             overloads = {
