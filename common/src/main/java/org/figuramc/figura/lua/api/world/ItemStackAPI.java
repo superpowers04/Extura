@@ -1,15 +1,12 @@
 package org.figuramc.figura.lua.api.world;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.*;
@@ -19,7 +16,7 @@ import org.figuramc.figura.lua.ReadOnlyLuaTable;
 import org.figuramc.figura.lua.docs.LuaFieldDoc;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
-import org.figuramc.figura.utils.LuaUtils;
+import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.LuaTable;
 import net.minecraft.world.food.FoodProperties;
 
@@ -53,18 +50,10 @@ public class ItemStackAPI {
     @LuaFieldDoc("itemstack.tag")
     public final LuaTable tag;
 
-    public ItemStackAPI(ItemStack itemStack, LuaTable tag) {
-        this.itemStack = itemStack;
-        this.id = BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString();
-        this.tag = tag;
-    }
-
     public ItemStackAPI(ItemStack itemStack) {
         this.itemStack = itemStack;
         this.id = BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString();
-        LuaTable tag = itemStack.getComponents() != DataComponentMap.EMPTY ? (LuaTable) NbtToLua.convert(NbtToLua.convertToNbt(itemStack.getComponents())) : new LuaTable();
-        LuaUtils.addLegacyNbtNames(tag, tag);
-        this.tag = new ReadOnlyLuaTable(tag);
+        this.tag = new ReadOnlyLuaTable(itemStack.getTag() != null ? NbtToLua.convert(itemStack.getTag()) : new LuaTable());
     }
 
     @LuaWhitelist
@@ -127,9 +116,26 @@ public class ItemStackAPI {
     }
 
     @LuaWhitelist
+    @LuaMethodDoc("itemstack.get_food_properties")
+    public Map<String, Object> getFoodProperties() {
+        Map<String, Object> foodPropertiesMap = new HashMap<>();
+        FoodProperties foodProperties = itemStack.getItem().getFoodProperties();
+        if(foodProperties == null) return foodPropertiesMap;
+        
+        foodPropertiesMap.put("nutrition", foodProperties.getNutrition());
+        foodPropertiesMap.put("saturationModifier", foodProperties.getSaturationModifier());
+        foodPropertiesMap.put("isMeat", foodProperties.isMeat());
+        foodPropertiesMap.put("canAlwaysEat", foodProperties.canAlwaysEat());
+        foodPropertiesMap.put("fastFood", foodProperties.isFastFood());
+        
+
+        return foodPropertiesMap;
+    }
+
+    @LuaWhitelist
     @LuaMethodDoc("itemstack.is_food")
     public boolean isFood() {
-        return itemStack.getComponents().has(DataComponents.FOOD);
+        return itemStack.isEdible();
     }
 
     @LuaWhitelist
@@ -142,6 +148,39 @@ public class ItemStackAPI {
     @LuaMethodDoc("itemstack.get_name")
     public String getName() {
         return itemStack.getHoverName().getString();
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("itemstack.get_lore")
+    public String getLore() {
+        // For nbt, this is located in tag.display.Lore
+        // For component data, this is located in tag.lore
+
+        CompoundTag display = itemStack.getTagElement("display");
+
+        if (display == null || !display.contains("Lore"))
+            return null;
+
+        // Parse the lore by unpacking each line which can be string or json containing
+        // multiple sections
+
+        ListTag tag = display.getList("Lore", 8);
+        StringBuilder str = new StringBuilder();
+
+        for (int i = 0; i < tag.size(); i++) {
+            String line = tag.getString(i);
+
+            Component sect = TextUtils.tryParseJson(line);
+            if (sect == null)
+                str.append(line);
+            else
+                str.append(sect.getString());
+
+            if (i < tag.size() - 1)
+                str.append("\n");
+        }
+
+        return str.toString();
     }
 
     @LuaWhitelist
@@ -183,13 +222,13 @@ public class ItemStackAPI {
     @LuaWhitelist
     @LuaMethodDoc("itemstack.get_repair_cost")
     public int getRepairCost() {
-        return itemStack != null && itemStack != ItemStack.EMPTY && itemStack.getComponents().has(DataComponents.REPAIR_COST) ? itemStack.get(DataComponents.REPAIR_COST).intValue() : 0;
+        return itemStack.getBaseRepairCost();
     }
 
     @LuaWhitelist
     @LuaMethodDoc("itemstack.get_use_duration")
     public int getUseDuration() {
-        return itemStack.getUseDuration(Minecraft.getInstance().player);
+        return itemStack.getUseDuration();
     }
 
     @LuaWhitelist
@@ -197,9 +236,10 @@ public class ItemStackAPI {
     public String toStackString() {
         ItemStack stack = itemStack;
         String ret = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-        String components = LuaUtils.getItemStackString(stack);
-        if (!components.isEmpty())
-            ret += components;
+
+        CompoundTag nbt = stack.getTag();
+        if (nbt != null)
+            ret += nbt.toString();
 
         return ret;
     }
@@ -219,30 +259,14 @@ public class ItemStackAPI {
     @LuaWhitelist
     @LuaMethodDoc("itemstack.get_equipment_slot")
     public String getEquipmentSlot() {
-        return Minecraft.getInstance().player.getEquipmentSlotForItem(itemStack).name();
+        return LivingEntity.getEquipmentSlotForItem(itemStack).name();
     }
 
     @LuaWhitelist
     @LuaMethodDoc("itemstack.copy")
     public ItemStackAPI copy() {
-        return new ItemStackAPI(itemStack.copy(), this.tag);
+        return new ItemStackAPI(itemStack.copy());
     }
-    // @LuaWhitelist
-    // @LuaMethodDoc("itemstack.get_food_properties")
-    // public Map<String, Object> getFoodProperties() {
-    //     Map<String, Object> foodPropertiesMap = new HashMap<>();
-    //     FoodProperties foodProperties = itemStack.getItem().getFoodProperties();
-    //     if(foodProperties == null) return foodPropertiesMap;
-        
-    //     foodPropertiesMap.put("nutrition", foodProperties.nutrition);
-    //     foodPropertiesMap.put("saturation", foodProperties.saturation);
-    //     foodPropertiesMap.put("canAlwaysEat", foodProperties.canAlwaysEat);
-    //     foodPropertiesMap.put("eatDurationTicks", foodProperties.eatDurationTicks);
-    //     foodPropertiesMap.put("fastFood", false);
-        
-
-    //     return foodPropertiesMap;
-    // }
 
     @LuaWhitelist
     @LuaMethodDoc("itemstack.get_blockstate")
@@ -254,11 +278,13 @@ public class ItemStackAPI {
     public boolean __eq(ItemStackAPI other) {
         ItemStack t = this.itemStack;
         ItemStack o = other.itemStack;
-        if (t.getCount() != o.getCount() && !t.is(o.getItem()) && !t.toString().equals(o.toString()))
+        if (t.getCount() != o.getCount())
+            return false;
+        if (!t.is(o.getItem()))
             return false;
 
-        DataComponentMap tag1 = t.getComponents();
-        DataComponentMap tag2 = o.getComponents();
+        CompoundTag tag1 = t.getTag();
+        CompoundTag tag2 = o.getTag();
         if (tag1 == null && tag2 != null)
             return false;
 
