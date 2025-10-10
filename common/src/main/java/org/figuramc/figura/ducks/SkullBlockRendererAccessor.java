@@ -41,6 +41,8 @@ public abstract class SkullBlockRendererAccessor {
         THIRD_PERSON_RIGHT_HAND,
         BLOCK,
         ITEM_ENTITY,
+        ITEM_FRAME,
+        GUI,
         OTHER
     }
 }
