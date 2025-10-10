@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.AbstractSkullBlock;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.SkullBlockRendererAccessor;
+import org.figuramc.figura.ducks.SkullBlockRendererAccessor.SkullRenderMode;
 import org.figuramc.figura.lua.api.world.ItemStackAPI;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.jetbrains.annotations.Nullable;
@@ -48,9 +49,19 @@ public abstract class ItemRendererMixin {
 
     @Inject(at = @At("HEAD"), method = "render(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/client/resources/model/BakedModel;)V")
     private void onRender(ItemStack stack, ItemDisplayContext modelTransformationMode, boolean leftHanded, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay, BakedModel model, CallbackInfo ci) {
-        if (modelTransformationMode == ItemDisplayContext.GROUND && stack.getItem() instanceof BlockItem bl && bl.getBlock() instanceof AbstractSkullBlock) {
+        if (stack.getItem() instanceof BlockItem bl && bl.getBlock() instanceof AbstractSkullBlock) {
+            SkullRenderMode mode = switch (modelTransformationMode) {
+                case GROUND -> SkullBlockRendererAccessor.SkullRenderMode.ITEM_ENTITY;
+                case FIXED -> SkullBlockRendererAccessor.SkullRenderMode.ITEM_FRAME;
+                case GUI -> SkullBlockRendererAccessor.SkullRenderMode.GUI;
+                default -> null;
+            };
+
+            if (mode == null)
+                return;
+
             SkullBlockRendererAccessor.setItem(stack);
-            SkullBlockRendererAccessor.setRenderMode(SkullBlockRendererAccessor.SkullRenderMode.ITEM_ENTITY);
+            SkullBlockRendererAccessor.setRenderMode(mode);
         }
     }
 }
