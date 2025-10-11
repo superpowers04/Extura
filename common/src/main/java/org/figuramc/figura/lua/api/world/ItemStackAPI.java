@@ -4,6 +4,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,10 +16,12 @@ import org.figuramc.figura.lua.ReadOnlyLuaTable;
 import org.figuramc.figura.lua.docs.LuaFieldDoc;
 import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
+import org.figuramc.figura.utils.TextUtils;
 import org.luaj.vm2.LuaTable;
-import net.minecraft.world.food.FoodProperties;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -113,23 +117,6 @@ public class ItemStackAPI {
     }
 
     @LuaWhitelist
-    @LuaMethodDoc("itemstack.get_food_properties")
-    public Map<String, Object> getFoodProperties() {
-        Map<String, Object> foodPropertiesMap = new HashMap<>();
-        FoodProperties foodProperties = itemStack.getItem().getFoodProperties();
-        if(foodProperties == null) return foodPropertiesMap;
-        
-        foodPropertiesMap.put("nutrition", foodProperties.getNutrition());
-        foodPropertiesMap.put("saturationModifier", foodProperties.getSaturationModifier());
-        foodPropertiesMap.put("isMeat", foodProperties.isMeat());
-        foodPropertiesMap.put("canAlwaysEat", foodProperties.canAlwaysEat());
-        foodPropertiesMap.put("fastFood", foodProperties.isFastFood());
-        
-
-        return foodPropertiesMap;
-    }
-
-    @LuaWhitelist
     @LuaMethodDoc("itemstack.is_food")
     public boolean isFood() {
         return itemStack.isEdible();
@@ -145,6 +132,39 @@ public class ItemStackAPI {
     @LuaMethodDoc("itemstack.get_name")
     public String getName() {
         return itemStack.getHoverName().getString();
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("itemstack.get_lore")
+    public String getLore() {
+        // For nbt, this is located in tag.display.Lore
+        // For component data, this is located in tag.lore
+
+        CompoundTag display = itemStack.getTagElement("display");
+
+        if (display == null || !display.contains("Lore"))
+            return null;
+
+        // Parse the lore by unpacking each line which can be string or json containing
+        // multiple sections
+
+        ListTag tag = display.getList("Lore", 8);
+        StringBuilder str = new StringBuilder();
+
+        for (int i = 0; i < tag.size(); i++) {
+            String line = tag.getString(i);
+
+            Component sect = TextUtils.tryParseJson(line);
+            if (sect == null)
+                str.append(line);
+            else
+                str.append(sect.getString());
+
+            if (i < tag.size() - 1)
+                str.append("\n");
+        }
+
+        return str.toString();
     }
 
     @LuaWhitelist
@@ -240,6 +260,9 @@ public class ItemStackAPI {
 
     @LuaWhitelist
     public boolean __eq(ItemStackAPI other) {
+        if (this == other)
+            return true;
+
         ItemStack t = this.itemStack;
         ItemStack o = other.itemStack;
         if (t.getCount() != o.getCount())
