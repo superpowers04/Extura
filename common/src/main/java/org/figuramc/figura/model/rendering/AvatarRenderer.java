@@ -17,6 +17,7 @@ import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.math.matrix.FiguraMat4;
 import org.figuramc.figura.model.FiguraModelPart;
 import org.figuramc.figura.model.ParentType;
+import org.figuramc.figura.model.PartCustomization;
 import org.figuramc.figura.model.VanillaModelData;
 import org.figuramc.figura.model.rendering.texture.FiguraTexture;
 import org.figuramc.figura.model.rendering.texture.FiguraTextureSet;
@@ -234,4 +235,18 @@ public abstract class AvatarRenderer {
         // normal
         this.normalMat.set(new Matrix3f(pose.normal()).scale(-1, -1, 1));
     }
+
+    public void addTextureSet(FiguraTextureSet set) {
+        textureSets.add(set);
+    }
+
+    public abstract boolean renderPart(FiguraModelPart part, int[] remainingComplexity, boolean prevPredicate);
+
+    public abstract void pushToCustomizationStack(PartCustomization stack);
+
+    public abstract void popCustomizationStack();
+
+    public abstract void doSetupForPart();
+
+    public abstract void flushBuffers();
 }

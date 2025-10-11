@@ -226,7 +226,8 @@ public class LuaUtils {
             } catch (Exception e) {
                 throw new LuaError("Could not parse item stack from string: " + string);
             }
-        }
+        } else if (item instanceof ItemStack)
+            return (ItemStack) item;
 
         throw new LuaError("Illegal argument to " + methodName + "(): " + item);
     }

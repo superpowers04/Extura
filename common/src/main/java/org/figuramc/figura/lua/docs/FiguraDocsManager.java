@@ -153,6 +153,7 @@ public class FiguraDocsManager {
         put("models", List.of(
                 Vertex.class,
                 FiguraModelPart.class,
+                PartCollection.class,
                 RenderTask.class,
                 BlockTask.class,
                 ItemTask.class,

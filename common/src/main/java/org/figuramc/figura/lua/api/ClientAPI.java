@@ -6,6 +6,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
@@ -27,6 +28,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.backend2.FSB;
 import org.figuramc.figura.backend2.NetworkStuff;
 import org.figuramc.figura.lua.LuaNotNil;
@@ -64,6 +66,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.nio.FloatBuffer;
 import java.io.IOException;
 
 @LuaWhitelist
@@ -269,8 +272,12 @@ public class ClientAPI {
 	@LuaMethodDoc("client.get_mouse_pos")
 	public static FiguraVec2 getMousePos() {
 		MouseHandler mouse = Minecraft.getInstance().mouseHandler;
-		return FiguraVec2.of(mouse.xpos(), mouse.ypos());
+		FloatBuffer xScale = BufferUtils.createFloatBuffer(1);
+		FloatBuffer yScale = BufferUtils.createFloatBuffer(1);
+		GLFW.glfwGetWindowContentScale( (long) Minecraft.getInstance().getWindow().getWindow(), xScale, yScale);
+		return FiguraVec2.of(mouse.xpos() * xScale.get(0), mouse.ypos() * yScale.get(0));
 	}
+
 
 	@LuaWhitelist
 	@LuaMethodDoc("client.get_scaled_window_size")
@@ -323,14 +330,16 @@ public class ClientAPI {
 
 	@LuaWhitelist
 	@LuaMethodDoc(
-			overloads = @LuaMethodOverload(
-					argumentTypes = String.class,
-					argumentNames = "text"
-			),
+            overloads = {
+                @LuaMethodOverload(
+                    argumentTypes = {String.class, Integer.class},
+                    argumentNames = {"text", "lineSpacing"}
+                )
+            },
 			value = "client.get_text_height"
 	)
-	public static int getTextHeight(String text) {
-		return TextUtils.getHeight(TextUtils.splitText(TextUtils.tryParseJson(text), "\n"), Minecraft.getInstance().font);
+	public static int getTextHeight(String text, Integer lineSpacing) {
+		return TextUtils.getHeight(TextUtils.splitText(TextUtils.tryParseJson(text), "\n"), Minecraft.getInstance().font, (lineSpacing == null ? 1 : lineSpacing));
 	}
 
 	@LuaWhitelist
@@ -341,18 +350,18 @@ public class ClientAPI {
 							argumentNames = "text"
 					),
 					@LuaMethodOverload(
-							argumentTypes = {String.class, Integer.class, Boolean.class},
-							argumentNames = {"text", "maxWidth", "wrap"}
+							argumentTypes = {String.class, Integer.class, Boolean.class, Integer.class},
+							argumentNames = {"text", "maxWidth", "wrap", "lineSpacing"}
 					)
 			},
 			value = "client.get_text_dimensions"
 	)
-	public static FiguraVec2 getTextDimensions(@LuaNotNil String text, int maxWidth, Boolean wrap) {
+	public static FiguraVec2 getTextDimensions(@LuaNotNil String text, int maxWidth, Boolean wrap, Integer lineSpacing) {
 		Component component = TextUtils.tryParseJson(text);
 		Font font = Minecraft.getInstance().font;
 		List<Component> list = TextUtils.formatInBounds(component, font, maxWidth, wrap == null || wrap);
 		int x = TextUtils.getWidth(list, font);
-		int y = TextUtils.getHeight(list, font);
+		int y = TextUtils.getHeight(list, font, (lineSpacing == null ? 1 : lineSpacing));
 		return FiguraVec2.of(x, y);
 	}
 
@@ -859,6 +868,89 @@ public class ClientAPI {
 
 
 	}
+   @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = String.class, argumentNames = "key"),
+            },
+            value = "client.get_figura_config"
+    )
+    public static Object getFiguraConfig(String key) {
+        if (key == null)
+            return Configs.REGISTRY;
+        try {
+            return Configs.REGISTRY.get(key.toLowerCase());
+        } catch (Exception e) {
+            throw new LuaError("Config " + key + " does not exist");
+        }
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc(
+            overloads = {
+                    @LuaMethodOverload(argumentTypes = String.class, argumentNames = "source"),
+            },
+            value = "client.get_volume"
+    )
+    public static float getVolume(String source) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (source == null)
+            return minecraft.options.getSoundSourceVolume(SoundSource.MASTER);
+        try {
+            return minecraft.options.getSoundSourceVolume(SoundSource.valueOf(source.toUpperCase()));
+        } catch (Exception e) {
+            throw new LuaError("Sound source " + source + " does not exist");
+        }
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("client.get_mouse_sensitivity")
+    public static double getMouseSensitivity() {
+        // https://www.spigotmc.org/threads/determining-a-players-sensitivity.468373/#post-3976392
+        return Math.pow(Minecraft.getInstance().options.sensitivity().get() * 0.6 + 0.2, 3) * 8;
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("client.get_mouse_inverted")
+    public static Boolean getMouseInverted() {
+        return Minecraft.getInstance().options.invertYMouse().get();
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("client.get_scroll_sensitivity")
+    public static double getScrollSensitivity() {
+        return Minecraft.getInstance().options.mouseWheelSensitivity().get();
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("client.get_discrete_scrolling")
+    public static Boolean getDiscreteScrolling() {
+        return Minecraft.getInstance().options.discreteMouseScroll().get();
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("client.get_chat_width")
+    public static Double getChatWidth() {
+        // 0 -> 40
+        // 1 -> 320
+        return Math.floor(40 + 280 * Minecraft.getInstance().options.chatWidth().get());
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("client.get_focused_chat_height")
+    public static Double getFocusedChatHeight() {
+        // 0 -> 20
+        // 1 -> 180
+        return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightFocused().get());
+    }
+
+    @LuaWhitelist
+    @LuaMethodDoc("client.get_unfocused_chat_height")
+    public static Double getUnfocusedChatHeight() {
+        // 0 -> 20
+        // 1 -> 180
+        return Math.floor(20 + 160 * Minecraft.getInstance().options.chatHeightUnfocused().get());
+    }
 
 	@LuaWhitelist
 	@LuaMethodDoc(
@@ -883,7 +975,7 @@ public class ClientAPI {
 			overloads = {
 					@LuaMethodOverload(argumentTypes = String.class, argumentNames = "enumName"),
 			},
-			value = "client.getEnum"
+			value = "client.get_enum"
 	)
 	public static List<String> getEnum(@LuaNotNil String enumName) {
 		try {
