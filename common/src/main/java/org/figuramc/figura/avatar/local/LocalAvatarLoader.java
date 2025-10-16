@@ -4,15 +4,11 @@ import net.minecraft.Util;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
-import org.apache.commons.lang3.concurrent.Computable;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.avatar.UserData;
-import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.FiguraToast;
-import org.figuramc.figura.parsers.AvatarMetadataParser;
-import org.figuramc.figura.parsers.BlockbenchModelParser;
-import org.figuramc.figura.parsers.LuaScriptParser;
+import org.figuramc.figura.parsers.*;
 import org.figuramc.figura.utils.FiguraResourceListener;
 import org.figuramc.figura.utils.FiguraText;
 import org.figuramc.figura.utils.IOUtils;
@@ -26,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -121,8 +116,6 @@ public class LocalAvatarLoader {
 
                 // scripts
                 loadState = LoadState.SCRIPTS;
-                nbt.put("scripts",new CompoundTag());
-				loadGlobalScripts(nbt);
                 loadScripts(finalPath, nbt);
 
                 // custom sounds
@@ -132,7 +125,7 @@ public class LocalAvatarLoader {
                 // models
                 CompoundTag textures = new CompoundTag();
                 ListTag animations = new ListTag();
-                BlockbenchModelParser modelParser = new BlockbenchModelParser();
+                BlockbenchParser2 modelParser = new BlockbenchParser2();
 
                 loadState = LoadState.MODELS;
                 CompoundTag models = loadModels(finalPath, finalPath, modelParser, textures, animations, "");
@@ -162,13 +155,7 @@ public class LocalAvatarLoader {
                     loadResources(nbt, metadataTag.getList("resources_paths", Tag.TAG_STRING), finalPath);
                     metadataTag.remove("resource_paths");
                 }
-				if (metadataTag.contains("script_paths")) {
-					ListTag pathsTag = metadataTag.getList("script_paths", Tag.TAG_STRING);
-					for (int i = 0; i < pathsTag.size(); i++){
-						loadScripts(finalPath.resolve(pathsTag.getString(i)),nbt);
-					}
-					metadataTag.remove("script_paths");
-				}
+
                 // load
                 target.loadAvatar(nbt);
             } catch (Throwable e) {
@@ -236,53 +223,39 @@ public class LocalAvatarLoader {
         }
     }
 
-	private static void loadScripts(Path path, CompoundTag nbt) throws IOException {
-		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
-		if (scripts.size() < 0) return;
-		CompoundTag scriptsNbt = nbt.getCompound("scripts");
+    private static void loadScripts(Path path, CompoundTag nbt) throws IOException {
+        List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
+        if (scripts.size() > 0) {
+            CompoundTag scriptsNbt = new CompoundTag();
+            String pathRegex = path.toString().isEmpty() ? "\\Q\\E" : Pattern.quote(path + path.getFileSystem().getSeparator());
+            for (Path script : scripts) {
+                String name = script.toString()
+                        .replaceFirst(pathRegex, "")
+                        .replaceAll("[/\\\\]", ".");
+                name = name.substring(0, name.length() - 4);
+                scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
+            }
+            nbt.put("scripts", scriptsNbt);
+        }
+    }
 
-		int pathLength = (path + path.getFileSystem().getSeparator()).length();
-		for (Path script : scripts) {
-			String name = script.toString();
-			name = name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
-			scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
-		}
-		nbt.put("scripts",scriptsNbt);
+    private static void loadSounds(Path path, CompoundTag nbt) throws IOException {
+        List<Path> sounds = IOUtils.getFilesByExtension(path, ".ogg");
+        if (sounds.size() > 0) {
+            CompoundTag soundsNbt = new CompoundTag();
+            String pathRegex = Pattern.quote(path.toString().isEmpty() ? path.toString() : path + path.getFileSystem().getSeparator());
+            for (Path sound : sounds) {
+                String name = sound.toString()
+                        .replaceFirst(pathRegex, "")
+                        .replaceAll("[/\\\\]", ".");
+                name = name.substring(0, name.length() - 4);
+                soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
+            }
+            nbt.put("sounds", soundsNbt);
+        }
+    }
 
-
-	}
-	private static void loadGlobalScripts(CompoundTag nbt) throws IOException {
-		if (!Configs.USE_GLOBAL_SCRIPTS.value) return;
-		Path path = IOUtils.getOrCreateDir(FiguraMod.getFiguraDirectory(),"global_scripts");
-		addWatchKey(path, KEYS::put);
-		List<Path> scripts = IOUtils.getFilesByExtension(path, ".lua");
-		if (scripts.size() < 0) return;
-		CompoundTag scriptsNbt = nbt.getCompound("scripts");
-
-		int pathLength = (path + path.getFileSystem().getSeparator()).length();
-		for (Path script : scripts) {
-			String name = script.toString();
-			name = "global."+name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
-			scriptsNbt.put(name, LuaScriptParser.parseScript(name, IOUtils.readFile(script)));
-		}
-
-	}
-
-	private static void loadSounds(Path path, CompoundTag nbt) throws IOException {
-		List<Path> sounds = IOUtils.getFilesByExtension(path, ".ogg");
-		if (sounds.size() == 0) return;
-		CompoundTag soundsNbt = new CompoundTag();
-		int pathLength = (path + path.getFileSystem().getSeparator()).length();
-		for (Path sound : sounds) {
-			String name = sound.toString();
-			name = name.substring(pathLength, name.length()- 4).replaceAll("[/\\\\]", ".");
-			soundsNbt.putByteArray(name, IOUtils.readFileBytes(sound));
-		}
-		nbt.put("sounds", soundsNbt);
-		
-	}
-
-    private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchModelParser parser, CompoundTag textures, ListTag animations, String folders) throws Exception {
+    private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchParser2 parser, CompoundTag textures, ListTag animations, String folders) throws Exception {
         CompoundTag result = new CompoundTag();
         List<Path> subFiles = IOUtils.listPaths(currentFile);
         ListTag children = new ListTag();
@@ -295,11 +268,11 @@ public class LocalAvatarLoader {
                     CompoundTag subfolder = loadModels(avatarFolder, file, parser, textures, animations, folders + name + ".");
                     if (!subfolder.isEmpty()) {
                         subfolder.putString("name", name);
-                        BlockbenchModelParser.parseParent(name, subfolder);
+                        BlockbenchCommonTypes.parseParent(name, subfolder);
                         children.add(subfolder);
                     }
                 } else if (file.toString().toLowerCase(Locale.US).endsWith(".bbmodel")) {
-                    BlockbenchModelParser.ModelData data = parser.parseModel(avatarFolder, file, IOUtils.readFile(file), name.substring(0, name.length() - 8), folders);
+                    ModelParseResult data = parser.parseModel(avatarFolder, file, IOUtils.readFile(file), name.substring(0, name.length() - 8), folders);
                     children.add(data.modelNbt());
                     animations.addAll(data.animationList());
 
@@ -314,55 +287,26 @@ public class LocalAvatarLoader {
 
                     textures.getList("data", Tag.TAG_COMPOUND).addAll(dataTag.getList("data", Tag.TAG_COMPOUND));
                     textures.getCompound("src").merge(dataTag.getCompound("src"));
-				}
-			}
+                }
+            }
 
-		if (!children.isEmpty())
-			result.put("chld", children);
+        if (children.size() > 0)
+            result.put("chld", children);
 
-		return result;
-	}
-	public static Matcher ValidFileMatcher = Pattern.compile(".*(avatar.json|(\\.lua|\\.bbmodel|\\.ogg|\\.png))$").matcher("");
-	/**
-	 * Tick the watched key for hotswapping avatars
-	 */
-	public static void tick() {
-		WatchEvent<?> event = null;
-		try{
+        return result;
+    }
 
-			if(IS_WINDOWS){ // This literally just removes one unix-only check, but it prevents some useless looping :3
+    /**
+     * Tick the watched key for hotswapping avatars
+     */
+    public static void tick() {
+        WatchEvent<?> event = null;
+        boolean reload = false;
 
-				var entries = KEYS.entrySet();
-				for (Map.Entry<Path, WatchKey> entry : entries) {
-					if(entry == null) continue;
-					WatchKey key = entry.getValue();
-					if (!key.isValid())
-						continue;
-
-					for (WatchEvent<?> watchEvent : key.pollEvents()) {
-						if (watchEvent.kind() == StandardWatchEventKinds.OVERFLOW)
-							continue;
-
-						event = watchEvent;
-						Path path = entry.getKey().resolve((Path) event.context());
-						String name = IOUtils.getFileNameOrEmpty(path);
-
-						if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
-							continue;
-						FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
-						AvatarManager.loadLocalAvatar(lastLoadedPath);
-						return;
-					}
-				}
-				return;
-			}
-			boolean reload = false;
-			var entries = KEYS.entrySet();
-			for (Map.Entry<Path, WatchKey> entry : entries) {
-				if(entry == null) continue;
-				WatchKey key = entry.getValue();
-				if (!key.isValid())
-					continue;
+        for (Map.Entry<Path, WatchKey> entry : KEYS.entrySet()) {
+            WatchKey key = entry.getValue();
+            if (!key.isValid())
+                continue;
 
             for (WatchEvent<?> watchEvent : key.pollEvents()) {
                 WatchEvent.Kind<?> kind = watchEvent.kind();
@@ -370,38 +314,36 @@ public class LocalAvatarLoader {
                     continue;
 
                 event = watchEvent;
-					Path path = entry.getKey().resolve((Path) event.context());
-					String name = IOUtils.getFileNameOrEmpty(path);
+                Path path = entry.getKey().resolve((Path) event.context());
+                String name = IOUtils.getFileNameOrEmpty(path);
 
-					if (IOUtils.isHidden(path) || !(Files.isDirectory(path) || ValidFileMatcher.reset(name).matches()))
-						continue;
+                if (IOUtils.isHiddenAvatarResource(path) || !(Files.isDirectory(path) || name.matches("(.*(\\.lua|\\.bbmodel|\\.ogg|\\.png)$|avatar\\.json)")))
+                    continue;
 
-					// This is it, this is the Unix-only check. I(superpowers04) dunno why only Unix needs to add paths like this
-					if (kind == StandardWatchEventKinds.ENTRY_CREATE) 
-						addWatchKey(path, KEYS::put);
+                if (kind == StandardWatchEventKinds.ENTRY_CREATE && !IS_WINDOWS)
+                    addWatchKey(path, KEYS::put);
 
-					reload = true;
+                reload = true;
+                break;
+            }
 
-				}
-			}
+            if (reload)
+                break;
+        }
 
-			// reload avatar
-			if (reload) {
-				FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
-				AvatarManager.loadLocalAvatar(lastLoadedPath);
-			}
-		}catch(java.util.ConcurrentModificationException meow){
-			FiguraMod.debug("LocalAvatarLoader.java:tick java.util.ConcurrentModificationException ignored");
-		}
-	}
+        // reload avatar
+        if (reload) {
+            FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
+            AvatarManager.loadLocalAvatar(lastLoadedPath);
+        }
+    }
 
-	public static void resetWatchKeys() {
-		lastLoadedPath = null;
-		var values = KEYS.values();
-		for (WatchKey key : values)
-			key.cancel();
-		KEYS.clear();
-	}
+    public static void resetWatchKeys() {
+        lastLoadedPath = null;
+        for (WatchKey key : KEYS.values())
+            key.cancel();
+        KEYS.clear();
+    }
 
     /**
      * register new watch keys

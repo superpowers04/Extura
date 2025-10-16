@@ -1,0 +1,340 @@
+package org.figuramc.figura.parsers;
+
+import com.google.gson.Gson;
+import net.minecraft.nbt.ByteArrayTag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.utils.IOUtils;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+
+import static org.figuramc.figura.parsers.BlockbenchCommonTypes.parseFloatOr;
+
+// holdout until the Codec PR comes through
+// or the permanent solution, as fate tends to have it
+public class BlockbenchParser2 {
+    private static final Gson GSON = BlockbenchCommonTypes.getGson();
+
+    // Multiple models can be loaded.
+    private int nextTexture = 0;
+    private int nextAnimation = 0;
+
+    public ModelParseResult parseModel(Path avatarRoot,
+                                       Path modelPath,
+                                       String json,
+                                       String modelName,
+                                       String locatedWithin) throws Exception {
+        try {
+            BlockbenchCommonTypes.ModelFormat model = GSON.fromJson(json, BlockbenchCommonTypes.ModelFormat.class);
+
+            boolean validFormat = model.modelFormat.equals("free") || model.modelFormat.contains(FiguraMod.MOD_ID);
+            if (!validFormat) throw new Exception(String.format(
+                    "Model \"%s\" has an incompatible model format: \"%s\".\n" +
+                            "Compatibility is limited to the \"Generic Model\" format and third-party %s-specific formats.",
+                    modelName,
+                    model.modelFormat,
+                    FiguraMod.MOD_NAME
+            ));
+
+            Intermediary container = new Intermediary(this);
+            container.name = modelName;
+            container.avatarRoot = avatarRoot;
+            container.modelPath = modelPath;
+            container.locatedWithin = locatedWithin;
+
+            CompoundTag nbt = model.convert(container);
+
+            return new ModelParseResult(
+                    container.getTexturesNBT(),
+                    container.getAnimationsNBT(),
+                    nbt
+            );
+        } catch (Exception e) {
+            throw new Exception(
+                    String.format(
+                            "model \"%s\": %s",
+                            modelName,
+                            e.getMessage()
+                    ), e
+            );
+        }
+    }
+
+    /**
+     * Data container for all model versions.
+     */
+    public static class Intermediary {
+        private final BlockbenchParser2 parser;
+
+        public Intermediary(BlockbenchParser2 parser) {
+            this.parser = parser;
+        }
+
+        // supplied externally
+        public String name;
+        public Path modelPath;
+        public Path avatarRoot;
+        public String locatedWithin;
+        // model file's 'resolution' property
+        public Vector2i defaultRes;
+
+        private final List<TextureRepresentation> textures = new ArrayList<>();
+        public final Map<String, BlockbenchCommonTypes.Element> elements = new HashMap<>();
+        public final Map<String, BlockbenchCommonTypes.UUIDReferable> referents = new HashMap<>();
+        public final List<AnimationRepresentation> animations = new ArrayList<>();
+        public final Map<String, Set<AnimationRepresentation>> animationsByElement = new HashMap<>();
+
+        public void loadTextures(List<BlockbenchCommonTypes.Texture> textures) {
+            int i = 0;
+            for (BlockbenchCommonTypes.Texture texture : textures) {
+                TextureRepresentation texRep = new TextureRepresentation();
+                texRep.globalID = parser.nextTexture++;
+                texRep.localID = i++;
+                texRep.load(texture);
+                this.textures.add(texRep);
+            }
+        }
+
+        public void loadAnimations(List<BlockbenchCommonTypes.Animation> animations) {
+            for (BlockbenchCommonTypes.Animation animation : animations) {
+                AnimationRepresentation animRep = new AnimationRepresentation();
+                animRep.globalID = parser.nextAnimation++;
+                animRep.load(animation);
+                this.animations.add(animRep);
+            }
+        }
+
+        public int getTextureGlobalID(int localID) {
+            return textures.get(localID).globalID;
+        }
+
+        public Vector2f getTextureFixedSize(int localID) {
+            return textures.get(localID).fixedSize;
+        }
+
+        public CompoundTag getTexturesNBT() {
+            CompoundTag tag = new CompoundTag();
+            CompoundTag sources = new CompoundTag();
+            Map<String, CompoundTag> buildData = new HashMap<>();
+
+            for (TextureRepresentation texture : textures) {
+                sources.put(texture.path, texture.getSourceNBT());
+                buildData.compute(
+                        texture.path, (k, it) -> {
+                            if (it == null) it = new CompoundTag();
+                            if (it.contains(texture.textureType))
+                                throw new RuntimeException("Model \"" + name + "\" contains texture with duplicate name \"" + texture.name + "\"");
+                            it.putString(texture.textureType, texture.path);
+                            return it;
+                        }
+                );
+            }
+
+            ListTag data = new ListTag();
+            data.addAll(buildData.values());
+            tag.put("src", sources);
+            tag.put("data", data);
+            return tag;
+        }
+
+        public List<CompoundTag> getAnimationsNBT() {
+            List<CompoundTag> list = new ArrayList<>();
+            for (AnimationRepresentation animation : animations) {
+                list.add(animation.getAnimNBT());
+            }
+            return list;
+        }
+
+        /* not static */
+        public class TextureRepresentation {
+            public String name;
+            public int globalID;
+            public int localID;
+
+            /// 'd', 'e', 'n', 's'
+            public String textureType;
+
+            public String path;
+            public byte[] source;
+
+            public Vector2f fixedSize;
+
+            public void load(BlockbenchCommonTypes.Texture texture) {
+                name = texture.name;
+                if (name.endsWith(".png")) name = name.substring(0, name.length() - 4);
+
+                // ugh why do we have to perpetuate this garbage
+                textureType = "d";
+                if (name.endsWith("_e")) textureType = "e";
+                else if (name.endsWith("_n")) textureType = "n";
+                else if (name.endsWith("_s")) textureType = "s";
+
+                try {
+                    // exceptions as control flow ._.
+                    if (texture.relative_path == null) throw new RuntimeException("load from source");
+                    Path p = modelPath.getParent().resolve(texture.relative_path);
+                    if (p.getFileSystem() == FileSystems.getDefault()) {
+                        p = p.toFile().getCanonicalFile().toPath();
+                    }
+                    p = p.normalize();
+
+                    if (!Files.exists(p)) {
+                        // note on parity: the v4 parser has some code to try
+                        // to filter out ../ from paths from bb4.9 and earlier
+                        // but that shouldn't(?) be applicable anymore for v5 models
+                        throw new FileNotFoundException("Could not locate texture '" + texture.name + "'");
+                    }
+
+                    if ((avatarRoot.getNameCount() > 1 && !p.startsWith(avatarRoot)) || p.getFileSystem() != avatarRoot.getFileSystem()) {
+                        throw new IllegalStateException("Texture '" + texture.name + "' is a reference outside the avatar folder");
+                    }
+
+                    FiguraMod.debug("loading texture {}: path is {}", texture.name, p.toString());
+                    source = IOUtils.readFileBytes(p);
+                    path = avatarRoot.relativize(p).toString().replace(p.getFileSystem().getSeparator(), ".");
+                    path = path.substring(0, path.length() - 4); // (file extension)
+                    name = locatedWithin + name;
+                    FiguraMod.debug("v5: Loaded {} texture \"{}\" from {}", textureType, name, p);
+                } catch (Exception e) {
+                    if (e instanceof IOException || e instanceof NullPointerException)
+                        FiguraMod.LOGGER.error("", e);
+
+                    // Try to load from base64
+                    if (!texture.source.startsWith("data:image/png;base64,"))
+                        throw new IllegalStateException(String.format(
+                                "Failed to find the %s texture: %s\n(and the bundled texture data was missing or bad)",
+                                texture.name,
+                                e
+                        ));
+                    source = Base64.getDecoder().decode(texture.source.substring("data:image/png;base64,".length()));
+                    path = locatedWithin + Intermediary.this.name + "." + name;
+                    FiguraMod.debug("v5: Loaded {} texture \"{}\" from {} (bundle)", textureType, name, path);
+                }
+
+                if (!textureType.equals("d"))
+                    name = name.substring(0, name.length() - 2);
+
+                if (texture.width != null) {
+                    fixedSize = new Vector2f(
+                            (float) texture.width / texture.uv_width,
+                            (float) texture.height / texture.uv_height
+                    );
+                } else {
+                    Vector2i imageSize = BlockbenchCommonTypes.getPNGDimensions(source);
+                    fixedSize = new Vector2f(
+                            (float) imageSize.x / defaultRes.x,
+                            (float) imageSize.y / defaultRes.y
+                    );
+                }
+            }
+
+            public ByteArrayTag getSourceNBT() {
+                return new ByteArrayTag(source);
+            }
+        }
+
+        public class AnimationRepresentation {
+            // assign externally
+            public int globalID;
+
+            String mdl = locatedWithin.isBlank() ? Intermediary.this.name : locatedWithin + Intermediary.this.name;
+            String name;
+            // skip if 'once'
+            String loop;
+            // skip if false
+            boolean override;
+            float length;
+            float offset;
+            float blend;
+            float startDelay;
+            float loopDelay;
+
+            public Map<String, BlockbenchCommonTypes.Animator> partAnimators;
+            public @Nullable BlockbenchCommonTypes.Animator fxAnimator;
+
+            public void load(BlockbenchCommonTypes.Animation animation) {
+                name = animation.name;
+                loop = animation.loop == null ? "once" : animation.loop;
+                override = Boolean.TRUE.equals(animation.override);
+                length = animation.length;
+                offset = parseFloatOr(animation.anim_time_update, 0f);
+                blend = parseFloatOr(animation.blend_weight, 1f);
+                startDelay = parseFloatOr(animation.start_delay, 0f);
+                loopDelay = parseFloatOr(animation.loop_delay, 0f);
+
+                if (animation.animators != null) {
+                    Map<String, BlockbenchCommonTypes.Animator> filtered = new HashMap<>(animation.animators);
+                    fxAnimator = filtered.remove("effects");
+                    partAnimators = filtered;
+                } else {
+                    fxAnimator = null;
+                    partAnimators = new HashMap<>();
+                }
+
+                for (Map.Entry<String, BlockbenchCommonTypes.Animator> entry : partAnimators.entrySet()) {
+                    animationsByElement.compute(
+                            entry.getKey(),
+                            (k, v) -> {
+                                if (v == null) v = new HashSet<>();
+                                v.add(this);
+                                return v;
+                            }
+                    );
+                }
+            }
+
+            public CompoundTag getAnimNBT() {
+                CompoundTag tag = new CompoundTag();
+
+                tag.putString("mdl", mdl);
+                tag.putString("name", name);
+                if (!loop.equals("once")) tag.putString("loop", loop);
+                if (override) tag.putBoolean("ovr", true);
+                if (length != 0f) tag.putFloat("len", length);
+                if (offset != 0f) tag.putFloat("off", offset);
+                if (blend != 1f) tag.putFloat("bld", blend);
+                if (startDelay != 0f) tag.putFloat("sdel", startDelay);
+                if (loopDelay != 0f) tag.putFloat("ldel", loopDelay);
+
+                // We also need to attach the instruction keyframe animator here
+                // (it's not bound to any parts.)
+                ListTag code = getEffectsNBT();
+                if (code != null) tag.put("code", code);
+
+                return tag;
+            }
+
+            private @Nullable ListTag getEffectsNBT() {
+                if (fxAnimator == null) return null;
+
+                // this code _only_ handles Instruction Keyframes.
+
+                ListTag fxData = new ListTag();
+
+                if (fxAnimator.keyframes != null)
+                    for (BlockbenchCommonTypes.Keyframe keyframe : fxAnimator.keyframes) {
+                        if (!keyframe.channel.equalsIgnoreCase("timeline"))
+                            continue;
+                        if (!(keyframe instanceof BlockbenchCommonTypes.Keyframe.InstructionKeyframe ik))
+                            continue;
+                        CompoundTag kfTag = new CompoundTag();
+                        kfTag.putFloat("time", ik.time);
+                        kfTag.putString("src", ik.data_points[0].script);
+                        fxData.add(kfTag);
+                    }
+
+
+                return fxData;
+            }
+        }
+    }
+}
