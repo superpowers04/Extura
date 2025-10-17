@@ -29,15 +29,21 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class WardrobeScreen extends AbstractPanelScreen {
-	private static final Component DEBUG_MOTD_FALLBACK = Component.literal("No motd could be loaded.\n\n")
-			.append("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n")
-					.withStyle(ChatFormatting.GRAY)
-			.append(Component.literal("(This is some text you can hover)\n")
-					.withStyle(Style.EMPTY.withColor(0xFFF311A0).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("hi chat")))))
-			.append(Component.literal("(This is some text you can click on)\n")
-					.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/FiguraMC/Figura"))))
-			.append(Component.literal("(This is only visible in debug mode)")
-					.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+	private static final Component DEBUG_MOTD_FALLBACK = Component.literal("Thanks for using ")
+			.append(Component.literal("Extura").withStyle(ChatFormatting.LIGHT_PURPLE))
+			.append("!\nThis message is showing because no MOTD could be loaded.\n")
+			.append(Component.literal("This is usually because you're not connected to a backend/cloud!").withStyle(ChatFormatting.RED))
+			.append("\nIf so, you won't be able to see other players models or upload your own.");
+
+			// .append("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n")
+			// 		.withStyle(ChatFormatting.GRAY)
+			// .append(Component.literal("(This is some text you can hover)\n")
+			// 		.withStyle(Style.EMPTY.withColor(0xFFF311A0).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("hi chat")))))
+			// .append(Component.literal("(This is some text you can click on)\n")
+			// 		.withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/FiguraMC/Figura"))))
+			// .append(Component.literal("(This is only visible in debug mode)")
+			// 		.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC))
+			
 
 	private Label panic;
 
@@ -292,20 +298,13 @@ public class WardrobeScreen extends AbstractPanelScreen {
 		int y = infoBottom + 8;
 
 		infoWidget.tick();
+		Component motd = NetworkStuff.motd == null ? DEBUG_MOTD_FALLBACK : NetworkStuff.motd;
 		if (motdWidget == null) {
-			Component motd = NetworkStuff.motd == null ? DEBUG_MOTD_FALLBACK : NetworkStuff.motd;
-			if (!FiguraMod.debugModeEnabled() && motd == DEBUG_MOTD_FALLBACK) {
-				return;
-			}
 			motdWidget = addRenderableWidget(new BackendMotdWidget(x, y, width, height, motd, font));
 		}  else {
 			motdWidget.setPosition(x, y);
 			motdWidget.setWidth(width);
 			motdWidget.setHeight(height);
-			Component motd = NetworkStuff.motd == null ? DEBUG_MOTD_FALLBACK : NetworkStuff.motd;
-			if (!FiguraMod.debugModeEnabled() && motd == DEBUG_MOTD_FALLBACK) {
-				return;
-			}
 			motdWidget.setMessage(motd);
 		}
 
