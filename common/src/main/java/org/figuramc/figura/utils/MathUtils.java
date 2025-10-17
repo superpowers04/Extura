@@ -114,7 +114,7 @@ public class MathUtils {
             i++;
         }
 
-        return (Math.floor(size*100)*0.01) + SIZE_UNITS[i];
+        return Math.floor(Math.floor(size*100)*0.01) + SIZE_UNITS[i];
     }
 
     public static float magicDelta(float speed, float delta) {
