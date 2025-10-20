@@ -8,7 +8,7 @@ import org.figuramc.figura.server.utils.Identifier;
  */
 public class AvatarDataPacket implements Packet {
     public static final Identifier PACKET_ID = new Identifier("figura", "avatars/data");
-    public static final int MAX_CHUNK_SIZE = 32767 - 5;
+    public static final int MAX_CHUNK_SIZE = 32766 - 5;
 
 
     private final int streamId;

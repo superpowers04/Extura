@@ -1,10 +1,13 @@
 package org.figuramc.figura.server.packets.handlers.c2s;
 
+import org.figuramc.figura.server.FiguraPermissionNodes;
 import org.figuramc.figura.server.FiguraServer;
 import org.figuramc.figura.server.FiguraUser;
+import org.figuramc.figura.server.avatars.EHashPair;
 import org.figuramc.figura.server.packets.AllowIncomingStreamPacket;
 import org.figuramc.figura.server.packets.CloseIncomingStreamPacket;
 import org.figuramc.figura.server.packets.c2s.C2SUploadAvatarPacket;
+import org.figuramc.figura.server.packets.s2c.S2CAvatarReadyPacket;
 import org.figuramc.figura.server.utils.IFriendlyByteBuf;
 import org.figuramc.figura.server.utils.StatusCode;
 
@@ -16,12 +19,13 @@ public class C2SUploadAvatarPacketHandler extends AuthorizedC2SPacketHandler<C2S
     @Override
     protected void handle(FiguraUser sender, C2SUploadAvatarPacket packet) {
         boolean avatarExists = parent.avatarManager().avatarExists(packet.hash());
-        if (getNewAvatarsCount(sender, packet.avatarId()) > parent.config().avatarsCountLimit()) {
+        if (getNewAvatarsCount(sender, packet.avatarId()) > parent.config().avatarsCountLimit(parent,sender.uuid())) {
             sender.sendPacket(new CloseIncomingStreamPacket(packet.streamId(), StatusCode.TOO_MANY_AVATARS));
         }
         if (avatarExists) {
             sender.replaceOrAddOwnedAvatar(packet.avatarId(), packet.hash(), packet.ehash());
             sender.sendPacket(new CloseIncomingStreamPacket(packet.streamId(), StatusCode.ALREADY_EXISTS));
+            sender.sendPacket(new S2CAvatarReadyPacket(packet.avatarId(), new EHashPair(packet.hash(), packet.ehash())));
         }
         else {
             parent.avatarManager().receiveAvatar(sender, packet.avatarId(), packet.streamId(), packet.hash(), packet.ehash());

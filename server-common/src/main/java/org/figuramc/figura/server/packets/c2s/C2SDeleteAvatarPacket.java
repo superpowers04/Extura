@@ -7,7 +7,7 @@ import org.figuramc.figura.server.utils.Identifier;
 import java.nio.charset.StandardCharsets;
 
 public class C2SDeleteAvatarPacket implements Packet {
-    public static Identifier PACKET_ID = new Identifier("figura", "c2s/avatars/delete");
+    public static final Identifier PACKET_ID = new Identifier("figura", "c2s/avatars/delete");
 
     private final String avatarId;
 

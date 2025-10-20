@@ -2,14 +2,18 @@ package org.figuramc.figura.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import org.figuramc.figura.server.avatars.EHashPair;
 import org.figuramc.figura.server.avatars.FiguraServerAvatarManager;
 import org.figuramc.figura.server.events.Events;
-import org.figuramc.figura.server.events.HandshakeEvent;
 import org.figuramc.figura.server.events.packets.OutcomingPacketEvent;
+import org.figuramc.figura.server.json.EHashPairSerializer;
+import org.figuramc.figura.server.json.HashSerializer;
 import org.figuramc.figura.server.packets.*;
 import org.figuramc.figura.server.packets.c2s.*;
 import org.figuramc.figura.server.packets.handlers.c2s.*;
 import org.figuramc.figura.server.packets.s2c.*;
+import org.figuramc.figura.server.utils.Hash;
 import org.figuramc.figura.server.utils.Identifier;
 import org.figuramc.figura.server.utils.Utils;
 
@@ -19,22 +23,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public abstract class FiguraServer {
-    private final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public final Gson GSON = new GsonBuilder().setPrettyPrinting()
+            .registerTypeAdapter(Hash.class, new HashSerializer())
+            .registerTypeAdapter(EHashPair.class, new EHashPairSerializer())
+            .create();
     protected static FiguraServer INSTANCE;
     private final FiguraUserManager userManager = new FiguraUserManager(this);
     private final FiguraServerAvatarManager avatarManager = new FiguraServerAvatarManager(this);
     private FiguraServerConfig config = new FiguraServerConfig();
-    private final DeferredPacketsQueue deferredPacketsQueue = new DeferredPacketsQueue(this);
     private final FiguraCustomPackets customPackets = new FiguraCustomPackets();
-    private boolean initialized;
     protected FiguraServer() {
         if (INSTANCE != null) throw new IllegalStateException("Can't create more than one instance of FiguraServer");
         INSTANCE = this;
@@ -55,27 +56,6 @@ public abstract class FiguraServer {
 
     public void forEachHandler(BiConsumer<Identifier, C2SPacketHandler<?>> consumer) {
         PACKET_HANDLERS.forEach(consumer);
-    }
-
-    public static final List<Identifier> OUTCOMING_PACKETS = List.of(
-            S2CBackendHandshakePacket.PACKET_ID,
-            S2CInitializeAvatarStreamPacket.PACKET_ID,
-            S2CNotifyPacket.PACKET_ID,
-            S2COwnedAvatarsPacket.PACKET_ID,
-            S2CPingErrorPacket.PACKET_ID,
-            S2CPingPacket.PACKET_ID,
-            S2CRefusedPacket.PACKET_ID,
-            S2CUserdataPacket.PACKET_ID,
-
-            AllowIncomingStreamPacket.PACKET_ID,
-            AvatarDataPacket.PACKET_ID,
-            CloseIncomingStreamPacket.PACKET_ID,
-            CloseOutcomingStreamPacket.PACKET_ID,
-            CustomFSBPacket.PACKET_ID
-    );
-
-    public final Collection<Identifier> getIncomingPacketIds() {
-        return PACKET_HANDLERS.keySet();
     }
 
     public static FiguraServer getInstance() {
@@ -105,10 +85,20 @@ public abstract class FiguraServer {
     }
 
     public Path getAvatarMetadata(byte[] hash) {
+        return getAvatarsFolder().resolve("%s.mtd.json".formatted(Utils.hexFromBytes(hash)));
+    }
+
+    @Deprecated(forRemoval = true)
+    public Path getOldAvatarMetadata(byte[] hash) {
         return getAvatarsFolder().resolve("%s.mtd".formatted(Utils.hexFromBytes(hash)));
     }
 
     public Path getUserdataFile(UUID user) {
+        return getUsersFolder().resolve("%s.pl.json".formatted(Utils.uuidToHex(user)));
+    }
+
+    @Deprecated(forRemoval = true)
+    public Path getOldUserdataFile(UUID user) {
         return getUsersFolder().resolve("%s.pl".formatted(Utils.uuidToHex(user)));
     }
 
@@ -118,7 +108,6 @@ public abstract class FiguraServer {
         loadConfig();
         getUsersFolder().toFile().mkdirs();
         getAvatarsFolder().toFile().mkdirs();
-        initialized = true;
         logInfo("Initialization complete.");
     }
 
@@ -156,17 +145,19 @@ public abstract class FiguraServer {
     }
 
     public final void tick() {
-        deferredPacketsQueue.tick();
         avatarManager.tick();
         userManager().tick();
     }
 
-    public final S2CBackendHandshakePacket getHandshake() {
+    public final S2CBackendHandshakePacket getHandshake(UUID newUser) {
+        ArrayList<UUID> connectedUsers = new ArrayList<>();
+        userManager.forEachUser(user -> connectedUsers.add(user.uuid()));
         return new S2CBackendHandshakePacket(
-                config.pingsRateLimit(),
-                config.pingsSizeLimit(),
-                config.avatarSizeLimit(),
-                config.avatarsCountLimit()
+                config.pingsRateLimit(this, newUser),
+                config.pingsSizeLimit(this, newUser),
+                config.avatarSizeLimit(this, newUser),
+                config.avatarsCountLimit(this, newUser),
+                connectedUsers
         );
     }
 
@@ -186,11 +177,11 @@ public abstract class FiguraServer {
         }
     }
 
-    public final synchronized void sendDeferredPacket(UUID receiver, CompletableFuture<? extends Packet> packet) {
-        deferredPacketsQueue.sendPacket(receiver, packet);
-    }
-
     protected abstract void sendPacketInternal(UUID receiver, Packet packet);
+
+    public abstract boolean getPermission(UUID player, FiguraPermissionNodes permission);
+    public abstract Optional<String> getOption(UUID player, FiguraPermissionNodes permission);
+    public abstract void sendMessage(UUID receiver, JsonObject component);
 
     public FiguraServerAvatarManager avatarManager() {
         return avatarManager;
