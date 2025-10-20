@@ -5,7 +5,7 @@ import org.figuramc.figura.server.utils.Identifier;
 
 public class CustomFSBPacket implements Packet {
     public static final Identifier PACKET_ID = new Identifier("figura", "ping/server");
-    public static final int MAX_SERVER_PING_SIZE = 32767 - 4;
+    public static final int MAX_SERVER_PING_SIZE = 32766 - 4;
     private final int id;
     private final byte[] data;
 

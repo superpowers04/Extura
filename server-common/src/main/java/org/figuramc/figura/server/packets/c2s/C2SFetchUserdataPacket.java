@@ -12,18 +12,26 @@ import java.util.UUID;
 public class C2SFetchUserdataPacket implements Packet {
     public static final Identifier PACKET_ID = new Identifier("figura", "c2s/userdata");
 
+    private final int requestId;
     private final UUID target;
 
-    public C2SFetchUserdataPacket(UUID target) {
+    public C2SFetchUserdataPacket(int requestId, UUID target) {
+        this.requestId = requestId;
         this.target = target;
     }
 
     public C2SFetchUserdataPacket(IFriendlyByteBuf byteBuf) {
+        requestId = byteBuf.readInt();
         target = byteBuf.readUUID();
+    }
+
+    public int transactionId() {
+        return requestId;
     }
 
     @Override
     public void write(IFriendlyByteBuf byteBuf) {
+        byteBuf.writeInt(requestId);
         byteBuf.writeUUID(target);
     }
 
