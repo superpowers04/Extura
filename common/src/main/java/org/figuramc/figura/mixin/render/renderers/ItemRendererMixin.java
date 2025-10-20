@@ -62,6 +62,8 @@ public abstract class ItemRendererMixin {
 
             SkullBlockRendererAccessor.setItem(stack);
             SkullBlockRendererAccessor.setRenderMode(mode);
+            if (modelTransformationMode == ItemDisplayContext.FIXED)
+                SkullBlockRendererAccessor.setEntity(stack.getFrame());
         }
     }
 }
