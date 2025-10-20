@@ -1,6 +1,8 @@
 package org.figuramc.figura.fabric;
 
 import io.netty.buffer.Unpooled;
+import me.lucko.fabric.api.permissions.v0.Options;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -11,10 +13,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.figuramc.figura.commands.fabric.FiguraServerCommandsFabric;
 import org.figuramc.figura.server.FiguraModServer;
+import org.figuramc.figura.server.FiguraPermissionNodes;
 import org.figuramc.figura.server.packets.Packet;
 import org.figuramc.figura.server.packets.handlers.c2s.C2SPacketHandler;
 import org.figuramc.figura.utils.FriendlyByteBufWrapper;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class FiguraServerFabric extends FiguraModServer implements DedicatedServerModInitializer {
@@ -25,7 +29,7 @@ public class FiguraServerFabric extends FiguraModServer implements DedicatedServ
             var resLoc = new ResourceLocation(id.namespace(), id.path());
             ServerPlayNetworking.registerGlobalReceiver(resLoc, new FabricServerHandler<>(handler));
         });
-        // FiguraServerCommandsFabric.init();
+        FiguraServerCommandsFabric.init();
     }
 
     @Override
@@ -41,9 +45,15 @@ public class FiguraServerFabric extends FiguraModServer implements DedicatedServ
     }
 
     @Override
-    public boolean getPermission(UUID uuid, String permission) {
+    public boolean getPermission(UUID uuid, FiguraPermissionNodes permission) {
         ServerPlayer player = getServer().getPlayerList().getPlayer(uuid);
-        return player != null; // && Permissions.check(player, permission)
+        return player != null && Permissions.check(player, permission.toString());
+    }
+
+    @Override
+    public Optional<String> getOption(UUID uuid, FiguraPermissionNodes option) {
+        ServerPlayer player = getServer().getPlayerList().getPlayer(uuid);
+        return (player != null) ? Options.get(player, option.toString()) : Optional.empty();
     }
 
     private static class FabricServerHandler<P extends Packet> implements ServerPlayNetworking.PlayChannelHandler {

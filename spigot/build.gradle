@@ -10,11 +10,14 @@ configurations {
 }
 
 repositories {
-    maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+    maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+    maven { url "https://libraries.minecraft.net" }
 }
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:$minecraft_version-R0.1-SNAPSHOT"
+
+    compileOnly "com.mojang:brigadier:${rootProject.brigadier}"
 
     common(project(path: ":server-common")) { transitive false }
     shadowCommon(project(path: ":server-common")) { transitive false }
