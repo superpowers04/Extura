@@ -7,7 +7,7 @@ architectury {
 	minecraft = rootProject.minecraft_version
 }
 
-subprojects {
+rootProject.mod_projects.split(",").each { project(":$it") {
 	apply plugin: "dev.architectury.loom"
 
 	loom {
@@ -32,7 +32,7 @@ subprojects {
 	dependencies {
 		minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
 	}
-}
+}}
 
 allprojects {
 	apply plugin: "java"
