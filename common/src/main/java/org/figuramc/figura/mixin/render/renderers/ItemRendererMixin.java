@@ -51,8 +51,8 @@ public abstract class ItemRendererMixin {
     private void onRender(ItemStack stack, ItemDisplayContext modelTransformationMode, boolean leftHanded, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay, BakedModel model, CallbackInfo ci) {
         if (stack.getItem() instanceof BlockItem bl && bl.getBlock() instanceof AbstractSkullBlock) {
             SkullRenderMode mode = switch (modelTransformationMode) {
-                case GROUND -> SkullBlockRendererAccessor.SkullRenderMode.ITEM_ENTITY;
-                case FIXED -> SkullBlockRendererAccessor.SkullRenderMode.ITEM_FRAME;
+                case GROUND -> SkullBlockRendererAccessor.SkullRenderMode.GROUND;
+                case FIXED -> SkullBlockRendererAccessor.SkullRenderMode.FIXED;
                 case GUI -> SkullBlockRendererAccessor.SkullRenderMode.GUI;
                 default -> null;
             };
