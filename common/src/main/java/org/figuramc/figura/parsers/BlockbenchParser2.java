@@ -210,7 +210,7 @@ public class BlockbenchParser2 {
                     path = avatarRoot.relativize(p).toString().replace(p.getFileSystem().getSeparator(), ".");
                     path = path.substring(0, path.length() - 4); // (file extension)
                     name = locatedWithin + name;
-                    FiguraMod.debug("v5: Loaded {} texture \"{}\" from {}", textureType, name, p);
+                    FiguraMod.debug("v5: Loaded {} texture \"{}\" as path {} (from {})", textureType, name, path, p);
                 } catch (Exception e) {
                     if (e instanceof IOException || e instanceof NullPointerException)
                         FiguraMod.LOGGER.error("", e);
@@ -224,7 +224,7 @@ public class BlockbenchParser2 {
                         ));
                     source = Base64.getDecoder().decode(texture.source.substring("data:image/png;base64,".length()));
                     path = locatedWithin + Intermediary.this.name + "." + name;
-                    FiguraMod.debug("v5: Loaded {} texture \"{}\" from {} (bundle)", textureType, name, path);
+                    FiguraMod.debug("v5: Loaded {} texture \"{}\" as path {} (bundled)", textureType, name, path);
                 }
 
                 if (!textureType.equals("d"))
