@@ -187,12 +187,19 @@ public class BlockbenchParser2 {
                     }
                     p = p.normalize();
 
-                    if (!Files.exists(p)) {
-                        // note on parity: the v4 parser has some code to try
-                        // to filter out ../ from paths from bb4.9 and earlier
-                        // but that shouldn't(?) be applicable anymore for v5 models
-                        throw new FileNotFoundException("Could not locate texture '" + texture.name + "'");
+                    if (!Files.exists(p) || (avatarRoot.getNameCount() > 1 && !p.startsWith(avatarRoot))) {
+                        // <=4.9
+                        if (texture.relative_path.startsWith("../")) {
+                            p = modelPath.resolve(texture.relative_path);
+                            if (p.getFileSystem() == FileSystems.getDefault()) {
+                                p = p.toFile().getCanonicalFile().toPath();
+                            }
+                            p = p.normalize();
+                        }
                     }
+
+                    if (!Files.exists(p))
+                        throw new FileNotFoundException("Could not locate texture '" + texture.name + "'");
 
                     if ((avatarRoot.getNameCount() > 1 && !p.startsWith(avatarRoot)) || p.getFileSystem() != avatarRoot.getFileSystem()) {
                         throw new IllegalStateException("Texture '" + texture.name + "' is a reference outside the avatar folder");
