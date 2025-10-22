@@ -124,7 +124,8 @@ public class BlockbenchParser2 {
         public CompoundTag getTexturesNBT() {
             CompoundTag tag = new CompoundTag();
             CompoundTag sources = new CompoundTag();
-            Map<String, CompoundTag> buildData = new HashMap<>();
+            // ordering is important!
+            LinkedHashMap<String, CompoundTag> buildData = new LinkedHashMap<>();
 
             for (TextureRepresentation texture : textures) {
                 sources.put(texture.path, texture.getSourceNBT());
@@ -205,12 +206,12 @@ public class BlockbenchParser2 {
                         throw new IllegalStateException("Texture '" + texture.name + "' is a reference outside the avatar folder");
                     }
 
-                    FiguraMod.debug("loading texture {}: path is {}", texture.name, p.toString());
+                    FiguraMod.debug("Loading texture {}: path is {}", texture.name, p.toString());
                     source = IOUtils.readFileBytes(p);
                     path = avatarRoot.relativize(p).toString().replace(p.getFileSystem().getSeparator(), ".");
                     path = path.substring(0, path.length() - 4); // (file extension)
                     name = locatedWithin + name;
-                    FiguraMod.debug("v5: Loaded {} texture \"{}\" as path {} (from {})", textureType, name, path, p);
+                    FiguraMod.debug("Loaded {} texture \"{}\" as path {} (from {})", textureType, name, path, p);
                 } catch (Exception e) {
                     if (e instanceof IOException || e instanceof NullPointerException)
                         FiguraMod.LOGGER.error("", e);
@@ -224,7 +225,7 @@ public class BlockbenchParser2 {
                         ));
                     source = Base64.getDecoder().decode(texture.source.substring("data:image/png;base64,".length()));
                     path = locatedWithin + Intermediary.this.name + "." + name;
-                    FiguraMod.debug("v5: Loaded {} texture \"{}\" as path {} (bundled)", textureType, name, path);
+                    FiguraMod.debug("Loaded {} texture \"{}\" as path {} (bundled)", textureType, name, path);
                 }
 
                 if (!textureType.equals("d"))

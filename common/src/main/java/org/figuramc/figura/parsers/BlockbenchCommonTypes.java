@@ -329,7 +329,7 @@ public class BlockbenchCommonTypes {
 
             for (Map.Entry<String, MeshFace> entry : faces.entrySet()) {
                 MeshFace face = entry.getValue();
-                if (face.texture == null || face.vertices == null || face.uv == null)
+                if (face.texture == null || face.vertices == null || face.uv == null || face.vertices.length < 3 || face.vertices.length > 4)
                     continue;
 
                 // so, want a face with... 16 sides?

@@ -194,8 +194,13 @@ public class BlockbenchV4Model extends ModelFormat {
                 ListTag chld = new ListTag();
                 for (OutlinerItem child : children) {
                     CompoundTag childTag = child.toNBT(context);
-                    if (childTag != null)
+                    if (childTag != null) {
+                        // do not propagate 'vsb' tag for children with same property
+                        // this causes them to be "overriding" their parents' visibility
+                        if (childTag.contains("vsb") && Objects.equals(visibility, childTag.getBoolean("vsb")))
+                            childTag.remove("vsb");
                         chld.add(childTag);
+                    }
                 }
                 tag.put("chld", chld);
 
