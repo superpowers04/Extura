@@ -54,10 +54,10 @@ public class PaperDoll {
         float guiScale = (float) window.getGuiScale();
 
         float scale = Configs.PAPERDOLL_SCALE.tempValue;
-        float x = scale * 25f;
-        float y = scale * 45f;
-        x += (Configs.PAPERDOLL_X.tempValue / 100f) * screenWidth / guiScale;
-        y += (Configs.PAPERDOLL_Y.tempValue / 100f) * screenHeight / guiScale;
+        float x = (scale * 25f) 
+        + ((Configs.PAPERDOLL_X.tempValue / 100f) * screenWidth / guiScale);
+        float y = (scale * 45f) 
+        + ((Configs.PAPERDOLL_Y.tempValue / 100f) * screenHeight / guiScale);
 
         UIHelper.drawEntity(
                 x, y,
