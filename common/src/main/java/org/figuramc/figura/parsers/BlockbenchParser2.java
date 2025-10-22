@@ -88,6 +88,7 @@ public class BlockbenchParser2 {
         public Vector2i defaultRes;
 
         private final List<TextureRepresentation> textures = new ArrayList<>();
+        private final HashMap<String, Map<String, TextureRepresentation>> textureNames = new HashMap<>();
         public final Map<String, BlockbenchCommonTypes.Element> elements = new HashMap<>();
         public final Map<String, BlockbenchCommonTypes.UUIDReferable> referents = new HashMap<>();
         public final List<AnimationRepresentation> animations = new ArrayList<>();
@@ -97,9 +98,20 @@ public class BlockbenchParser2 {
             int i = 0;
             for (BlockbenchCommonTypes.Texture texture : textures) {
                 TextureRepresentation texRep = new TextureRepresentation();
-                texRep.globalID = parser.nextTexture++;
                 texRep.localID = i++;
                 texRep.load(texture);
+                // assign the same global index as others with the same name, or
+                // add a new index
+                textureNames.compute(texRep.name, (k, v) -> {
+                    if (v == null) {
+                        texRep.globalID = parser.nextTexture++;
+                        v = new HashMap<>();
+                    } else {
+                        texRep.globalID = v.values().iterator().next().globalID;
+                    }
+                    v.put(texRep.textureType, texRep);
+                    return v;
+                });
                 this.textures.add(texRep);
             }
         }
@@ -130,7 +142,7 @@ public class BlockbenchParser2 {
             for (TextureRepresentation texture : textures) {
                 sources.put(texture.path, texture.getSourceNBT());
                 buildData.compute(
-                        texture.path, (k, it) -> {
+                        texture.name, (k, it) -> {
                             if (it == null) it = new CompoundTag();
                             if (it.contains(texture.textureType))
                                 throw new RuntimeException("Model \"" + name + "\" contains texture with duplicate name \"" + texture.name + "\"");
