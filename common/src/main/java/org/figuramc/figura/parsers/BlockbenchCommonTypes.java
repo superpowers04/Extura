@@ -450,6 +450,22 @@ public class BlockbenchCommonTypes {
     }
 
     public static class Animator {
+        // why does it do this? No clue
+        /**
+         * <a href="https://github.com/JannisX11/blockbench/blob/603201853499087aa3aa6a14406a061f27d4898f/js/io/formats/bbmodel.js#L72-L98">
+         * v5 flipped the X and Y axes on rotations.
+         * </a>
+         */
+        public static final Vector3f v5_ROT_TRANS = new Vector3f(-1, -1, 1);
+        /**
+         * <a href="https://github.com/JannisX11/blockbench/blob/603201853499087aa3aa6a14406a061f27d4898f/js/io/formats/bbmodel.js#L72-L98">
+         * v5 flipped the X axis on positions.
+         * </a>
+         */
+        public static final Vector3f v5_POS_TRANS = new Vector3f(-1, 1, 1);
+
+        private static final Vector3f DO_NOTHING = new Vector3f(1, 1, 1);
+
         String name;
         String type;
         @Nullable Boolean rotation_global;
@@ -459,8 +475,20 @@ public class BlockbenchCommonTypes {
         @Nullable List<Keyframe> keyframes;
 
         // okay so that qualified class name is horrible, but it's what we have
-        public @Nullable CompoundTag getNBT(BlockbenchParser2.Intermediary.AnimationRepresentation animContext) {
+
+        /**
+         * Get a NBT tag for this animator.
+         *
+         * @param animContext what {@link BlockbenchParser2.Intermediary.AnimationRepresentation} this is
+         * @param isV5        if this is a v5 model; flips X and Y components of some things
+         * @return the NBT
+         */
+        public @Nullable CompoundTag getNBT(BlockbenchParser2.Intermediary.AnimationRepresentation animContext,
+                                            boolean isV5) {
             if (type.equals("effect")) throw new RuntimeException("Shouldn't be attaching FX animators to parts!");
+
+            Vector3f rotTrans = isV5 ? v5_ROT_TRANS : DO_NOTHING;
+            Vector3f posTrans = isV5 ? v5_POS_TRANS : DO_NOTHING;
 
             ListTag rot = new ListTag();
             ListTag pos = new ListTag();
@@ -474,6 +502,14 @@ public class BlockbenchCommonTypes {
                     kfTag.putFloat("time", kf3.time);
                     kfTag.putString("int", kf3.interpolation != null ? kf3.interpolation : "linear");
                     Keyframe.Keyframe3.Data pre = kf3.data_points[0];
+
+                    Vector3f trans;
+                    switch(kf3.channel) {
+                        case "rotation" -> trans = rotTrans;
+                        case "position" -> trans = posTrans;
+                        default -> trans = DO_NOTHING;
+                    }
+
                     kfTag.put("pre", pre.toNBT(kf3.channel));
                     if (kf3.data_points.length > 1) {
                         Keyframe.Keyframe3.Data post = kf3.data_points[1];
@@ -482,10 +518,10 @@ public class BlockbenchCommonTypes {
 
                     // Bezier handles TODO: investigate if this has changed in v5
                     if (kf3.bezier_left_value != null && !kf3.bezier_left_value.equals(0, 0, 0)) {
-                        kfTag.put("bl", vecToList(kf3.bezier_left_value));
+                        kfTag.put("bl", vecToList(new Vector3f(kf3.bezier_left_value).mul(trans)));
                     }
                     if (kf3.bezier_right_value != null && !kf3.bezier_right_value.equals(0, 0, 0)) {
-                        kfTag.put("br", vecToList(kf3.bezier_right_value));
+                        kfTag.put("br", vecToList(new Vector3f(kf3.bezier_right_value).mul(trans)));
                     }
                     if (kf3.bezier_left_time != null && !kf3.bezier_left_time.equals(-0.1f, -0.1f, -0.1f)) {
                         kfTag.put("blt", vecToList(kf3.bezier_left_time));

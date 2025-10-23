@@ -88,6 +88,14 @@ public class BlockbenchV5Model extends ModelFormat {
         return refs;
     }
 
+    /**
+     * PAIN.
+     * @return source code that returns the opposite, hopefully?
+     */
+    public static String negateLua(String source) {
+        throw new RuntimeException("// TODO: wtf");
+    }
+
     @Override
     public CompoundTag convert(BlockbenchParser2.Intermediary target) {
         target.defaultRes = resolution;
@@ -219,7 +227,7 @@ public class BlockbenchV5Model extends ModelFormat {
                     for (AnimationRepresentation animation : animations) {
                         Animator animator = animation.partAnimators.get(uuid);
                         if (animator == null) throw new RuntimeException("inconsistent state!! animationsByElement indicated an animator, but none actually present");
-                        anim.add(animator.getNBT(animation));
+                        anim.add(animator.getNBT(animation, true));
                     }
                     tag.put("anim", anim);
                 }
