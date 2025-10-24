@@ -211,7 +211,8 @@ public class BlockbenchV4Model extends ModelFormat {
                         Animator animator = animation.partAnimators.get(uuid);
                         if (animator == null) throw new RuntimeException(
                                 "inconsistent state!! animationsByElement indicated an animator, but none actually present");
-                        anim.add(animator.getNBT(animation, false));
+                        CompoundTag attachment = animator.getNBT(animation, false);
+                        if (attachment != null) anim.add(attachment);
                     }
                     tag.put("anim", anim);
                 }
