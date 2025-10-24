@@ -600,8 +600,14 @@ public class BlockbenchCommonTypes {
                         tag.add(FloatTag.valueOf(yf * ys));
                         tag.add(FloatTag.valueOf(zf));
                     } else {
-                        tag.add(StringTag.valueOf(String.valueOf(x)));
-                        tag.add(StringTag.valueOf(String.valueOf(y)));
+                        if (invX)
+                            tag.add(StringTag.valueOf(BlockbenchV5Model.negateLua(String.valueOf(x))));
+                        else
+                            tag.add(StringTag.valueOf(String.valueOf(x)));
+                        if (invY)
+                            tag.add(StringTag.valueOf(BlockbenchV5Model.negateLua(String.valueOf(y))));
+                        else
+                            tag.add(StringTag.valueOf(String.valueOf(y)));
                         tag.add(StringTag.valueOf(String.valueOf(z)));
                     }
 
