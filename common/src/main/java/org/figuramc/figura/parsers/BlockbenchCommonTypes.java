@@ -262,7 +262,7 @@ public class BlockbenchCommonTypes {
 
         Vector4f uv;
         float rotation;
-        Integer texture;
+        @Nullable Integer texture;
 
         @Override
         public @Nullable CompoundTag toNBT(BlockbenchParser2.Intermediary context) {
