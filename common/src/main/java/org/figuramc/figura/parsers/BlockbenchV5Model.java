@@ -14,6 +14,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class BlockbenchV5Model extends ModelFormat {
     Vector2i resolution;
@@ -89,11 +90,26 @@ public class BlockbenchV5Model extends ModelFormat {
     }
 
     /**
-     * PAIN.
+     * Pattern for Lua code that is definitely a statement and not an expression.
+     * <ul>
+     *     <li>{@code [:;]} - labels and semicolons</li>
+     *     <li>{@code function\\s*[^\\s(]} - non-anonymous functions</li>
+     * </ul>
+     */
+    public static final Pattern DEFINITELY_STMT = Pattern.compile("^\\s*([:;]|break|goto|do|while|repeat|if|for|function\\s*[^\\s(]|local)");
+
+    /**
      * @return source code that returns the opposite, hopefully?
      */
     public static String negateLua(String source) {
-        throw new RuntimeException("// TODO: wtf");
+        if (source.contains("return") || DEFINITELY_STMT.matcher(source).find()) {
+            // don't bother
+            return source;
+        }
+        // if it is truly an expression, then this will work
+        // otherwise this is definitely invalid syntax, so we put a label on it
+        // in case it breaks
+        return String.format("-(%s)--v5", source);
     }
 
     @Override

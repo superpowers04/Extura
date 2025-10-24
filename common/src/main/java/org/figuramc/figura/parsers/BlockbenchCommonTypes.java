@@ -504,19 +504,21 @@ public class BlockbenchCommonTypes {
                     Keyframe.Keyframe3.Data pre = kf3.data_points[0];
 
                     Vector3f trans;
+                    boolean transX = isV5 && (kf3.channel.equals("rotation") || kf3.channel.equals("position"));
+                    boolean transY = isV5 && (kf3.channel.equals("rotation"));
                     switch(kf3.channel) {
                         case "rotation" -> trans = rotTrans;
                         case "position" -> trans = posTrans;
                         default -> trans = DO_NOTHING;
                     }
 
-                    kfTag.put("pre", pre.toNBT(kf3.channel));
+                    kfTag.put("pre", pre.toNBT(kf3.channel, transX, transY));
                     if (kf3.data_points.length > 1) {
                         Keyframe.Keyframe3.Data post = kf3.data_points[1];
-                        kfTag.put("end", post.toNBT(kf3.channel));
+                        kfTag.put("end", post.toNBT(kf3.channel, transX, transY));
                     }
 
-                    // Bezier handles TODO: investigate if this has changed in v5
+                    // Bezier handles
                     if (kf3.bezier_left_value != null && !kf3.bezier_left_value.equals(0, 0, 0)) {
                         kfTag.put("bl", vecToList(new Vector3f(kf3.bezier_left_value).mul(trans)));
                     }
@@ -586,14 +588,16 @@ public class BlockbenchCommonTypes {
                 String y;
                 String z;
 
-                public ListTag toNBT(String channel) {
+                public ListTag toNBT(String channel, boolean invX, boolean invY) {
                     float fallback = channel.equals("scale") ? 1f : 0f;
                     Object x = kfData(this.x, fallback), y = kfData(this.y, fallback), z = kfData(this.z, fallback);
 
                     ListTag tag = new ListTag();
                     if (x instanceof Float xf && y instanceof Float yf && z instanceof Float zf) {
-                        tag.add(FloatTag.valueOf(xf));
-                        tag.add(FloatTag.valueOf(yf));
+                        float xs = invX ? -1f : 1f;
+                        float ys = invY ? -1f : 1f;
+                        tag.add(FloatTag.valueOf(xf * xs));
+                        tag.add(FloatTag.valueOf(yf * ys));
                         tag.add(FloatTag.valueOf(zf));
                     } else {
                         tag.add(StringTag.valueOf(String.valueOf(x)));
