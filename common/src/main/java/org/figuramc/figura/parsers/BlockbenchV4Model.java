@@ -142,14 +142,16 @@ public class BlockbenchV4Model extends ModelFormat {
             }
 
             @Override
-            public CompoundTag toNBT(BlockbenchParser2.Intermediary context) {
-                return context.elements.get(uuid).toNBT(context);
+            public @Nullable CompoundTag toNBT(BlockbenchParser2.Intermediary context) {
+                BlockbenchCommonTypes.Element ref = context.elements.get(uuid);
+                if (ref == null) return null;
+                return ref.toNBT(context);
             }
         }
 
         public static final class Group extends OutlinerItem implements UUIDReferable {
 
-            List<OutlinerItem> children = new ArrayList<>();
+            @Nullable List<OutlinerItem> children = new ArrayList<>();
             String name;
             @Nullable Boolean visibility;
             @Nullable Boolean export;
@@ -165,7 +167,9 @@ public class BlockbenchV4Model extends ModelFormat {
             public void fillContainedRefs(Map<String, UUIDReferable> to) {
                 // in this model format, all the group information is in fact in the outliner struct
                 to.put(uuid, this);
-                children.forEach(it -> it.fillContainedRefs(to));
+                if (children != null) {
+                    children.forEach(it -> it.fillContainedRefs(to));
+                }
             }
 
             @Override
@@ -191,18 +195,20 @@ public class BlockbenchV4Model extends ModelFormat {
 
                 // TODO: collections?!
 
-                ListTag chld = new ListTag();
-                for (OutlinerItem child : children) {
-                    CompoundTag childTag = child.toNBT(context);
-                    if (childTag != null) {
-                        // do not propagate 'vsb' tag for children with same property
-                        // this causes them to be "overriding" their parents' visibility
-                        if (childTag.contains("vsb") && Objects.equals(visibility, childTag.getBoolean("vsb")))
-                            childTag.remove("vsb");
-                        chld.add(childTag);
+                if (children != null) {
+                    ListTag chld = new ListTag();
+                    for (OutlinerItem child : children) {
+                        CompoundTag childTag = child.toNBT(context);
+                        if (childTag != null) {
+                            // do not propagate 'vsb' tag for children with same property
+                            // this causes them to be "overriding" their parents' visibility
+                            if (childTag.contains("vsb") && Objects.equals(visibility, childTag.getBoolean("vsb")))
+                                childTag.remove("vsb");
+                            chld.add(childTag);
+                        }
                     }
+                    tag.put("chld", chld);
                 }
-                tag.put("chld", chld);
 
                 Set<AnimationRepresentation> animations = context.animationsByElement.get(uuid);
                 if (animations != null) {

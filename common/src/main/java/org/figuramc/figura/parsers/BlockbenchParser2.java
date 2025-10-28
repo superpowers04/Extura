@@ -125,7 +125,8 @@ public class BlockbenchParser2 {
             }
         }
 
-        public int getTextureGlobalID(int localID) {
+        public @Nullable Integer getTextureGlobalID(int localID) {
+            if (localID < 0 || textures.size() <= localID) return null;
             return textures.get(localID).globalID;
         }
 

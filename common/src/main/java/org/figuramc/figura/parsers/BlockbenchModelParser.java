@@ -15,6 +15,11 @@ import java.util.*;
 //main class to convert a blockbench model (json) into nbt
 //default fields are omitted from the nbt to save up space
 //note: use the same instance for parsing multiple models for the same avatar
+
+/**
+ * @deprecated Use {@link BlockbenchParser2} instead
+ */
+@Deprecated
 public class BlockbenchModelParser {
 
     private final static Gson GSON = new GsonBuilder().create();

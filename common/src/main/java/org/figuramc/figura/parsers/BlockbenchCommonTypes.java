@@ -222,8 +222,8 @@ public class BlockbenchCommonTypes {
 
     public static class CubeElement extends Element {
         // type = "cube"
-        Vector3f from;
-        Vector3f to;
+        @Nullable Vector3f from;
+        @Nullable Vector3f to;
 
         float inflate;
 
@@ -234,10 +234,8 @@ public class BlockbenchCommonTypes {
             CompoundTag tag = super.toNBT(context);
             if (tag == null) return null;
 
-            if (!from.equals(0, 0, 0))
-                tag.put("f", vecToList(from));
-            if (!to.equals(0, 0, 0))
-                tag.put("t", vecToList(to));
+            if (from != null && !from.equals(0, 0, 0)) tag.put("f", vecToList(from));
+            if (to != null && !to.equals(0, 0, 0)) tag.put("t", vecToList(to));
             if (inflate != 0f)
                 tag.putFloat("inf", inflate);
 
@@ -269,10 +267,12 @@ public class BlockbenchCommonTypes {
             if (texture == null)
                 return null;
             CompoundTag tag = new CompoundTag();
-            tag.putInt("tex", context.getTextureGlobalID(texture));
+            Integer textureID = context.getTextureGlobalID(texture);
+            if (textureID == null) return null;
+            tag.putInt("tex", textureID);
             if (rotation != 0f)
                 tag.putFloat("rot", rotation);
-            if (!uv.equals(0, 0, 0, 0)) {
+            if (uv != null && !uv.equals(0, 0, 0, 0)) {
                 Vector2f size = context.getTextureFixedSize(texture);
                 Vector4f sizeTwice = new Vector4f(size.x, size.y, size.x, size.y);
                 // this is the order it is because otherwise we'd be mutating uv
@@ -335,7 +335,9 @@ public class BlockbenchCommonTypes {
                 // so, want a face with... 16 sides?
                 // ...or 4096 textures? (which will cause other problems)
                 // format 0xTTTn
-                short texBase = (short) ((context.getTextureGlobalID(face.texture) << 4) + face.vertices.length);
+                Integer textureID = context.getTextureGlobalID(face.texture);
+                if (textureID == null) continue;
+                short texBase = (short) ((textureID << 4) + face.vertices.length);
                 tex.add(ShortTag.valueOf(texBase));
 
                 if (face.vertices.length == 4)
@@ -485,7 +487,7 @@ public class BlockbenchCommonTypes {
          */
         public @Nullable CompoundTag getNBT(BlockbenchParser2.Intermediary.AnimationRepresentation animContext,
                                             boolean isV5) {
-            if (type.equals("effect")) throw new RuntimeException("Shouldn't be attaching FX animators to parts!");
+            if ("effect".equals(type)) throw new RuntimeException("Shouldn't be attaching FX animators to parts!");
 
             Vector3f rotTrans = isV5 ? v5_ROT_TRANS : DO_NOTHING;
             Vector3f posTrans = isV5 ? v5_POS_TRANS : DO_NOTHING;

@@ -18,16 +18,19 @@ public class PlatformUtils {
 
     @ExpectPlatform
     public static Path getGameDir() {
+        if ("true".equals(System.getProperty("figura.standalone_testing"))) return Path.of("./run");
         throw new AssertionError();
     }
 
     @ExpectPlatform
     public static String getFiguraModVersionString(){
+        if ("true".equals(System.getProperty("figura.standalone_testing"))) return "(testbench)";
         throw new AssertionError();
     }
 
     @ExpectPlatform
     public static Path getConfigDir() {
+        if ("true".equals(System.getProperty("figura.standalone_testing"))) return Path.of("./run/config");
         throw new AssertionError();
     }
 
