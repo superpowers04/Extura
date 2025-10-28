@@ -42,6 +42,14 @@ dependencies {
     modCompileOnly "maven.modrinth:immediatelyfast:$immediately_fast"
 }
 
+tasks.register('runFuzzer', JavaExec) {
+    it.classpath = sourceSets.main.runtimeClasspath
+    it.mainClass = "org.figuramc.figura.parsers.ModelFuzzerMain"
+    final targetProp = providers.gradleProperty("fuzzTarget")
+    if (!targetProp.isPresent()) throw new RuntimeException("Specify -PfuzzTarget with a path to a model file!")
+    it.args([targetProp.get()])
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
