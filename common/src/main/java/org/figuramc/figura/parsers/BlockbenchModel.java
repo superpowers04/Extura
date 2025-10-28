@@ -8,6 +8,10 @@ import java.util.List;
 
 // dummy class for gson reflection
 // allows reading the model json way easier
+/**
+ * @deprecated Use {@link BlockbenchCommonTypes.ModelFormat} instead
+ */
+@Deprecated
 public class BlockbenchModel {
     Meta meta;
     Resolution resolution;
