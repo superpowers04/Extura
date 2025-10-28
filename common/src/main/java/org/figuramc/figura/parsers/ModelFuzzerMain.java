@@ -35,11 +35,15 @@ public class ModelFuzzerMain {
     public static final int MAX_DEPTH = 10;
     public static final Path OUT_TO = Path.of("build/reports/fuzz");
 
-    public static final Set<String> PROTECTED_KEYS = Set.of(
+    public static final Set<String> NOT_DELETABLE = Set.of(
             // known issues WONTFIX (i.e. definitely wrong)
-            "resolution", "origin", "width", "height", "rotation",
-            "uv_width", "uv_height", "from", "to",
-            "bezier_left_time","bezier_right_time","bezier_left_value","bezier_right_value"
+            "width", "height", "rotation",
+            "uv_width", "uv_height", "resolution"
+    );
+    public static final Set<String> NOT_MODIFIABLE = Set.of(
+            // known issues WONTFIX (i.e. definitely wrong)
+            "resolution", "origin",
+            "bezier_left_time", "bezier_right_time", "bezier_left_value", "bezier_right_value"
     );
 
     static {
@@ -225,7 +229,8 @@ public class ModelFuzzerMain {
                     .findFirst()
                     .orElse(null);
             if (key == null) return obj;
-            if (PROTECTED_KEYS.contains(key)) return obj;
+            if (NOT_DELETABLE.contains(key) && deleteSomething) return obj;
+            if (NOT_MODIFIABLE.contains(key) && !deleteSomething) return obj;
             path.add("." + key);
             if (deleteSomething) {
                 mutations.add(String.format(
