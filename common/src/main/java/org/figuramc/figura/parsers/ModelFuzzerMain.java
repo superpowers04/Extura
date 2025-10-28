@@ -66,6 +66,7 @@ public class ModelFuzzerMain {
         rand = new SecureRandom(seed);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static <T> T bindUnderlyingLogger(org.slf4j.Logger slf, Class<T> to) {
         try {
             final Class<? extends org.slf4j.Logger> cls = slf.getClass();
@@ -189,6 +190,7 @@ public class ModelFuzzerMain {
     // rest is STR_REMOVE
 
     public String mutateString(String input, Deque<String> path, List<String> mutations) {
+        // TODO
         double f = rand.nextDouble();
         throw new RuntimeException();
     }
