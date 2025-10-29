@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
@@ -221,6 +222,13 @@ public class ActionWheel {
                         (float) texture.u, (float) texture.v,
                         texture.width, texture.height,
                         texture.texture.getWidth(), texture.texture.getHeight());
+            }
+
+            ItemStack item = action.getItem(isSelected);
+            if (item != null && !item.isEmpty()) {
+                gui.renderItem(item, (int) Math.round(xOff - 8), (int) Math.round(yOff - 8));
+                if (Configs.ACTION_WHEEL_DECORATIONS.value)
+                    gui.renderItemDecorations(minecraft.font, item, (int) Math.round(xOff - 8), (int) Math.round(yOff - 8));
             }
 
             // no part, no render

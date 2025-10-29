@@ -1,5 +1,6 @@
 package org.figuramc.figura.lua.api.action_wheel;
 
+import net.minecraft.world.item.ItemStack;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaWhitelist;
@@ -31,6 +32,7 @@ public class Action {
     public static final FiguraVec3 TOGGLE_COLOR = FiguraVec3.of(0, 1, 0);
 
     protected String title, toggleTitle;
+    protected ItemStack item, hoverItem, toggleItem;
     protected FiguraModelPart part, hoverPart, togglePart;
     protected FiguraVec3 color, hoverColor, toggleColor;
     protected TextureData texture, hoverTexture, toggleTexture;
@@ -97,6 +99,17 @@ public class Action {
             ret = togglePart;
         if (ret == null)
             ret = part;
+        return ret;
+    }
+
+    public ItemStack getItem(boolean selected) {
+        ItemStack ret = null;
+        if (selected)
+            ret = hoverItem;
+        if (ret == null && toggled)
+            ret = toggleItem;
+        if (ret == null)
+            ret = item;
         return ret;
     }
 
@@ -230,13 +243,8 @@ public class Action {
             value = "wheel_action.set_item"
     )
     public Action setItem(Object item) {
-        this.part = new FiguraModelPart(owner, title+"_part", null, new PartCustomization(), new HashMap<>(), new ArrayList<>(), null, null);
-        this.part.facesByTexture = new ArrayList<>();
-        this.part.textures = new ArrayList<>();
-
-        this.part.addTask(new ItemTask(title+"_task", owner, null)
-                .setItem(LuaUtils.parseItemStack("item", item))
-                .displayMode("gui").setLight(15d, 15d));
+        this.item = LuaUtils.parseItemStack("item", item);
+        this.part = null;
         return this;
     }
 
@@ -261,13 +269,8 @@ public class Action {
             value = "wheel_action.set_hover_item"
     )
     public Action setHoverItem(Object item) {
-        this.hoverPart = new FiguraModelPart(owner, title+"_hover_part", null, new PartCustomization(), new HashMap<>(), new ArrayList<>(), null, null);
-        this.hoverPart.facesByTexture = new ArrayList<>();
-        this.hoverPart.textures = new ArrayList<>();
-
-        this.hoverPart.addTask(new ItemTask(title+"_hover_task", owner, null)
-                .setItem(LuaUtils.parseItemStack("hoverItem", item))
-                .displayMode("gui").setLight(15d, 15d));
+        this.hoverItem = LuaUtils.parseItemStack("hoverItem", item);
+        this.hoverPart = null;
         return this;
     }
 
@@ -290,6 +293,7 @@ public class Action {
     )
     public Action setPart(FiguraModelPart part) {
         this.part = part;
+        this.item = null;
         return this;
     }
 
@@ -311,6 +315,7 @@ public class Action {
     )
     public Action setHoverPart(FiguraModelPart part) {
         this.hoverPart = part;
+        this.hoverItem = null;
         return this;
     }
 
@@ -561,13 +566,8 @@ public class Action {
             value = "wheel_action.set_toggle_item"
     )
     public Action setToggleItem(Object item) {
-        this.togglePart = new FiguraModelPart(owner, title+"_toggle_part", null, new PartCustomization(), new HashMap<>(), new ArrayList<>(), null, null);
-        this.togglePart.facesByTexture = new ArrayList<>();
-        this.togglePart.textures = new ArrayList<>();
-
-        this.togglePart.addTask(new ItemTask(title+"_toggle_task", owner, null)
-                .setItem(LuaUtils.parseItemStack("hoverItem", item))
-                .displayMode("gui").setLight(15d, 15d));
+        this.toggleItem = LuaUtils.parseItemStack("toggleItem", item);
+        this.togglePart = null;
         return this;
     }
 
@@ -589,6 +589,7 @@ public class Action {
     )
     public Action setTogglePart(FiguraModelPart modelPart) {
         this.togglePart = modelPart;
+        this.toggleItem = null;
         return this;
     }
 
