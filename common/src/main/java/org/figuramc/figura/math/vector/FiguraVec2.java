@@ -43,6 +43,8 @@ public class FiguraVec2 extends FiguraVector<FiguraVec2, FiguraMat2> {
     	this.y=y;
     }
 
+    public FiguraVec2(){}
+
     public static FiguraVec2 of() {
         return new FiguraVec2();
     }
