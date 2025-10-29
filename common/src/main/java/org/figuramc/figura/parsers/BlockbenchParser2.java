@@ -1,10 +1,13 @@
 package org.figuramc.figura.parsers;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.gson.Gson;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.lua.api.json.FiguraJsonArray;
 import org.figuramc.figura.utils.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
@@ -93,13 +96,15 @@ public class BlockbenchParser2 {
         public final Map<String, BlockbenchCommonTypes.UUIDReferable> referents = new HashMap<>();
         public final List<AnimationRepresentation> animations = new ArrayList<>();
         public final Map<String, Set<AnimationRepresentation>> animationsByElement = new HashMap<>();
+        public final List<CollectionRepresentation> collections = new ArrayList<>();
+        public final Multimap<String, Integer> collectionsByElement =
+                MultimapBuilder.hashKeys().hashSetValues().build();
 
         public void loadTextures(List<BlockbenchCommonTypes.Texture> textures) {
             int i = 0;
             for (BlockbenchCommonTypes.Texture texture : textures) {
-                TextureRepresentation texRep = new TextureRepresentation();
+                TextureRepresentation texRep = new TextureRepresentation(texture);
                 texRep.localID = i++;
-                texRep.load(texture);
                 // assign the same global index as others with the same name, or
                 // add a new index
                 textureNames.compute(texRep.name, (k, v) -> {
@@ -118,10 +123,16 @@ public class BlockbenchParser2 {
 
         public void loadAnimations(List<BlockbenchCommonTypes.Animation> animations) {
             for (BlockbenchCommonTypes.Animation animation : animations) {
-                AnimationRepresentation animRep = new AnimationRepresentation();
-                animRep.globalID = parser.nextAnimation++;
-                animRep.load(animation);
+                AnimationRepresentation animRep = new AnimationRepresentation(parser.nextAnimation++, animation);
                 this.animations.add(animRep);
+            }
+        }
+
+        public void loadCollections(List<BlockbenchCommonTypes.Collection> collections) {
+            int i = 0;
+            for (BlockbenchCommonTypes.Collection collection : collections) {
+                CollectionRepresentation coll = new CollectionRepresentation(i++, collection);
+                this.collections.add(coll);
             }
         }
 
@@ -175,22 +186,22 @@ public class BlockbenchParser2 {
             public int localID;
 
             /// 'd', 'e', 'n', 's'
-            public String textureType;
+            public final String textureType;
 
             public String path;
             public byte[] source;
 
-            public Vector2f fixedSize;
+            public final Vector2f fixedSize;
 
-            public void load(BlockbenchCommonTypes.Texture texture) {
+            public TextureRepresentation(BlockbenchCommonTypes.Texture texture) {
                 name = texture.name;
                 if (name.endsWith(".png")) name = name.substring(0, name.length() - 4);
 
                 // ugh why do we have to perpetuate this garbage
-                textureType = "d";
                 if (name.endsWith("_e")) textureType = "e";
                 else if (name.endsWith("_n")) textureType = "n";
                 else if (name.endsWith("_s")) textureType = "s";
+                else textureType = "d";
 
                 try {
                     // exceptions as control flow ._.
@@ -265,24 +276,25 @@ public class BlockbenchParser2 {
 
         public class AnimationRepresentation {
             // assign externally
-            public int globalID;
+            public final int globalID;
 
-            String mdl = locatedWithin.isBlank() ? Intermediary.this.name : locatedWithin + Intermediary.this.name;
-            String name;
+            final String mdl = locatedWithin.isBlank() ? Intermediary.this.name : locatedWithin + Intermediary.this.name;
+            final String name;
             // skip if 'once'
-            String loop;
+            final String loop;
             // skip if false
-            boolean override;
-            float length;
-            float offset;
-            float blend;
-            float startDelay;
-            float loopDelay;
+            final boolean override;
+            final float length;
+            final float offset;
+            final float blend;
+            final float startDelay;
+            final float loopDelay;
 
-            public Map<String, BlockbenchCommonTypes.Animator> partAnimators;
-            public @Nullable BlockbenchCommonTypes.Animator fxAnimator;
+            public final Map<String, BlockbenchCommonTypes.Animator> partAnimators;
+            public final @Nullable BlockbenchCommonTypes.Animator fxAnimator;
 
-            public void load(BlockbenchCommonTypes.Animation animation) {
+            public AnimationRepresentation(int globalID, BlockbenchCommonTypes.Animation animation) {
+                this.globalID = globalID;
                 name = animation.name;
                 loop = animation.loop == null ? "once" : animation.loop;
                 override = Boolean.TRUE.equals(animation.override);
@@ -355,6 +367,18 @@ public class BlockbenchParser2 {
 
 
                 return fxData;
+            }
+        }
+
+        public class CollectionRepresentation {
+            public final String name;
+            public final int localID;
+
+            public CollectionRepresentation(int localID, BlockbenchCommonTypes.Collection source) {
+                name = source.name;
+                this.localID = localID;
+
+                source.children.forEach(it -> collectionsByElement.put(it, localID));
             }
         }
     }

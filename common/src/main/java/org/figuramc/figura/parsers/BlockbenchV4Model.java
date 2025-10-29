@@ -6,8 +6,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.TypeAdapterFactory;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import org.figuramc.figura.parsers.BlockbenchCommonTypes.*;
+import org.figuramc.figura.parsers.BlockbenchCommonTypes.Collection;
 import org.figuramc.figura.parsers.BlockbenchParser2.Intermediary.AnimationRepresentation;
+import org.figuramc.figura.parsers.BlockbenchParser2.Intermediary.CollectionRepresentation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -24,6 +27,9 @@ public class BlockbenchV4Model extends ModelFormat {
     List<Texture> textures;
 
     List<Animation> animations;
+
+    List<Collection> collections;
+
     public static final IllegalStateException WRONG_FORMAT =
             new IllegalStateException("Tried to execute the v4 parser on a model file of a different version");
 
@@ -67,6 +73,12 @@ public class BlockbenchV4Model extends ModelFormat {
                 instance.animations.add(context.deserialize(item, Animation.class));
             }
 
+        instance.collections = new ArrayList<>();
+        if (obj.has("collections"))
+            for (JsonElement item : obj.getAsJsonArray("collections")) {
+                instance.collections.add(context.deserialize(item, Collection.class));
+            }
+
         return instance;
     };
 
@@ -90,13 +102,12 @@ public class BlockbenchV4Model extends ModelFormat {
         }
         target.referents.putAll(getAllReferences());
         target.loadAnimations(animations);
+        target.loadCollections(collections);
 
         CompoundTag tag = new CompoundTag();
 
         tag.putString("name", target.name);
         BlockbenchCommonTypes.parseParent(target.name, tag);
-
-        // TODO: collections
 
         ListTag chld = new ListTag();
         for (OutlinerItem item : outliner) {
@@ -105,6 +116,12 @@ public class BlockbenchV4Model extends ModelFormat {
                 chld.add(itemTag);
         }
         tag.put("chld", chld);
+
+        ListTag cn = new ListTag();
+        for (CollectionRepresentation collRep : target.collections) {
+            cn.add(StringTag.valueOf(collRep.name));
+        }
+        tag.put("cn", cn);
 
         return tag;
     }
@@ -193,8 +210,6 @@ public class BlockbenchV4Model extends ModelFormat {
 
                 BlockbenchCommonTypes.parseParent(name, tag);
 
-                // TODO: collections?!
-
                 if (children != null) {
                     ListTag chld = new ListTag();
                     for (OutlinerItem child : children) {
@@ -222,6 +237,8 @@ public class BlockbenchV4Model extends ModelFormat {
                     }
                     tag.put("anim", anim);
                 }
+
+                BlockbenchCommonTypes.attachCollections(context, uuid, tag);
 
                 return tag;
             }
