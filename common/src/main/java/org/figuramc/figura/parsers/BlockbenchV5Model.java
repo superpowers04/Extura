@@ -111,11 +111,13 @@ public class BlockbenchV5Model extends ModelFormat {
     public static final Pattern DEFINITELY_STMT = Pattern.compile(
             "^\\s*([:;]|break|goto|do|while|repeat|if|for|function\\s*[^\\s(]|local)");
 
+    public static final Pattern RETURN_BOUNDARY = Pattern.compile("\\breturn\\b");
+
     /**
      * @return source code that returns the opposite, hopefully?
      */
     public static String negateLua(String source) {
-        if (source.contains("return") || DEFINITELY_STMT.matcher(source).find()) {
+        if (RETURN_BOUNDARY.matcher(source).find() || DEFINITELY_STMT.matcher(source).find()) {
             // don't bother
             return source;
         }

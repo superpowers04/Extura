@@ -3,17 +3,12 @@ package org.figuramc.figura.animation;
 import com.mojang.datafixers.util.Pair;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
-import org.figuramc.figura.lua.LuaWhitelist;
-import org.figuramc.figura.lua.docs.LuaMethodDoc;
-import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.vector.FiguraVec3;
-import org.figuramc.figura.utils.LuaUtils;
+import org.figuramc.figura.model.FiguraModelPart;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 
-@LuaWhitelist
-@LuaTypeDoc(name = "Keyframe",value = "keyframe")
 public class Keyframe implements Comparable<Keyframe> {
     /**
      * <p>
@@ -35,6 +30,8 @@ public class Keyframe implements Comparable<Keyframe> {
     }
 
     private final Avatar owner;
+    private final FiguraModelPart part;
+    private final TransformType channel;
     private final Animation animation;
     private final float time;
     private final Interpolation interpolation;
@@ -47,6 +44,8 @@ public class Keyframe implements Comparable<Keyframe> {
     private final KeyframeValue[] bCache = {null, null, null};
 
     public Keyframe(Avatar owner,
+                    FiguraModelPart part,
+                    TransformType channel,
                     Animation animation,
                     float time,
                     Interpolation interpolation,
@@ -57,6 +56,8 @@ public class Keyframe implements Comparable<Keyframe> {
                     FiguraVec3 bezierLeftTime,
                     FiguraVec3 bezierRightTime) {
         this.owner = owner;
+        this.part = part;
+        this.channel = channel;
         this.animation = animation;
         this.time = time;
         this.interpolation = interpolation;
@@ -69,14 +70,11 @@ public class Keyframe implements Comparable<Keyframe> {
         this.bezierLeftTime = bezierLeftTime;
         this.bezierRightTime = bezierRightTime;
     }
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_target_a")
+
     public FiguraVec3 getTargetA(float delta) {
         return targetA != null ? targetA.copy() : FiguraVec3.of(getA(0, delta), getA(1, delta), getA(2, delta));
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_target_a")
     public FiguraVec3 getTargetB(float delta) {
         return targetB != null ? targetB.copy() : FiguraVec3.of(getB(0, delta), getB(1, delta), getB(2, delta));
     }
@@ -99,10 +97,20 @@ public class Keyframe implements Comparable<Keyframe> {
                     if (chunk == null) return null;
                     return KeyframeValue.function(chunk, chunkName);
                 } catch (LuaError e) { /* chunk compile failed (probably syntax) */
-                    // Try as a statement.
-                    LuaValue chunk = owner.loadScript(chunkName, source);
-                    if (chunk == null) return null;
-                    return KeyframeValue.function(chunk, chunkName);
+                    try {
+                        // Try as a statement.
+                        LuaValue chunk = owner.loadScript(chunkName, source);
+                        if (chunk == null) return null;
+                        return KeyframeValue.function(chunk, chunkName);
+                    } catch (LuaError e2) { /* Maybe this is caused by a bad inversion? */
+                        if (source.endsWith("--v5")) {
+                            throw new LuaError(e2.getMessage() + "\n" +
+                                    "\nThis might have been caused by a bad automatic inversion when importing a 5.0 model:" +
+                                    "\nIf this keyframe is a statement and not an expression, include the word 'return'" +
+                                    "\nsomewhere in it (e.g. --[[ return ]] ) to skip inversion.");
+                        }
+                        throw e2;
+                    }
                 }
             }
         } catch (Exception e3) {
@@ -142,14 +150,12 @@ public class Keyframe implements Comparable<Keyframe> {
             return 0; // fallback
         }
     }
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_a")
-    public double getA(int idx, float delta) {
+
+    private double getA(int idx, float delta) {
         return evalCompile(aCache, aCode, idx, delta);
     }
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_b")
-    public double getB(int idx, float delta) {
+
+    private double getB(int idx, float delta) {
         return evalCompile(bCache, bCode, idx, delta);
     }
 
@@ -157,10 +163,10 @@ public class Keyframe implements Comparable<Keyframe> {
         StringBuilder b = new StringBuilder();
         // note: scripts rely on the animation name followed by "keyframe" being at the start
         b.append(animation.getName())
-                .append(" keyframe (")
-                .append(time)
-                .append("s, ");
-
+                .append(" keyframe (part '");
+        b.append(part.name);
+        b.append("', time ").append(time).append("s, ");
+        b.append(channel.name()).append(" ");
         switch (idx) {
             case 0:
                 b.append("X");
@@ -178,43 +184,32 @@ public class Keyframe implements Comparable<Keyframe> {
         b.append(")");
         return b.toString();
     }
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_time")
+
     public float getTime() {
         return time;
     }
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_interpolation")
+
     public Interpolation getInterpolation() {
         return interpolation;
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_bezier_left")
     public FiguraVec3 getBezierLeft() {
         return bezierLeft.copy();
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_bezier_right")
     public FiguraVec3 getBezierRight() {
         return bezierRight.copy();
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_bezier_left_time")
     public FiguraVec3 getBezierLeftTime() {
         return bezierLeftTime.copy();
     }
 
-    @LuaWhitelist
-    @LuaMethodDoc("keyframe.get_bezier_right_time")
     public FiguraVec3 getBezierRightTime() {
         return bezierRightTime.copy();
     }
 
     @Override
-    @LuaWhitelist
     public int compareTo(Keyframe other) {
         return Float.compare(this.getTime(), other.getTime());
     }
