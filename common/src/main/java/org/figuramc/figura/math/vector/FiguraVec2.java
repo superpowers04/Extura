@@ -38,12 +38,17 @@ public class FiguraVec2 extends FiguraVector<FiguraVec2, FiguraMat2> {
         return this;
     }
 
+    public FiguraVec2(double x, double y){
+    	this.x=x;
+    	this.y=y;
+    }
+
     public static FiguraVec2 of() {
         return new FiguraVec2();
     }
 
     public static FiguraVec2 of(double x, double y) {
-        return of().set(x, y);
+        return new FiguraVec2(x, y);
     }
 
     // -- basic math -- // 
