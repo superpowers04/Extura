@@ -166,8 +166,6 @@ public class Keyframe implements Comparable<Keyframe> {
     }
     @LuaWhitelist
     @LuaMethodDoc("keyframe.get_b")
-    public double getB(int idx, float delta) {
-
     private double getB(int idx, float delta) {
         return evalCompile(bCache, bCode, idx, delta);
     }
