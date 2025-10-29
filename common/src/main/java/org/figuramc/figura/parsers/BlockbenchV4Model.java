@@ -139,7 +139,7 @@ public class BlockbenchV4Model extends ModelFormat {
                 )
                         .bind("group", Group.class).bind("element", Element.class);
 
-        String uuid;
+        final String uuid;
 
         public OutlinerItem(String uuid) {
             this.uuid = uuid;
@@ -168,7 +168,8 @@ public class BlockbenchV4Model extends ModelFormat {
 
         public static final class Group extends OutlinerItem implements UUIDReferable {
 
-            @Nullable List<OutlinerItem> children = new ArrayList<>();
+            @Nullable
+            final List<OutlinerItem> children = new ArrayList<>();
             String name;
             @Nullable Boolean visibility;
             @Nullable Boolean export;

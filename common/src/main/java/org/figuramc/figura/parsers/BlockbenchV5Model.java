@@ -196,7 +196,7 @@ public class BlockbenchV5Model extends ModelFormat {
                     .getSimpleName() + " instead");
         };
 
-        String uuid;
+        final String uuid;
 
         public OutlinerItem(String uuid) {
             this.uuid = uuid;
@@ -214,7 +214,7 @@ public class BlockbenchV5Model extends ModelFormat {
         }
 
         public static final class Container extends OutlinerItem {
-            List<OutlinerItem> children = new ArrayList<>();
+            final List<OutlinerItem> children = new ArrayList<>();
 
             public Container(String uuid) {
                 super(uuid);
