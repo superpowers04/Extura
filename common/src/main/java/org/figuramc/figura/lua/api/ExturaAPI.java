@@ -12,6 +12,7 @@ import org.figuramc.figura.lua.LuaNotNil;
 import org.figuramc.figura.lua.LuaTypeManager;
 import org.figuramc.figura.lua.LuaWhitelist;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
+import org.figuramc.figura.model.FiguraModelPart;
 import org.figuramc.figura.permissions.Permissions;
 // import org.figuramc.figura.lua.api.java.ExturaClassAPI;
 
@@ -22,6 +23,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Field;
 import java.util.Objects;
+import java.util.List;
+import java.util.ArrayList;
 import java.net.*;
 import java.util.HashMap;
 import java.lang.Class;
@@ -80,6 +83,19 @@ public class ExturaAPI {
 			// return ((ConfigType<?>) obj.get(null)).value;
 		return map;
 	}
+
+	@LuaWhitelist
+	@LuaMethodDoc("extura.model_part_path")
+	public List<String> modelPartPath(FiguraModelPart part) {
+		List<String> path = new ArrayList<>();
+		FiguraModelPart p = part;
+		while (p != null) {
+			path.add(0,p.getName());
+			p = p.parent;
+		}
+		return path;
+	}
+
 	@LuaWhitelist
 	@LuaMethodDoc("extura.get_minecraft_setting")
 	public Object getMinecraftSetting(String arg) {
