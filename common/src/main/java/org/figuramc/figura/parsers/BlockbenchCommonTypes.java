@@ -228,6 +228,12 @@ public class BlockbenchCommonTypes {
 
     public static class UnknownElement extends Element {
         /* idk */
+
+        @Override
+        public @Nullable CompoundTag toNBT(BlockbenchParser2.Intermediary context) {
+            // Never export.
+            return null;
+        }
     }
 
     public static class CubeElement extends Element {
