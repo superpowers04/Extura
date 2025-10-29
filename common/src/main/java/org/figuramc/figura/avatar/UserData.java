@@ -17,6 +17,8 @@ public class UserData {
     public final UUID id;
     private final Queue<Avatar> avatars = new ConcurrentLinkedQueue<>();
     private Pair<BitSet, BitSet> badges;
+    public boolean fromFSB;
+    public boolean fromBackend;
 
     public UserData(UUID id) {
         this.id = id;
@@ -38,6 +40,8 @@ public class UserData {
         Avatar avatar = new Avatar(id);
         this.avatars.add(avatar);
         avatar.load(nbt);
+        avatar.uploadedTo.setFSB(fromFSB);
+        avatar.uploadedTo.setBackend(fromBackend);
         FiguraMod.debug("--- loaded " + id + " ---");
     }
 
@@ -61,5 +65,20 @@ public class UserData {
         for (Avatar avatar : avatars)
             avatar.clean();
         avatars.clear();
+    }
+
+    public void fromFSB(boolean state) {
+        fromFSB = state;
+    }
+
+    public boolean fromFSB() {
+        return fromFSB;
+    }
+    public void fromBackend(boolean state) {
+        fromBackend = state;
+    }
+
+    public boolean fromBackend() {
+        return fromBackend;
     }
 }
