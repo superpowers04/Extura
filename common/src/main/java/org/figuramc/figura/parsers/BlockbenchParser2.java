@@ -7,7 +7,6 @@ import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import org.figuramc.figura.FiguraMod;
-import org.figuramc.figura.lua.api.json.FiguraJsonArray;
 import org.figuramc.figura.utils.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;

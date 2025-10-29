@@ -141,7 +141,6 @@ public class ModelFuzzerMain {
             n++;
             explore(queue.pop());
             if (n % 100 == 0) {
-                //noinspection LoggingSimilarMessage
                 LOGGER.info("---- PROGRESS REPORT ----");
                 LOGGER.info("  {} completed", n);
                 LOGGER.info("  {} in queue", queue.size());
@@ -180,8 +179,8 @@ public class ModelFuzzerMain {
     BlockbenchParser2 newParser;
 
     static JsonElement baseStructure = null;
-    static Path avatarFolder = Path.of(".").toAbsolutePath();
-    static Path modelPath = Path.of("./example.bbmodel").toAbsolutePath();
+    static final Path avatarFolder = Path.of(".").toAbsolutePath();
+    static final Path modelPath = Path.of("./example.bbmodel").toAbsolutePath();
 
 
     public void before() {
