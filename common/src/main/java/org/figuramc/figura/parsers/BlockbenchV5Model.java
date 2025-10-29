@@ -6,9 +6,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.parsers.BlockbenchCommonTypes.*;
+import org.figuramc.figura.parsers.BlockbenchCommonTypes.Collection;
 import org.figuramc.figura.parsers.BlockbenchParser2.Intermediary.AnimationRepresentation;
+import org.figuramc.figura.parsers.BlockbenchParser2.Intermediary.CollectionRepresentation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -28,6 +31,9 @@ public class BlockbenchV5Model extends ModelFormat {
     List<Texture> textures;
 
     List<Animation> animations;
+
+    List<Collection> collections;
+
     public static final IllegalStateException WRONG_FORMAT =
             new IllegalStateException("Tried to execute the v5 parser on a model file of a different version");
     public static final JsonDeserializer<BlockbenchV5Model> MODEL_DESERIALIZER = (json, typeOfT, context) -> {
@@ -76,6 +82,12 @@ public class BlockbenchV5Model extends ModelFormat {
                 instance.animations.add(context.deserialize(item, Animation.class));
             }
 
+        instance.collections = new ArrayList<>();
+        if (obj.has("collections"))
+            for (JsonElement item : obj.getAsJsonArray("collections")) {
+                instance.collections.add(context.deserialize(item, Collection.class));
+            }
+
         return instance;
     };
 
@@ -96,7 +108,8 @@ public class BlockbenchV5Model extends ModelFormat {
      *     <li>{@code function\\s*[^\\s(]} - non-anonymous functions</li>
      * </ul>
      */
-    public static final Pattern DEFINITELY_STMT = Pattern.compile("^\\s*([:;]|break|goto|do|while|repeat|if|for|function\\s*[^\\s(]|local)");
+    public static final Pattern DEFINITELY_STMT = Pattern.compile(
+            "^\\s*([:;]|break|goto|do|while|repeat|if|for|function\\s*[^\\s(]|local)");
 
     /**
      * @return source code that returns the opposite, hopefully?
@@ -121,13 +134,12 @@ public class BlockbenchV5Model extends ModelFormat {
             target.elements.put(element.uuid, element);
         }
         target.referents.putAll(getAllReferences());
+        target.loadCollections(collections);
 
         CompoundTag tag = new CompoundTag();
 
         tag.putString("name", target.name);
         BlockbenchCommonTypes.parseParent(target.name, tag);
-
-        // TODO: collections
 
         ListTag chld = new ListTag();
         for (OutlinerItem item : outliner) {
@@ -136,6 +148,12 @@ public class BlockbenchV5Model extends ModelFormat {
                 chld.add(itemTag);
         }
         tag.put("chld", chld);
+
+        ListTag cn = new ListTag();
+        for (CollectionRepresentation collRep : target.collections) {
+            cn.add(StringTag.valueOf(collRep.name));
+        }
+        tag.put("cn", cn);
 
         return tag;
     }
@@ -208,7 +226,8 @@ public class BlockbenchV5Model extends ModelFormat {
                             "Broken reference (in model '{}'): expected a group at UUID {} but found {} instead",
                             context.name,
                             uuid,
-                            groupProbably == null ? "(nothing with that UUID!)" : groupProbably.getClass().getSimpleName()
+                            groupProbably == null ? "(nothing with that UUID!)" : groupProbably.getClass()
+                                    .getSimpleName()
                     );
                     return null;
                 }
@@ -227,8 +246,6 @@ public class BlockbenchV5Model extends ModelFormat {
 
                 BlockbenchCommonTypes.parseParent(group.name, tag);
 
-                // TODO: collections?!
-
                 ListTag chld = new ListTag();
                 for (OutlinerItem child : children) {
                     CompoundTag childTag = child.toNBT(context);
@@ -242,12 +259,15 @@ public class BlockbenchV5Model extends ModelFormat {
                     ListTag anim = new ListTag();
                     for (AnimationRepresentation animation : animations) {
                         Animator animator = animation.partAnimators.get(uuid);
-                        if (animator == null) throw new RuntimeException("inconsistent state!! animationsByElement indicated an animator, but none actually present");
+                        if (animator == null) throw new RuntimeException(
+                                "inconsistent state!! animationsByElement indicated an animator, but none actually present");
                         CompoundTag attachment = animator.getNBT(animation, true);
                         if (attachment != null) anim.add(attachment);
                     }
                     tag.put("anim", anim);
                 }
+
+                BlockbenchCommonTypes.attachCollections(context, group.uuid, tag);
 
                 return tag;
             }

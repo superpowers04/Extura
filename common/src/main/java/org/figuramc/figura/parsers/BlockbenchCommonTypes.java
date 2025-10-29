@@ -57,6 +57,15 @@ public class BlockbenchCommonTypes {
         return new Vector2i(w, h);
     }
 
+    public static void attachCollections(BlockbenchParser2.Intermediary context, String uuid, CompoundTag target) {
+        List<Integer> collections = new ArrayList<>(context.collectionsByElement.get(uuid));
+        if (!collections.isEmpty()) {
+            byte[] prs = new byte[collections.size()];
+            for (int i = 0; i < collections.size(); i++) prs[i] = collections.get(i).byteValue();
+            target.put("pr", new ByteArrayTag(prs));
+        }
+    }
+
     public static abstract class ModelFormat {
         String formatVersion;
 
@@ -211,7 +220,8 @@ public class BlockbenchCommonTypes {
             if (Boolean.FALSE.equals(visibility))
                 tag.putBoolean("vsb", false);
 
-            // TODO: collections?!
+            attachCollections(context, uuid, tag);
+
             return tag;
         }
     }
@@ -648,5 +658,18 @@ public class BlockbenchCommonTypes {
         Float height;
         Float uv_width;
         Float uv_height;
+    }
+
+    public static class Collection implements UUIDReferable {
+        String uuid;
+        String name;
+
+        /// uuid referables
+        List<String> children;
+
+        @Override
+        public String getUUID() {
+            return uuid;
+        }
     }
 }
