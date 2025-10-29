@@ -221,12 +221,13 @@ public class ActionWheel {
                         texture.width, texture.height,
                         texture.texture.getWidth(), texture.texture.getHeight());
             }
-
+            int xOffRounded=Math.round(xOff-8);
+            int yOffRounded=Math.round(yOff-8);
             ItemStack item = action.getItem(isSelected);
             if (item != null && !item.isEmpty()) {
-                gui.renderItem(item, (int) Math.round(xOff - 8), (int) Math.round(yOff - 8));
+                gui.renderItem(item, xOffRounded, yOffRounded);
                 if (Configs.ACTION_WHEEL_DECORATIONS.value)
-                    gui.renderItemDecorations(minecraft.font, item, (int) Math.round(xOff - 8), (int) Math.round(yOff - 8));
+                    gui.renderItemDecorations(minecraft.font, item, xOffRounded, yOffRounded);
             }
 
             // no part, no render
@@ -240,12 +241,12 @@ public class ActionWheel {
             // this is so ugly lol, i could do better
             for (RenderTask task : part.renderTasks.values())
                 if (Configs.ACTION_WHEEL_DECORATIONS.value && task instanceof ItemTask itemTask)
-                    gui.renderItemDecorations(minecraft.font, itemTask.getItem(), (int) Math.round(xOff - 8), (int) Math.round(yOff - 8));
+                    gui.renderItemDecorations(minecraft.font, itemTask.getItem(), xOffRounded, yOffRounded);
 
             for (FiguraModelPart child : part.getChildren().values()) {
                 for (RenderTask task : child.renderTasks.values())
                     if (Configs.ACTION_WHEEL_DECORATIONS.value && task instanceof ItemTask itemTask)
-                        gui.renderItemDecorations(minecraft.font, itemTask.getItem(), (int) Math.round(xOff - 8), (int) Math.round(yOff - 8));
+                        gui.renderItemDecorations(minecraft.font, itemTask.getItem(), xOffRounded, yOffRounded);
             }
         }
     }
