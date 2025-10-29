@@ -45,6 +45,7 @@ dependencies {
 tasks.register('runFuzzer', JavaExec) {
     it.classpath = sourceSets.main.runtimeClasspath
     it.mainClass = "org.figuramc.figura.parsers.ModelFuzzerMain"
+    it.workingDir = rootProject.projectDir
     final targetProp = providers.gradleProperty("fuzzTarget")
     if (!targetProp.isPresent()) throw new RuntimeException("Specify -PfuzzTarget with a path to a model file!")
     it.args([targetProp.get()])

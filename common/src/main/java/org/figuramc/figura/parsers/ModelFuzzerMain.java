@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -28,22 +29,26 @@ public class ModelFuzzerMain {
     public record State(JsonElement base, int depth, String label, List<String> mutations) {
     }
 
+    public record Result(boolean pass, boolean crashed) {}
+
     private static final Gson GSON_RAW = new GsonBuilder().create();
     private final SecureRandom rand;
 
-    public static final int MAX_EXPLORE_PER_LAYER = 7;
-    public static final int MAX_DEPTH = 10;
+    public static final int MAX_EXPLORE_PER_LAYER = 25;
+    public static final int MAX_DEPTH = 5;
     public static final Path OUT_TO = Path.of("build/reports/fuzz");
 
     public static final Set<String> NOT_DELETABLE = Set.of(
-            // known issues WONTFIX (i.e. definitely wrong)
-            "width", "height", "rotation",
+            // should be mandatory
+            "width", "height",
             "uv_width", "uv_height", "resolution"
     );
     public static final Set<String> NOT_MODIFIABLE = Set.of(
-            // known issues WONTFIX (i.e. definitely wrong)
-            "resolution", "origin",
-            "bezier_left_time", "bezier_right_time", "bezier_left_value", "bezier_right_value"
+            // vectors
+            "resolution", "origin", "from", "to", "rotation",
+            "bezier_left_time", "bezier_right_time", "bezier_left_value", "bezier_right_value",
+            // the old parser doesn't care, and the new one does care
+            "format_version"
     );
 
     static {
@@ -154,13 +159,17 @@ public class ModelFuzzerMain {
         int depth = s.depth;
         List<String> mutations = s.mutations;
         // Try this one.
-        boolean passed = tryIt(base, label);
+        Result res = tryIt(base, label);
+        boolean passed = res.pass;
+        boolean crashed = res.crashed;
 
         // If we failed, then stop here; we've found a defect.
         if (!passed) {
             reportFailure("fail", base, label, mutations);
             return;
         }
+        // If we crashed, it's probably invalid. Don't try to go further here; that just wastes time
+        if (crashed) return;
 
         if (depth >= MAX_DEPTH) return;
 
@@ -170,7 +179,10 @@ public class ModelFuzzerMain {
             List<String> mutCopy = new ArrayList<>(mutations);
             path.clear();
             JsonElement derived = warp(base, path, mutCopy);
-            queue.add(new State(derived, depth + 1, label + i, mutCopy));
+            String attach;
+            if (MAX_EXPLORE_PER_LAYER > 10) attach = "_" + i;
+            else attach = Integer.toString(i);
+            queue.add(new State(derived, depth + 1, label + attach, mutCopy));
         }
     }
 
@@ -189,13 +201,61 @@ public class ModelFuzzerMain {
     }
 
     private static final double STR_MODIFY = 0.33;
-    private static final double STR_ADD = 0.33;
-    // rest is STR_REMOVE
+    private static final double STR_REMOVE = 0.33;
+    // rest is STR_ADD
+
+    private char getRandomPrintable() {
+        final int delta = 0x7e - 0x20;
+        int i = rand.nextInt(delta);
+        return (char) (i + 0x20);
+    }
+
+    private static String fromListOfChar(List<Character> list) {
+        StringBuilder sb = new StringBuilder(list.size());
+        for (Character c : list) {
+            sb.append(c);
+        }
+        return sb.toString();
+    }
 
     public String mutateString(String input, Deque<String> path, List<String> mutations) {
-        // TODO
         double f = rand.nextDouble();
-        throw new RuntimeException();
+        String pathS = String.join("", path);
+        List<Character> codepoints = input.chars().mapToObj(x -> (char) x).collect(Collectors.toCollection(ArrayList::new));
+        final String output;
+        if (f < STR_MODIFY && !input.isEmpty()) {
+            // modify
+            int at = rand.nextInt(codepoints.size());
+            char toInsert = getRandomPrintable();
+            char toReplace = codepoints.get(at);
+            codepoints.set(at, toInsert);
+            output = fromListOfChar(codepoints);
+            mutations.add(String.format(
+                    "Changed %s (Replaced '%s' with '%s' at position %s: \"%s\" -> \"%s\")",
+                    pathS, toReplace, toInsert, at, input, output
+            ));
+        } else if (f < STR_MODIFY + STR_REMOVE && !input.isEmpty()) {
+            // delete
+            int at = rand.nextInt(codepoints.size());
+            codepoints.remove(at);
+
+            output = fromListOfChar(codepoints);
+            mutations.add(String.format(
+                    "Changed %s (Deleted at position %s: \"%s\" -> \"%s\")",
+                    pathS, at, input, output
+            ));
+        } else {
+            // insert
+            int at = rand.nextInt(codepoints.size() + 1);
+            char toInsert = getRandomPrintable();
+            codepoints.add(at, toInsert);
+            output = fromListOfChar(codepoints);
+            mutations.add(String.format(
+                    "Changed %s (Inserted '%s' at position %s: \"%s\" -> \"%s\")",
+                    pathS, toInsert, at, input, output
+            ));
+        }
+        return output;
     }
 
     private static final double DELETE_CHANCE = 0.05;
@@ -265,11 +325,14 @@ public class ModelFuzzerMain {
                 ));
                 return new JsonPrimitive(!prim.getAsBoolean());
             }
+            if (prim.isString()) {
+                return new JsonPrimitive(mutateString(prim.getAsString(), path, mutations));
+            }
         }
         return element;
     }
 
-    public boolean tryIt(JsonElement structure, String label) {
+    public Result tryIt(JsonElement structure, String label) {
         LOGGER.info("-- {} --", label);
         boolean pass = true;
         before();
@@ -330,6 +393,6 @@ public class ModelFuzzerMain {
 
         LOGGER.info("-- {} COMPLETED {} --", label, pass ? "PASSED" : "FAILED");
 
-        return pass;
+        return new Result(pass, failedNew);
     }
 }
