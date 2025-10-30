@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
@@ -222,6 +223,14 @@ public class ActionWheel {
                         texture.width, texture.height,
                         texture.texture.getWidth(), texture.texture.getHeight());
             }
+            int xOffRounded=(int)Math.round(xOff-8);
+            int yOffRounded=(int)Math.round(yOff-8);
+            ItemStack item = action.getItem(isSelected);
+            if (item != null && !item.isEmpty()) {
+                gui.renderItem(item, xOffRounded, yOffRounded);
+                if (Configs.ACTION_WHEEL_DECORATIONS.value)
+                    gui.renderItemDecorations(minecraft.font, item, xOffRounded, yOffRounded);
+            }
 
             // no part, no render
             FiguraModelPart part = action.getPart(isSelected);
@@ -234,12 +243,12 @@ public class ActionWheel {
             // this is so ugly lol, i could do better
             for (RenderTask task : part.renderTasks.values())
                 if (Configs.ACTION_WHEEL_DECORATIONS.value && task instanceof ItemTask itemTask)
-                    gui.renderItemDecorations(minecraft.font, itemTask.getItem(), (int) Math.round(xOff - 8), (int) Math.round(yOff - 8));
+                    gui.renderItemDecorations(minecraft.font, itemTask.getItem(), xOffRounded, yOffRounded);
 
             for (FiguraModelPart child : part.getChildren().values()) {
                 for (RenderTask task : child.renderTasks.values())
                     if (Configs.ACTION_WHEEL_DECORATIONS.value && task instanceof ItemTask itemTask)
-                        gui.renderItemDecorations(minecraft.font, itemTask.getItem(), (int) Math.round(xOff - 8), (int) Math.round(yOff - 8));
+                        gui.renderItemDecorations(minecraft.font, itemTask.getItem(), xOffRounded, yOffRounded);
             }
         }
     }
