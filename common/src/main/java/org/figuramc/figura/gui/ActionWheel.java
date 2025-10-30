@@ -221,8 +221,8 @@ public class ActionWheel {
                         texture.width, texture.height,
                         texture.texture.getWidth(), texture.texture.getHeight());
             }
-            int xOffRounded=Math.round(xOff-8);
-            int yOffRounded=Math.round(yOff-8);
+            int xOffRounded=(int)Math.round(xOff-8);
+            int yOffRounded=(int)Math.round(yOff-8);
             ItemStack item = action.getItem(isSelected);
             if (item != null && !item.isEmpty()) {
                 gui.renderItem(item, xOffRounded, yOffRounded);
