@@ -7,10 +7,9 @@ import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.utils.IOUtils;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -87,7 +86,7 @@ public class BlockbenchParser2 {
         public Path avatarRoot;
         public String locatedWithin;
         // model file's 'resolution' property
-        public Vector2i defaultRes;
+        public BlockbenchCommonTypes.IntPair defaultRes;
 
         private final List<TextureRepresentation> textures = new ArrayList<>();
         private final HashMap<String, Map<String, TextureRepresentation>> textureNames = new HashMap<>();
@@ -140,7 +139,7 @@ public class BlockbenchParser2 {
             return textures.get(localID).globalID;
         }
 
-        public Vector2f getTextureFixedSize(int localID) {
+        public FiguraVec2 getTextureFixedSize(int localID) {
             return textures.get(localID).fixedSize;
         }
 
@@ -190,7 +189,7 @@ public class BlockbenchParser2 {
             public String path;
             public byte[] source;
 
-            public final Vector2f fixedSize;
+            public final FiguraVec2 fixedSize;
 
             public TextureRepresentation(BlockbenchCommonTypes.Texture texture) {
                 name = texture.name;
@@ -255,13 +254,13 @@ public class BlockbenchParser2 {
                     name = name.substring(0, name.length() - 2);
 
                 if (texture.width != null) {
-                    fixedSize = new Vector2f(
+                    fixedSize = FiguraVec2.of(
                             (float) texture.width / texture.uv_width,
                             (float) texture.height / texture.uv_height
                     );
                 } else {
-                    Vector2i imageSize = BlockbenchCommonTypes.getPNGDimensions(source);
-                    fixedSize = new Vector2f(
+                    BlockbenchCommonTypes.IntPair imageSize = BlockbenchCommonTypes.getPNGDimensions(source);
+                    fixedSize = FiguraVec2.of(
                             (float) imageSize.x / defaultRes.x,
                             (float) imageSize.y / defaultRes.y
                     );

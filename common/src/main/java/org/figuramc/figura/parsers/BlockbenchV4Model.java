@@ -7,18 +7,19 @@ import com.google.gson.TypeAdapterFactory;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.parsers.BlockbenchCommonTypes.*;
 import org.figuramc.figura.parsers.BlockbenchCommonTypes.Collection;
 import org.figuramc.figura.parsers.BlockbenchParser2.Intermediary.AnimationRepresentation;
 import org.figuramc.figura.parsers.BlockbenchParser2.Intermediary.CollectionRepresentation;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
 
 import java.util.*;
 
 public class BlockbenchV4Model extends ModelFormat {
-    Vector2i resolution;
+    private static final FiguraVec3 ZERO = FiguraVec3.of(0, 0, 0);
+
+    IntPair resolution;
 
     List<Element> elements;
 
@@ -44,7 +45,7 @@ public class BlockbenchV4Model extends ModelFormat {
         if (!instance.formatVersion.startsWith("4.")) throw WRONG_FORMAT;
 
         JsonObject resolution = obj.getAsJsonObject("resolution");
-        instance.resolution = new Vector2i(
+        instance.resolution = new IntPair(
                 resolution.get("width").getAsInt(),
                 resolution.get("height").getAsInt()
         );
@@ -173,9 +174,9 @@ public class BlockbenchV4Model extends ModelFormat {
             String name;
             @Nullable Boolean visibility;
             @Nullable Boolean export;
-            @Nullable Vector3f origin;
+            FiguraVec3 origin;
 
-            @Nullable Vector3f rotation;
+            FiguraVec3 rotation;
 
             public Group(String uuid) {
                 super(uuid);
@@ -205,8 +206,8 @@ public class BlockbenchV4Model extends ModelFormat {
                 if (Boolean.FALSE.equals(visibility))
                     tag.putBoolean("vsb", false);
 
-                if (origin != null && !origin.equals(0, 0, 0)) tag.put("piv", BlockbenchCommonTypes.vecToList(origin));
-                if (rotation != null && !rotation.equals(0, 0, 0))
+                if (origin != null && !origin.equals(ZERO)) tag.put("piv", BlockbenchCommonTypes.vecToList(origin));
+                if (rotation != null && !rotation.equals(ZERO))
                     tag.put("rot", BlockbenchCommonTypes.vecToList(rotation));
 
                 BlockbenchCommonTypes.parseParent(name, tag);
