@@ -8,19 +8,20 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.parsers.BlockbenchCommonTypes.*;
 import org.figuramc.figura.parsers.BlockbenchCommonTypes.Collection;
 import org.figuramc.figura.parsers.BlockbenchParser2.Intermediary.AnimationRepresentation;
 import org.figuramc.figura.parsers.BlockbenchParser2.Intermediary.CollectionRepresentation;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class BlockbenchV5Model extends ModelFormat {
-    Vector2i resolution;
+    private static final FiguraVec3 ZERO = FiguraVec3.of(0, 0, 0);
+
+    IntPair resolution;
 
     List<Element> elements;
 
@@ -47,7 +48,7 @@ public class BlockbenchV5Model extends ModelFormat {
         if (!instance.formatVersion.startsWith("5.")) throw WRONG_FORMAT;
 
         JsonObject resolution = obj.getAsJsonObject("resolution");
-        instance.resolution = new Vector2i(
+        instance.resolution = new IntPair(
                 resolution.get("width").getAsInt(),
                 resolution.get("height").getAsInt()
         );
@@ -167,8 +168,8 @@ public class BlockbenchV5Model extends ModelFormat {
         @Nullable Boolean visibility;
         @Nullable Boolean export;
 
-        @Nullable Vector3f origin;
-        @Nullable Vector3f rotation;
+        FiguraVec3 origin;
+        FiguraVec3 rotation;
 
         @Override
         public String getUUID() {
@@ -241,9 +242,9 @@ public class BlockbenchV5Model extends ModelFormat {
                 if (Boolean.FALSE.equals(group.visibility))
                     tag.putBoolean("vsb", false);
 
-                if (group.origin != null && !group.origin.equals(0, 0, 0))
+                if (group.origin != null && !group.origin.equals(ZERO))
                     tag.put("piv", BlockbenchCommonTypes.vecToList(group.origin));
-                if (group.rotation != null && !group.rotation.equals(0, 0, 0))
+                if (group.rotation != null && !group.rotation.equals(ZERO))
                     tag.put("rot", BlockbenchCommonTypes.vecToList(group.rotation));
 
                 BlockbenchCommonTypes.parseParent(group.name, tag);
