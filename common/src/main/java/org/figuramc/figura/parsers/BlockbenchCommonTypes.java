@@ -3,12 +3,11 @@ package org.figuramc.figura.parsers;
 import com.google.gson.*;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
+import org.figuramc.figura.math.vector.FiguraVec2;
+import org.figuramc.figura.math.vector.FiguraVec3;
+import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.model.ParentType;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -16,14 +15,26 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public class BlockbenchCommonTypes {
+    private static final FiguraVec3 ZERO = FiguraVec3.of(0, 0, 0);
+    private static final FiguraVec4 ZERO4 = FiguraVec4.of(0, 0, 0, 0);
+
+    public static class IntPair {
+        public int x;
+        public int y;
+
+        public IntPair(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
 
     public static Gson getGson() {
         return new GsonBuilder()
                 .registerTypeAdapter(BlockbenchV5Model.class, BlockbenchV5Model.MODEL_DESERIALIZER)
                 .registerTypeAdapter(BlockbenchV4Model.class, BlockbenchV4Model.MODEL_DESERIALIZER)
-                .registerTypeAdapter(Vector4f.class, VEC4F_DESERIALIZER)
-                .registerTypeAdapter(Vector3f.class, VEC3F_DESERIALIZER)
-                .registerTypeAdapter(Vector2f.class, VEC2F_DESERIALIZER)
+                .registerTypeAdapter(FiguraVec4.class, VEC4_DESERIALIZER)
+                .registerTypeAdapter(FiguraVec3.class, VEC3_DESERIALIZER)
+                .registerTypeAdapter(FiguraVec2.class, VEC2_DESERIALIZER)
                 .registerTypeAdapter(BlockbenchV5Model.OutlinerItem.class, BlockbenchV5Model.OutlinerItem.DESERIALIZER)
                 .registerTypeAdapter(
                         BlockbenchV4Model.OutlinerItem.Element.class,
@@ -42,7 +53,7 @@ public class BlockbenchCommonTypes {
             nbt.putString("pt", parentType.name());
     }
 
-    public static Vector2i getPNGDimensions(byte[] png) {
+    public static IntPair getPNGDimensions(byte[] png) {
         // this grabs the two values from the header ._.
         // duplicate of BlockbenchModelParser.getTextureSize
         int w = (int) png[16] & 0xFF;
@@ -55,7 +66,7 @@ public class BlockbenchCommonTypes {
         h = (h << 8) + ((int) png[22] & 0xFF);
         h = (h << 8) + ((int) png[23] & 0xFF);
 
-        return new Vector2i(w, h);
+        return new IntPair(w, h);
     }
 
     public static void attachCollections(BlockbenchParser2.Intermediary context, String uuid, CompoundTag target) {
@@ -87,32 +98,32 @@ public class BlockbenchCommonTypes {
         public abstract CompoundTag convert(BlockbenchParser2.Intermediary target);
     }
 
-    public static final JsonDeserializer<Vector4f> VEC4F_DESERIALIZER = (json, typeOfT, context) -> {
+    public static final JsonDeserializer<FiguraVec4> VEC4_DESERIALIZER = (json, typeOfT, context) -> {
         JsonArray four = json.getAsJsonArray();
         if (four.size() != 4)
-            throw new JsonParseException("Trying to parse a Vector4f, but the list has " + four.size() + " items (expected 4)");
-        return new Vector4f(
+            throw new JsonParseException("Trying to parse a Vector4, but the list has " + four.size() + " items (expected 4)");
+        return FiguraVec4.of(
                 four.get(0).getAsFloat(),
                 four.get(1).getAsFloat(),
                 four.get(2).getAsFloat(),
                 four.get(3).getAsFloat()
         );
     };
-    public static final JsonDeserializer<Vector3f> VEC3F_DESERIALIZER = (json, typeOfT, context) -> {
+    public static final JsonDeserializer<FiguraVec3> VEC3_DESERIALIZER = (json, typeOfT, context) -> {
         JsonArray three = json.getAsJsonArray();
         if (three.size() != 3)
-            throw new JsonParseException("Trying to parse a Vector3f, but the list has " + three.size() + " items (expected 3)");
-        return new Vector3f(
+            throw new JsonParseException("Trying to parse a Vector3, but the list has " + three.size() + " items (expected 3)");
+        return FiguraVec3.of(
                 three.get(0).getAsFloat(),
                 three.get(1).getAsFloat(),
                 three.get(2).getAsFloat()
         );
     };
-    public static final JsonDeserializer<Vector2f> VEC2F_DESERIALIZER = (json, typeOfT, context) -> {
+    public static final JsonDeserializer<FiguraVec2> VEC2_DESERIALIZER = (json, typeOfT, context) -> {
         JsonArray two = json.getAsJsonArray();
         if (two.size() != 2)
-            throw new JsonParseException("Trying to parse a Vector2f, but the list has " + two.size() + " items (expected 2)");
-        return new Vector2f(
+            throw new JsonParseException("Trying to parse a Vector2, but the list has " + two.size() + " items (expected 2)");
+        return FiguraVec2.of(
                 two.get(0).getAsFloat(),
                 two.get(1).getAsFloat()
         );
@@ -147,12 +158,12 @@ public class BlockbenchCommonTypes {
         return tag;
     }
 
-    public static ListTag vecToList(Vector3f vector) {
-        return floatArrToList(new float[]{vector.x, vector.y, vector.z});
+    public static ListTag vecToList(FiguraVec3 vector) {
+        return floatArrToList(new float[]{(float) vector.x, (float) vector.y, (float) vector.z});
     }
 
-    public static ListTag vecToList(Vector4f vector) {
-        return floatArrToList(new float[]{vector.x, vector.y, vector.z, vector.w});
+    public static ListTag vecToList(FiguraVec4 vector) {
+        return floatArrToList(new float[]{(float) vector.x, (float) vector.y, (float) vector.z, (float) vector.w});
     }
 
     public static float parseFloatOr(@Nullable String floatLike, float fallback) {
@@ -187,8 +198,8 @@ public class BlockbenchCommonTypes {
         String type;
         String uuid;
 
-        @Nullable Vector3f rotation;
-        @Nullable Vector3f origin;
+        FiguraVec3 rotation;
+        FiguraVec3 origin;
 
         @Nullable Boolean visibility;
         @Nullable Boolean export;
@@ -210,10 +221,10 @@ public class BlockbenchCommonTypes {
             } catch (IllegalArgumentException ignored) {
                 tag.putString("nr", uuid);
             }
-            if (rotation != null && !rotation.equals(0, 0, 0)) {
+            if (rotation != null && !rotation.equals(ZERO)) {
                 tag.put("rot", vecToList(rotation));
             }
-            if (origin != null && !origin.equals(0, 0, 0)) {
+            if (origin != null && !origin.equals(ZERO)) {
                 tag.put("piv", vecToList(origin));
             }
 
@@ -239,8 +250,8 @@ public class BlockbenchCommonTypes {
 
     public static class CubeElement extends Element {
         // type = "cube"
-        @Nullable Vector3f from;
-        @Nullable Vector3f to;
+        FiguraVec3 from;
+        FiguraVec3 to;
 
         float inflate;
 
@@ -251,8 +262,8 @@ public class BlockbenchCommonTypes {
             CompoundTag tag = super.toNBT(context);
             if (tag == null) return null;
 
-            if (from != null && !from.equals(0, 0, 0)) tag.put("f", vecToList(from));
-            if (to != null && !to.equals(0, 0, 0)) tag.put("t", vecToList(to));
+            if (from != null && !from.equals(ZERO)) tag.put("f", vecToList(from));
+            if (to != null && !to.equals(ZERO)) tag.put("t", vecToList(to));
             if (inflate != 0f)
                 tag.putFloat("inf", inflate);
 
@@ -275,7 +286,7 @@ public class BlockbenchCommonTypes {
     public static class CubeFace implements NBTRepresentation<CompoundTag> {
         static final String[] FACES = new String[]{"north", "south", "west", "east", "up", "down"};
 
-        Vector4f uv;
+        FiguraVec4 uv;
         float rotation;
         @Nullable Integer texture;
 
@@ -289,11 +300,11 @@ public class BlockbenchCommonTypes {
             tag.putInt("tex", textureID);
             if (rotation != 0f)
                 tag.putFloat("rot", rotation);
-            if (uv != null && !uv.equals(0, 0, 0, 0)) {
-                Vector2f size = context.getTextureFixedSize(texture);
-                Vector4f sizeTwice = new Vector4f(size.x, size.y, size.x, size.y);
+            if (uv != null && !uv.equals(ZERO4)) {
+                FiguraVec2 size = context.getTextureFixedSize(texture);
+                FiguraVec4 sizeTwice = FiguraVec4.of(size.x, size.y, size.x, size.y);
                 // this is the order it is because otherwise we'd be mutating uv
-                Vector4f corrected = sizeTwice.mul(uv);
+                FiguraVec4 corrected = sizeTwice.multiply(uv);
                 tag.put("uv", vecToList(corrected));
             }
             return tag;
@@ -304,7 +315,7 @@ public class BlockbenchCommonTypes {
         /// map of face ID(?) to face
         Map<String, MeshFace> faces;
         /// map of vertex ID to offsets
-        Map<String, Vector3f> vertices;
+        Map<String, FiguraVec3> vertices;
 
         // default "flat", alternative "smooth"
         // smooth: set 'smo' to true (note: since meshes aren't groups, only setting it if true is fine)
@@ -321,18 +332,18 @@ public class BlockbenchCommonTypes {
             CompoundTag meshData = new CompoundTag();
 
             HashMap<String, Integer> vert2idx = new HashMap<>();
-            HashMap<String, Vector3f> vert2pos = new HashMap<>();
+            HashMap<String, FiguraVec3> vert2pos = new HashMap<>();
             ListTag vtx = new ListTag();
 
             int i = 0;
-            for (Map.Entry<String, Vector3f> entry : vertices.entrySet()) {
-                Vector3f combined = new Vector3f(entry.getValue()).add(origin);
+            for (Map.Entry<String, FiguraVec3> entry : vertices.entrySet()) {
+                FiguraVec3 combined = entry.getValue().copy().add(origin);
                 vert2idx.put(entry.getKey(), i++);
                 vert2pos.put(entry.getKey(), combined);
 
-                vtx.add(FloatTag.valueOf(combined.x));
-                vtx.add(FloatTag.valueOf(combined.y));
-                vtx.add(FloatTag.valueOf(combined.z));
+                vtx.add(FloatTag.valueOf((float) combined.x));
+                vtx.add(FloatTag.valueOf((float) combined.y));
+                vtx.add(FloatTag.valueOf((float) combined.z));
             }
 
             // textures _and_ vertex counts, despite the name
@@ -369,10 +380,10 @@ public class BlockbenchCommonTypes {
                     };
                     fac.add(value);
 
-                    Vector2f uv = face.uv.get(vertID);
-                    Vector2f fixedSize = context.getTextureFixedSize(face.texture);
-                    uvs.add(FloatTag.valueOf(uv.x * fixedSize.x));
-                    uvs.add(FloatTag.valueOf(uv.y * fixedSize.y));
+                    FiguraVec2 uv = face.uv.get(vertID);
+                    FiguraVec2 fixedSize = context.getTextureFixedSize(face.texture);
+                    uvs.add(FloatTag.valueOf((float) (uv.x * fixedSize.x)));
+                    uvs.add(FloatTag.valueOf((float) (uv.y * fixedSize.y)));
                 }
             }
 
@@ -388,19 +399,19 @@ public class BlockbenchCommonTypes {
 
     public static class MeshFace {
         /// map of vertex ID to UV position
-        Map<String, Vector2f> uv;
+        Map<String, FiguraVec2> uv;
         /// list of vertex IDs
         String[] vertices;
         /// optional texture override
         Integer texture;
 
-        public void reorder(Map<String, Vector3f> vertexIDtoPos) {
+        public void reorder(Map<String, FiguraVec3> vertexIDtoPos) {
             if (vertices.length != 4) return;
 
-            Vector3f v1 = vertexIDtoPos.get(vertices[0]);
-            Vector3f v2 = vertexIDtoPos.get(vertices[1]);
-            Vector3f v3 = vertexIDtoPos.get(vertices[2]);
-            Vector3f v4 = vertexIDtoPos.get(vertices[3]);
+            FiguraVec3 v1 = vertexIDtoPos.get(vertices[0]);
+            FiguraVec3 v2 = vertexIDtoPos.get(vertices[1]);
+            FiguraVec3 v3 = vertexIDtoPos.get(vertices[2]);
+            FiguraVec3 v4 = vertexIDtoPos.get(vertices[3]);
 
             if (testOppositeSides(v2, v3, v1, v4)) {
                 vertices = new String[]{
@@ -419,25 +430,25 @@ public class BlockbenchCommonTypes {
             }
         }
 
-        private static final Vector3f
-                temp1 = new Vector3f(),
-                temp2 = new Vector3f(),
-                temp3 = new Vector3f(),
-                temp4 = new Vector3f();
+        private static final FiguraVec3
+                temp1 = new FiguraVec3(),
+                temp2 = new FiguraVec3(),
+                temp3 = new FiguraVec3(),
+                temp4 = new FiguraVec3();
 
         /**
          * Checks if the two points are on opposite sides of the line formed by the two other points
          */
-        private static boolean testOppositeSides(Vector3f line1, Vector3f line2, Vector3f point1, Vector3f point2) {
+        private static boolean testOppositeSides(FiguraVec3 line1, FiguraVec3 line2, FiguraVec3 point1, FiguraVec3 point2) {
             // why does this work? I don't know
             temp1.set(line1);
             temp2.set(line2);
             temp3.set(point1);
             temp4.set(point2);
 
-            temp2.sub(temp1);
-            temp3.sub(temp1);
-            temp4.sub(temp1);
+            temp2.subtract(temp1);
+            temp3.subtract(temp1);
+            temp4.subtract(temp1);
 
             temp1.set(temp2);
             temp1.cross(temp3);
@@ -448,14 +459,14 @@ public class BlockbenchCommonTypes {
     }
 
     public static class PointElement extends Element {
-        Vector3f position;
+        FiguraVec3 position;
 
         @Override
         public @Nullable CompoundTag toNBT(BlockbenchParser2.Intermediary context) {
             CompoundTag tag = super.toNBT(context);
             if (tag == null) return null;
-            if (position != null && origin == null && !position.equals(0, 0, 0))
-                tag.put("piv", vecToList(origin));
+            if (position != null && origin == null && !position.equals(ZERO))
+                tag.put("piv", vecToList(position));
 
             // Allow parent types for these; this is mostly useful for the pivot-type parent types
             parseParent(name, tag);
@@ -488,15 +499,17 @@ public class BlockbenchCommonTypes {
          * v5 flipped the X and Y axes on rotations.
          * </a>
          */
-        public static final Vector3f v5_ROT_TRANS = new Vector3f(-1, -1, 1);
+        public static final FiguraVec3 v5_ROT_TRANS = FiguraVec3.of(-1, -1, 1);
         /**
          * <a href="https://github.com/JannisX11/blockbench/blob/603201853499087aa3aa6a14406a061f27d4898f/js/io/formats/bbmodel.js#L72-L98">
          * v5 flipped the X axis on positions.
          * </a>
          */
-        public static final Vector3f v5_POS_TRANS = new Vector3f(-1, 1, 1);
+        public static final FiguraVec3 v5_POS_TRANS = FiguraVec3.of(-1, 1, 1);
 
-        private static final Vector3f DO_NOTHING = new Vector3f(1, 1, 1);
+        private static final FiguraVec3 DO_NOTHING = FiguraVec3.of(1, 1, 1);
+        private static final FiguraVec3 LEFT_TIMING = FiguraVec3.of(-0.1, -0.1, -0.1);
+        private static final FiguraVec3 RIGHT_TIMING = FiguraVec3.of(0.1, 0.1, 0.1);
 
         String name;
         String type;
@@ -519,8 +532,8 @@ public class BlockbenchCommonTypes {
                                             boolean isV5) {
             if ("effect".equals(type)) throw new RuntimeException("Shouldn't be attaching FX animators to parts!");
 
-            Vector3f rotTrans = isV5 ? v5_ROT_TRANS : DO_NOTHING;
-            Vector3f posTrans = isV5 ? v5_POS_TRANS : DO_NOTHING;
+            FiguraVec3 rotTrans = isV5 ? v5_ROT_TRANS : DO_NOTHING;
+            FiguraVec3 posTrans = isV5 ? v5_POS_TRANS : DO_NOTHING;
 
             ListTag rot = new ListTag();
             ListTag pos = new ListTag();
@@ -535,7 +548,7 @@ public class BlockbenchCommonTypes {
                     kfTag.putString("int", kf3.interpolation != null ? kf3.interpolation : "linear");
                     Keyframe.Keyframe3.Data pre = kf3.data_points[0];
 
-                    Vector3f trans;
+                    FiguraVec3 trans;
                     boolean transX = isV5 && (kf3.channel.equals("rotation") || kf3.channel.equals("position"));
                     boolean transY = isV5 && (kf3.channel.equals("rotation"));
                     switch(kf3.channel) {
@@ -551,16 +564,16 @@ public class BlockbenchCommonTypes {
                     }
 
                     // Bezier handles
-                    if (kf3.bezier_left_value != null && !kf3.bezier_left_value.equals(0, 0, 0)) {
-                        kfTag.put("bl", vecToList(new Vector3f(kf3.bezier_left_value).mul(trans)));
+                    if (kf3.bezier_left_value != null && !kf3.bezier_left_value.equals(ZERO)) {
+                        kfTag.put("bl", vecToList(kf3.bezier_left_value.copy().multiply(trans)));
                     }
-                    if (kf3.bezier_right_value != null && !kf3.bezier_right_value.equals(0, 0, 0)) {
-                        kfTag.put("br", vecToList(new Vector3f(kf3.bezier_right_value).mul(trans)));
+                    if (kf3.bezier_right_value != null && !kf3.bezier_right_value.equals(ZERO)) {
+                        kfTag.put("br", vecToList(kf3.bezier_right_value.copy().multiply(trans)));
                     }
-                    if (kf3.bezier_left_time != null && !kf3.bezier_left_time.equals(-0.1f, -0.1f, -0.1f)) {
+                    if (kf3.bezier_left_time != null && !kf3.bezier_left_time.equals(LEFT_TIMING)) {
                         kfTag.put("blt", vecToList(kf3.bezier_left_time));
                     }
-                    if (kf3.bezier_right_time != null && !kf3.bezier_right_time.equals(0.1f, 0.1f, 0.1f)) {
+                    if (kf3.bezier_right_time != null && !kf3.bezier_right_time.equals(RIGHT_TIMING)) {
                         kfTag.put("brt", vecToList(kf3.bezier_right_time));
                     }
 
@@ -609,10 +622,10 @@ public class BlockbenchCommonTypes {
         float time;
 
         // bezier interpolation
-        @Nullable Vector3f bezier_left_time;
-        @Nullable Vector3f bezier_left_value;
-        @Nullable Vector3f bezier_right_time;
-        @Nullable Vector3f bezier_right_value;
+        FiguraVec3 bezier_left_time;
+        FiguraVec3 bezier_left_value;
+        FiguraVec3 bezier_right_time;
+        FiguraVec3 bezier_right_value;
 
         public static class Keyframe3 extends Keyframe {
             public static class Data {
