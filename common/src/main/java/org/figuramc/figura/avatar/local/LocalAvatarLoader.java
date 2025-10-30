@@ -10,9 +10,7 @@ import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.avatar.UserData;
 import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.FiguraToast;
-import org.figuramc.figura.parsers.AvatarMetadataParser;
-import org.figuramc.figura.parsers.BlockbenchModelParser;
-import org.figuramc.figura.parsers.LuaScriptParser;
+import org.figuramc.figura.parsers.*;
 import org.figuramc.figura.utils.FiguraResourceListener;
 import org.figuramc.figura.utils.FiguraText;
 import org.figuramc.figura.utils.IOUtils;
@@ -130,7 +128,7 @@ public class LocalAvatarLoader {
 				// models
 				CompoundTag textures = new CompoundTag();
 				ListTag animations = new ListTag();
-				BlockbenchModelParser modelParser = new BlockbenchModelParser();
+                BlockbenchParser2 modelParser = new BlockbenchParser2();
 
 				loadState = LoadState.MODELS;
 				CompoundTag models = loadModels(finalPath, finalPath, modelParser, textures, animations, "");
@@ -160,9 +158,7 @@ public class LocalAvatarLoader {
 				if (metadataTag.contains("script_paths")) {
 					ListTag pathsTag = metadataTag.getList("script_paths", Tag.TAG_STRING);
 					for (int i = 0; i < pathsTag.size(); i++){
-						Path scriptPath = FiguraMod.getFiguraDirectory().resolve(pathsTag.getString(i));
-						String p_string = scriptPath.toString();
-						loadScriptsFromPath(scriptPath,nbt,p_string.substring(p_string.lastIndexOf('/',p_string.length()-2)+1,p_string.length()-1));
+						loadScripts(finalPath.resolve(pathsTag.getString(i)),nbt);
 					}
 					metadataTag.remove("script_paths");
 				}
@@ -274,46 +270,47 @@ public class LocalAvatarLoader {
 		
 	}
 
-	private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchModelParser parser, CompoundTag textures, ListTag animations, String folders) throws Exception {
-		CompoundTag result = new CompoundTag();
-		List<Path> subFiles = IOUtils.listPaths(currentFile);
-		ListTag children = new ListTag();
-		if (subFiles != null)
-			for (Path file : subFiles) {
-				if (IOUtils.isHidden(file))
-					continue;
-				String name = IOUtils.getFileNameOrEmpty(file);
-				if (Files.isDirectory(file)) {
-					CompoundTag subfolder = loadModels(avatarFolder, file, parser, textures, animations, folders + name + ".");
-					if (!subfolder.isEmpty()) {
-						subfolder.putString("name", name);
-						BlockbenchModelParser.parseParent(name, subfolder);
-						children.add(subfolder);
-					}
-				} else if (file.toString().toLowerCase(Locale.US).endsWith(".bbmodel")) {
-					BlockbenchModelParser.ModelData data = parser.parseModel(avatarFolder, file, IOUtils.readFile(file), name.substring(0, name.length() - 8), folders);
-					children.add(data.modelNbt());
-					animations.addAll(data.animationList());
 
-					CompoundTag dataTag = data.textures();
-					if (dataTag.isEmpty())
-						continue;
+    private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchParser2 parser, CompoundTag textures, ListTag animations, String folders) throws Exception {
+        CompoundTag result = new CompoundTag();
+        List<Path> subFiles = IOUtils.listPaths(currentFile);
+        ListTag children = new ListTag();
+        if (subFiles != null)
+            for (Path file : subFiles) {
+                if (IOUtils.isHidden(file))
+                    continue;
+                String name = IOUtils.getFileNameOrEmpty(file);
+                if (Files.isDirectory(file)) {
+                    CompoundTag subfolder = loadModels(avatarFolder, file, parser, textures, animations, folders + name + ".");
+                    if (!subfolder.isEmpty()) {
+                        subfolder.putString("name", name);
+                        BlockbenchCommonTypes.parseParent(name, subfolder);
+                        children.add(subfolder);
+                    }
+                } else if (file.toString().toLowerCase(Locale.US).endsWith(".bbmodel")) {
+                    ModelParseResult data = parser.parseModel(avatarFolder, file, IOUtils.readFile(file), name.substring(0, name.length() - 8), folders);
+                    children.add(data.modelNbt());
+                    animations.addAll(data.animationList());
 
-					if (textures.isEmpty()) {
-						textures.put("data", new ListTag());
-						textures.put("src", new CompoundTag());
-					}
+                    CompoundTag dataTag = data.textures();
+                    if (dataTag.isEmpty())
+                        continue;
 
-					textures.getList("data", Tag.TAG_COMPOUND).addAll(dataTag.getList("data", Tag.TAG_COMPOUND));
-					textures.getCompound("src").merge(dataTag.getCompound("src"));
-				}
-			}
+                    if (textures.isEmpty()) {
+                        textures.put("data", new ListTag());
+                        textures.put("src", new CompoundTag());
+                    }
 
-		if (!children.isEmpty())
-			result.put("chld", children);
+                    textures.getList("data", Tag.TAG_COMPOUND).addAll(dataTag.getList("data", Tag.TAG_COMPOUND));
+                    textures.getCompound("src").merge(dataTag.getCompound("src"));
+                }
+            }
 
-		return result;
-	}
+        if (children.size() > 0)
+            result.put("chld", children);
+
+        return result;
+    }
 	public static Matcher ValidFileMatcher = Pattern.compile(".*(avatar.json|(\\.lua|\\.bbmodel|\\.ogg|\\.png))$").matcher("");
 	/**
 	 * Tick the watched key for hotswapping avatars

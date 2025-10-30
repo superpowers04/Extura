@@ -21,7 +21,6 @@ import org.figuramc.figura.model.rendering.texture.RenderTypes;
 import org.figuramc.figura.utils.MathUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Take the reading code out of FiguraModelPart itself, since that class
@@ -161,7 +160,20 @@ public class FiguraModelPartReader {
                         bezierLeftTime = MathUtils.clamp(bezierLeftTime, 0, 1);
                         bezierRightTime = MathUtils.clamp(bezierRightTime, 0, 1);
 
-                        keyframes.add(new Keyframe(owner, animation, time, interpolation, pre, end, bezierLeft, bezierRight, bezierLeftTime, bezierRightTime));
+                        keyframes.add(new Keyframe(
+                                owner,
+                                result,
+                                type,
+                                animation,
+                                time,
+                                interpolation,
+                                pre,
+                                end,
+                                bezierLeft,
+                                bezierRight,
+                                bezierLeftTime,
+                                bezierRightTime
+                        ));
                     }
 
                     keyframes.sort(Keyframe::compareTo);
