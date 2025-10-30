@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import org.figuramc.figura.animation.Keyframe;
-import org.figuramc.figura.parsers.BlockbenchModel;
 
 /**
  * A set of Globals of which there is only one in the MC instance.
