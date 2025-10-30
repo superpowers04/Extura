@@ -163,14 +163,20 @@ public class LocalAvatarFetcher {
 		return IOUtils.getOrCreateDir(FiguraMod.getFiguraDirectory(), "avatars");
 	}
 
-	public static boolean isAvatar(Path path) {
+	public static final String[] avatarJsons = {"avatar.extura-insecure.jsonc","avatar.extura.jsonc","avatar.extura-insecure.json","avatar.extura.json","avatar.jsonc","avatar.json"};
+	public static Path getAvatarJson(Path path) {
 		if (!Files.exists(path))
-			return false;
+			return null;
 
-		Path metadata = path.resolve("avatar.jsonc");
-		if(Files.exists(metadata) && !Files.isDirectory(metadata)) return true;
-		metadata = path.resolve("avatar.json");
-		return Files.exists(metadata) && !Files.isDirectory(metadata);
+		for (String jsonFile : avatarJsons){
+			Path metadata = path.resolve(jsonFile);
+			if(Files.exists(metadata) && !Files.isDirectory(metadata)) 
+				return metadata;
+		}
+		return null;
+	}
+	public static boolean isAvatar(Path path) {
+		return getAvatarJson(path) != null;
 	}
 
 	public static void loadExternal(List<Path> paths) throws IOException {
