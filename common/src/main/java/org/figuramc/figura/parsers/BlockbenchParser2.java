@@ -240,7 +240,7 @@ public class BlockbenchParser2 {
                         FiguraMod.LOGGER.error("", e);
 
                     // Try to load from base64
-                    if (!texture.source.startsWith("data:image/png;base64,"))
+                    if (texture.source == null || !texture.source.startsWith("data:image/png;base64,"))
                         throw new IllegalStateException(String.format(
                                 "Failed to find the %s texture: %s\n(and the bundled texture data was missing or bad)",
                                 texture.name,
