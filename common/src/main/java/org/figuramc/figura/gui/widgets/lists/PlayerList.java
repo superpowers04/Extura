@@ -156,6 +156,8 @@ public class PlayerList extends AbstractList {
         // for all players
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         List<UUID> playerList = connection == null ? List.of() : new ArrayList<>(connection.getOnlinePlayerIds());
+        
+        String lowercaseFilter = filter.toLowerCase(Locale.US);
         for (UUID uuid : playerList) {
             // get player
             PlayerInfo player = connection.getPlayerInfo(uuid);
@@ -168,7 +170,7 @@ public class PlayerList extends AbstractList {
             Avatar avatar = AvatarManager.getAvatarForPlayer(uuid);
 
             // filter check
-            if ((!name.toLowerCase(Locale.US).contains(filter.toLowerCase(Locale.US)) && !uuid.toString().contains(filter.toLowerCase(Locale.US))) || (showFigura.isToggled() && !FiguraMod.isLocal(uuid) && (avatar == null || avatar.nbt == null)))
+            if ((!name.toLowerCase(Locale.US).contains(lowercaseFilter) && !uuid.toString().contains(lowercaseFilter)) || (showFigura.isToggled() && !FiguraMod.isLocal(uuid) && (avatar == null || avatar.nbt == null)))
                 continue;
 
             // player is not missing
@@ -186,7 +188,6 @@ public class PlayerList extends AbstractList {
         }
 
         if (showDisconnected.isToggled()) {
-        	String lowercaseFilter = filter.toLowerCase(Locale.US);
             for (Avatar avatar : AvatarManager.getLoadedAvatars()) {
                 UUID id = avatar.owner;
 
