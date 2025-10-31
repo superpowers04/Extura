@@ -187,7 +187,6 @@ public class ModelFuzzerMain {
     }
 
 
-    BlockbenchModelParser oldParser;
     BlockbenchParser2 newParser;
 
     static JsonElement baseStructure = null;
