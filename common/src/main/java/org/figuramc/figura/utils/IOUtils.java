@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 public class IOUtils {
 
-    public static final String INVALID_FILENAME_REGEX = "CON|PRN|AUX|NUL|COM\\d|LPT\\d|[\\\\/:*?\"<>|\u0000]|\\.$";
+    public static final String INVALID_FILENAME_REGEX = "CON|PRN|AUX|NUL|COM\\d|LPT\\d|[\\\\/:*?\"<>|\u0000]|\\.(?!extura)$";
 
     public static List<Path> getFilesByExtension(Path root, String extension) {
         List<Path> result = new ArrayList<>();

@@ -136,7 +136,7 @@ public class LocalAvatarLoader {
 
 				// metadata
 				loadState = LoadState.METADATA;
-				String _meta = IOUtils.readFile(finalPath.resolve("avatar.json"));
+				String _meta = IOUtils.readFile(LocalAvatarFetcher.getAvatarJson(finalPath));
 				var metadata = AvatarMetadataParser.read(_meta);
 
 				CompoundTag metaNBT = AvatarMetadataParser.parse(metadata,_meta, IOUtils.getFileNameOrEmpty(finalPath));
@@ -311,7 +311,7 @@ public class LocalAvatarLoader {
 
         return result;
     }
-	public static Matcher ValidFileMatcher = Pattern.compile(".*(avatar.json|(\\.lua|\\.bbmodel|\\.ogg|\\.png))$").matcher("");
+	public static Matcher ValidFileMatcher = Pattern.compile(".*(avatar\\.json|avatar\\.jsonc|avatar\\.extura\\.json|(\\.lua|\\.bbmodel|\\.ogg|\\.png))$").matcher("");
 	/**
 	 * Tick the watched key for hotswapping avatars
 	 */
