@@ -244,8 +244,7 @@ public class LocalAvatarFetcher {
 			if (!(this instanceof FolderPath)) {
 				// metadata
 				try {
-					Path avatarJsonc = path.resolve("avatar.jsonc");
-					String str = IOUtils.readFile(Files.exists(avatarJsonc) ? avatarJsonc : path.resolve("avatar.json"));
+					String str = IOUtils.readFile(IOUtils.getAvatarJson(path));
 					AvatarMetadataParser.Metadata metadata = AvatarMetadataParser.read(str);
 
 					name = Configs.WARDROBE_FILE_NAMES.value || metadata.name == null || metadata.name.isBlank() ? filename : metadata.name;
