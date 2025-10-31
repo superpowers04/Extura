@@ -246,7 +246,7 @@ public class AvatarMetadataParser {
     // json object class
     public static class Metadata {
         public String name, description, author, version, color, background, id;
-        public String[] authors, autoScripts, autoAnims, ignoredTextures, resources;
+        public String[] authors, autoScripts, autoAnims, ignoredTextures, resources, allowedSubdirs;
         public Boolean allow_uploads;
         public HashMap<String, Customization> customizations;
     }
