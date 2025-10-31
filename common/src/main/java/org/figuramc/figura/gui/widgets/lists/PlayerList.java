@@ -186,6 +186,7 @@ public class PlayerList extends AbstractList {
         }
 
         if (showDisconnected.isToggled()) {
+        	String lowercaseFilter = filter.toLowerCase(Locale.US);
             for (Avatar avatar : AvatarManager.getLoadedAvatars()) {
                 UUID id = avatar.owner;
 
@@ -193,7 +194,7 @@ public class PlayerList extends AbstractList {
                     continue;
 
                 // filter check
-                if (!avatar.entityName.toLowerCase(Locale.US).contains(filter.toLowerCase(Locale.US)) && !id.toString().contains(filter.toLowerCase(Locale.US)))
+                if (!avatar.entityName.toLowerCase(Locale.US).contains(lowercaseFilter) && !id.toString().contains(lowercaseFilter))
                     continue;
 
                 missingPlayers.remove(id);
