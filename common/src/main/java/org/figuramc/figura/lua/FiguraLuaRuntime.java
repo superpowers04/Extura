@@ -539,7 +539,12 @@ public class FiguraLuaRuntime {
 	// script execution //
 
 	public LuaValue load(String name, String src) {
-		return userGlobals.load(src, name, userGlobals);
+		try {
+			return userGlobals.load(src, name, userGlobals);
+		} catch (Exception | StackOverflowError e) {
+			error(e);
+		}
+		return null;
 	}
 
 	public Varargs run(Object toRun, Avatar.Instructions limit, Object... args) {
