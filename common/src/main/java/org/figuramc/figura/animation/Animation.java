@@ -127,7 +127,7 @@ public class Animation {
         while (iter.hasNext()) {
             Map.Entry<Float, String> item = iter.next();
 
-            LuaValue chunk;
+            LuaValue chunk = null;
             try{
                 chunk = owner.loadScript("animations." + modelName + "." + name, item.getValue());
             }catch(Exception e){
