@@ -126,7 +126,13 @@ public class Animation {
         Iterator<Map.Entry<Float, String>> iter = codeFrameQueue.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<Float, String> item = iter.next();
-            LuaValue chunk = owner.loadScript("animations." + modelName + "." + name, item.getValue());
+
+            LuaValue chunk
+            try{
+                chunk = owner.loadScript("animations." + modelName + "." + name, item.getValue());
+            }catch(Exception e){
+                owner.luaRuntime.error(e);
+            }
             if (chunk != null) {
                 codeFrames.put(item.getKey(), chunk);
                 iter.remove();
