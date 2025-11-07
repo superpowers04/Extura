@@ -8,5 +8,6 @@ public enum EntityRenderMode {
     FIRST_PERSON_WORLD,
     RENDER,
     WORLD,
-    OTHER
+    OTHER,
+    SHADOW
 }
