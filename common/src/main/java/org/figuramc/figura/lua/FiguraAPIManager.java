@@ -218,7 +218,8 @@ public class FiguraAPIManager {
 		put("json", r -> JsonAPI.INSTANCE);
 		put("resources", r -> new ResourcesAPI(r.owner));
 		put("raycast", r -> new RaycastAPI(r.owner));
-		put("file", r -> (r.owner.isHost ? new FileAPI(r.owner) : new DisabledAPI("FileAPI"," is only usable on host avatars. Add a check for if you're on host by using `host:isHost()`") ));
+
+		put("file", r ->(r.owner.isHost ? (r.file = new FileAPI(r.owner)) : new DisabledAPI("FileAPI"," is only usable on host avatars. Add a check for if you're on host by using `host:isHost()`")));
 		put("net", r -> (r.owner.isHost ? new NetworkingAPI(r.owner) : new DisabledAPI("NetworkingAPI"," is only usable on host avatars. Add a check for if you're on host by using `host:isHost()`")));
 	}};
 

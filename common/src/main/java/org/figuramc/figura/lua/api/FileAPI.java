@@ -123,6 +123,15 @@ public class FileAPI {
         return f.exists() && f.isDirectory();
     }
 
+    public FiguraInputStream openReadStreamDropped(Path path) {
+        try {
+            File f = path.toFile();
+            FileInputStream fis = new FileInputStream(f);
+            return new FiguraInputStream(parent,fis);
+        } catch (FileNotFoundException e) {
+            throw new LuaError(e);
+        }
+    }
     @LuaWhitelist
     @LuaMethodDoc(
             value = "file.open_read_stream",
