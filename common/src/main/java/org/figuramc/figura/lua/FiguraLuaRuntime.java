@@ -23,6 +23,7 @@ import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -52,6 +53,8 @@ public class FiguraLuaRuntime {
 	public AvatarAPI avatar_meta;
 	public PingAPI ping;
 	public TextureAPI texture;
+    public ServerPacketsAPI serverPackets;
+    @Nullable public FileAPI file;
 
 	//---------------------------------
 

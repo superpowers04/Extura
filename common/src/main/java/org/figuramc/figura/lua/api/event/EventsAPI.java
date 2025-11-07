@@ -97,6 +97,8 @@ public class EventsAPI {
     public final LuaEvent DAMAGE = new LuaEvent();
     @LuaFieldDoc("events.pre_render")
     public final LuaEvent PRE_RENDER = new LuaEvent();
+    @LuaFieldDoc("events.drop_file")
+    public final LuaEvent DROP_FILE = new LuaEvent();
 
     private final Map<String, LuaEvent> events = new HashMap<>();
     
@@ -127,6 +129,7 @@ public class EventsAPI {
         events.put("TOTEM", TOTEM);
         events.put("DAMAGE", DAMAGE);
         events.put("PRE_RENDER", PRE_RENDER);
+        events.put("DROP_FILE", DROP_FILE);
 
         for (FiguraEvent entrypoint : ENTRYPOINTS) {
             String ID = entrypoint.getID().toUpperCase(Locale.US);

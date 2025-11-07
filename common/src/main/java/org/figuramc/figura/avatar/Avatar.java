@@ -77,6 +77,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -399,6 +400,25 @@ public class Avatar {
 		if (loaded && luaRuntime != null && luaRuntime.getUser() != null)
 			run("POST_RENDER", render.post(), delta, renderMode.name(), poseMatrix);
 		renderMode = EntityRenderMode.OTHER;
+	}
+	public boolean dropFileEvent(List<Path> paths) {
+		Varargs result = null;
+		if(loaded){
+			ArrayList<FiguraInputStream> streams = new ArrayList<>();
+
+			for (Path path : paths) {
+				try{
+					streams.add(luaRuntime.file.openReadStreamDropped(path));
+				}catch(Exception e){}
+			}
+			result = run("DROP_FILE", tick, streams);
+			for(FiguraInputStream stream : streams){
+				try{
+					stream.close();
+				}catch(Exception e){}
+			}
+		}
+		return isCancelled(result);
 	}
 
 	public void postWorldRenderEvent(float delta) {

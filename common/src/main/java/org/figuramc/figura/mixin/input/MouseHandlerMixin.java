@@ -16,6 +16,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.nio.file.Path;
+import java.util.List;
+
 @Mixin(MouseHandler.class)
 public class MouseHandlerMixin {
 
@@ -76,6 +79,13 @@ public class MouseHandlerMixin {
         if (avatar != null && avatar.mouseMoveEvent(x - this.xpos, y - this.ypos) && (this.mouseGrabbed || this.minecraft.screen == null)) {
             this.xpos = x;
             this.ypos = y;
+            ci.cancel();
+        }
+    }
+    @Inject(method = "onDrop", at = @At("HEAD"), cancellable = true)
+    private void onMove(long window, List<Path> paths, long unknown, CallbackInfo ci) {
+        Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+        if (avatar != null && avatar.dropFileEvent(paths)) {
             ci.cancel();
         }
     }

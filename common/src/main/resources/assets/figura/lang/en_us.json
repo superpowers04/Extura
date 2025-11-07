@@ -156,8 +156,9 @@
     "figura.gui.wardrobe.delete_fsb.tooltip": "Delete avatar from FSB",
     "figura.gui.wardrobe.delete_fsb": "Delete avatar from FSB",
     "figura.gui.wardrobe.upload_backend.tooltip": "Upload avatar to Cloud\n* Non-FSB users will see uploaded avatar",
-	"figura.docs.events.upload": "Runs before your avatar is uploaded(Note it's run 3 times).\nArgument 1 is where it's currently uploading to as a string. \"BOTH\", \"FSB\" second then \"BACKEND\"\nArgument 2 is true if uploading to backend\nArgument 2 is true if uploading to fsb\nReturn true to cancel uploading to whatever is currently being uploaded to.\nNo NBT edits after the 'BOTH' event call will be uploaded",
-	"figura.docs.events.pre_render": "Runs at the HEAD of Minecraft's render function\nArgument 1 is a number between 0 to 1 for the delta between last tick and the next tick\nArgument 2 is a string with the name of the source of this render event (See /figura docs enums render_modes)",
+	"figura.docs.events.upload": "(Extura) Runs before your avatar is uploaded(Note it's run 3 times).\nArgument 1 is where it's currently uploading to as a string. \"BOTH\", \"FSB\" second then \"BACKEND\"\nArgument 2 is true if uploading to backend\nArgument 2 is true if uploading to fsb\nReturn true to cancel uploading to whatever is currently being uploaded to.\nNo NBT edits after the 'BOTH' event call will be uploaded\nReturn true to cancel upload",
+	"figura.docs.events.pre_render": "Runs at the HEAD of Minecraft's render function.\nArgument 1 is a number between 0 to 1 for the delta between last tick and the next tick\nArgument 2 is a string with the name of the source of this render event (See /figura docs enums render_modes)",
+	"figura.docs.events.file_drop": "(Extura) Runs whenever a file is dropped into the game window.\nArgument 1 is a table of all dropped in files as input streams. These streams are closed after the event is finished.\nReturn true to prevent the game from attempting to do anything with the dropped files",
 
     "figura.gui.wardrobe.upload_both": "Upload avatar to both FSB and Cloud",
     "figura.gui.wardrobe.upload_fsb": "Upload avatar to FSB",
