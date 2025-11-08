@@ -83,7 +83,7 @@ public class MouseHandlerMixin {
         }
     }
     @Inject(method = "onDrop", at = @At("HEAD"), cancellable = true)
-    private void onMove(long window, List<Path> paths, long unknown, CallbackInfo ci) {
+    private void onDrop(long window, List<Path> paths, long unknown, CallbackInfo ci) {
         Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
         if (avatar != null && avatar.dropFileEvent(paths)) {
             ci.cancel();
