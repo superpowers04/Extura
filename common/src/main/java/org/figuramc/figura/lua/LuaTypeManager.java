@@ -85,8 +85,7 @@ public class LuaTypeManager {
                                 @Override
                                 public LuaValue call(LuaValue arg1, LuaValue arg2) {
                                     LuaValue result = indexTable.get(arg2);
-                                    if (result == LuaValue.NIL)
-                                        result = wrappedIndexer.call(arg1, arg2);
+                                    if (result == LuaValue.NIL) return wrappedIndexer.call(arg1, arg2);
                                     return result;
                                 }
                             });
@@ -141,13 +140,16 @@ public class LuaTypeManager {
 
             private final Class<?> clazz = method.getDeclaringClass();
             private final Class<?>[] argumentTypes = method.getParameterTypes();
+
+            private final boolean canOffset = argumentTypes.length > 0 && !argumentTypes[0].isAssignableFrom(clazz);
             private final Object[] actualArgs = new Object[argumentTypes.length];
             private final boolean[] requiredNotNil = getRequiredNotNil(method);
 
             @Override
             public Varargs invoke(Varargs args) {
-
+                int offset;
                 if (!isStatic) {
+                    offset = 2;
                     try {
                         caller = args.checkuserdata(1, clazz);
                     } catch (LuaError e) {
@@ -158,14 +160,15 @@ public class LuaTypeManager {
                                 methodName, targetType, methodName, methodName
                         ));
                     }
+                }else{
+                    // dirty hack for QOL of ignoring the first argument if the method is static and the arg matches the class type
+                    offset = canOffset && args.isuserdata(1) && clazz.isAssignableFrom(args.checkuserdata(1).getClass()) ? 2 : 1;
                 }
 
-                // dirty hack for QOL of ignoring the first argument if the method is static and the arg matches the class type
-                int offset = isStatic && argumentTypes.length > 0 && !argumentTypes[0].isAssignableFrom(clazz) && args.isuserdata(1) && clazz.isAssignableFrom(args.checkuserdata(1).getClass()) ? 1 : 0;
 
                 // Fill in actualArgs from args
                 for (int i = 0; i < argumentTypes.length; i++) {
-                    int argIndex = i + (isStatic ? 1 : 2) + offset;
+                    int argIndex = i + offset;
                     boolean nil = args.isnil(argIndex);
                     if (nil && requiredNotNil[i])
                         throw new LuaError("bad argument: " + method.getName() + " " + argIndex + " does not allow nil values, expected " + FiguraDocsManager.getNameFor(argumentTypes[i]));
