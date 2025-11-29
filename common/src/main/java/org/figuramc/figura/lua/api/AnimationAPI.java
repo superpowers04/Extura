@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -32,23 +33,21 @@ public class AnimationAPI {
         for (Animation animation : avatar.animations.values()) {
             // get or create animation table
             Map<String, Animation> animations = root.get(animation.modelName);
-            if (animations == null)
+            if (animations == null){
                 animations = new HashMap<>();
+                root.put(animation.modelName, animations);
+            }
 
             // put animation on the model table
             animations.put(animation.name, animation);
-            root.put(animation.modelName, animations);
         }
         return root;
     }
 
     @LuaWhitelist
     @LuaMethodDoc("animations.get_animations")
-    public List<Animation> getAnimations() {
-        List<Animation> list = new ArrayList<>();
-        for (Map<String, Animation> value : animTable.values())
-            list.addAll(value.values());
-        return list;
+    public Collection<Animation> getAnimations() {
+        return avatar.animations.values();
     }
 
     @LuaWhitelist
@@ -65,7 +64,7 @@ public class AnimationAPI {
     public List<Animation> getPlaying(boolean hold) {
         List<Animation> list = new ArrayList<>();
         for (Animation animation : avatar.animations.values())
-            if (hold ? (animation.playState == Animation.PlayState.PLAYING || animation.playState == Animation.PlayState.HOLDING) : (animation.playState == Animation.PlayState.PLAYING))
+            if (animation.playState == Animation.PlayState.PLAYING || ( hold && animation.playState == Animation.PlayState.HOLDING))
                 list.add(animation);
         return list;
     }

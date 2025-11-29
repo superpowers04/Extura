@@ -85,8 +85,7 @@ public class LuaTypeManager {
                                 @Override
                                 public LuaValue call(LuaValue arg1, LuaValue arg2) {
                                     LuaValue result = indexTable.get(arg2);
-                                    if (result == LuaValue.NIL) return wrappedIndexer.call(arg1, arg2);
-                                    return result;
+                                    return (result == LuaValue.NIL) ? wrappedIndexer.call(arg1, arg2) : result;
                                 }
                             });
                         } else {

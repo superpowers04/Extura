@@ -108,9 +108,15 @@ public class Animation {
                     time += length + loopDelay - offset;
             }
             case HOLD -> {
-                time = inverted ? Math.max(time, offset) : Math.min(time, length);
-                if ((!inverted && time >= length) || (inverted && time <= 0))
+                if(!inverted){
+                    if(time >= length){
+                        time = length;
+                        playState = PlayState.HOLDING;
+                    }
+                }else if(time <= 0){
+                    time = offset;
                     playState = PlayState.HOLDING;
+                }
             }
         }
 
