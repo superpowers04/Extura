@@ -90,8 +90,10 @@ public class Animation {
     public void tick() {
         // tick time
         this.controller.tick();
+        Float diff = controller.getDiff();
+        if(diff == 0) return;
 
-        this.time += controller.getDiff() * speed;
+        this.time += diff * speed;
 
         // loop checks
         switch (this.loop) {
