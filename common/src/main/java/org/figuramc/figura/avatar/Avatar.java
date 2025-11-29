@@ -460,14 +460,14 @@ public class Avatar {
 		if (result == null)
 			return false;
 
-		boolean rendered = false;
 		int i = 0;
 		int length = result.narg();
 		while (i++ <= length) {
-			if (result.arg(i).isuserdata(FiguraModelPart.class))
-				rendered |= renderItem(stack, bufferSource, (FiguraModelPart) result.arg(i).checkuserdata(FiguraModelPart.class), light, overlay);
+			if (result.arg(i).isuserdata(FiguraModelPart.class) 
+				&& renderItem(stack, bufferSource, (FiguraModelPart) result.arg(i).checkuserdata(FiguraModelPart.class), light, overlay))
+				return true;
 		}
-		return rendered;
+		return false;
 	}
 
 	public boolean playSoundEvent(String id, FiguraVec3 pos, float vol, float pitch, boolean loop, String category, String file) {
