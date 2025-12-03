@@ -76,24 +76,24 @@ public class LuaTypeManager {
                     continue;
                 }
                 String name = method.getName();
-                if (name.startsWith("__")) { // metamethods
-                    if (metatable.rawget(name) == LuaValue.NIL) { // Only add the most recently declared metamethod, in the most specific subclass.
-                        if (name.equals("__index")) {
-                            // Custom __index implementation. First checks the regular __index table, and if it gets NIL, then calls the custom-defined __index function.
-                            metatable.set("__index", new TwoArgFunction() {
-                                final LuaFunction wrappedIndexer = getWrapper(method);
-                                @Override
-                                public LuaValue call(LuaValue arg1, LuaValue arg2) {
-                                    LuaValue result = indexTable.get(arg2);
-                                    return (result == LuaValue.NIL) ? wrappedIndexer.call(arg1, arg2) : result;
-                                }
-                            });
-                        } else {
-                            metatable.set(name, getWrapper(method));
-                        }
-                    }
-                } else { // regular methods
+                if (!name.startsWith("__")) { // regular methods
                     indexTable.set(name, getWrapper(method));
+                    continue;
+                }
+                if (metatable.rawget(name) == LuaValue.NIL) { // Only add the most recently declared metamethod, in the most specific subclass.
+                    if (name.equals("__index")) {
+                        // Custom __index implementation. First checks the regular __index table, and if it gets NIL, then calls the custom-defined __index function.
+                        metatable.set("__index", new TwoArgFunction() {
+                            final LuaFunction wrappedIndexer = getWrapper(method);
+                            @Override
+                            public LuaValue call(LuaValue arg1, LuaValue arg2) {
+                                LuaValue result = indexTable.get(arg2);
+                                return (result == LuaValue.NIL) ? wrappedIndexer.call(arg1, arg2) : result;
+                            }
+                        });
+                    } else {
+                        metatable.set(name, getWrapper(method));
+                    }
                 }
             }
             for (Class<?> iface: currentClass.getInterfaces()) extracted(iface, metatable, indexTable);
@@ -327,25 +327,25 @@ public class LuaTypeManager {
     public Object luaVarargToJava(Varargs args, int argIndex, Class<?> argumentType) {
         if (args.arg(argIndex).istable()) {
             return luaVarargToJava(args.checktable(argIndex).unpack(), 1, argumentType);
-        } else {
-            Object[] obj = new Object[args.narg() - argIndex + 1];
-            for (int start = argIndex; argIndex <= args.narg(); argIndex++) {
-                obj[argIndex - start] = switch (argumentType.getName()) {
-                    case "[Ljava.lang.Number;", "[Ljava.lang.Double;", "[D" -> args.checkdouble(argIndex);
-                    case "[Ljava.lang.String;" -> args.checkjstring(argIndex);
-                    case "[Ljava.lang.Boolean;", "[B" -> args.toboolean(argIndex);
-                    case "[Ljava.lang.Float;", "[F" -> (float) args.checkdouble(argIndex);
-                    case "[Ljava.lang.Integer;", "[I" -> args.checkint(argIndex);
-                    case "[Ljava.lang.Long;", "[J" -> args.checklong(argIndex);
-                    case "[Lorg.luaj.vm2.LuaTable;" -> args.checktable(argIndex);
-                    case "[Lorg.luaj.vm2.LuaFunction;" -> args.checkfunction(argIndex);
-                    case "[Lorg.luaj.vm2.LuaValue;" -> args.arg(argIndex);
-                    case "[Ljava.lang.Object;" -> luaToJava(args.arg(argIndex));
-                    default -> args.checkuserdata(argIndex, argumentType);
-                };
-            }
-            return Arrays.copyOf(obj, obj.length, (Class<? extends Object[]>) argumentType);
         }
+        Object[] obj = new Object[args.narg() - argIndex + 1];
+        for (int start = argIndex; argIndex <= args.narg(); argIndex++) {
+            obj[argIndex - start] = switch (argumentType.getName()) {
+                case "[Ljava.lang.Number;", "[Ljava.lang.Double;", "[D" -> args.checkdouble(argIndex);
+                case "[Ljava.lang.String;" -> args.checkjstring(argIndex);
+                case "[Ljava.lang.Boolean;", "[B" -> args.toboolean(argIndex);
+                case "[Ljava.lang.Float;", "[F" -> (float) args.checkdouble(argIndex);
+                case "[Ljava.lang.Integer;", "[I" -> args.checkint(argIndex);
+                case "[Ljava.lang.Long;", "[J" -> args.checklong(argIndex);
+                case "[Lorg.luaj.vm2.LuaTable;" -> args.checktable(argIndex);
+                case "[Lorg.luaj.vm2.LuaFunction;" -> args.checkfunction(argIndex);
+                case "[Lorg.luaj.vm2.LuaValue;" -> args.arg(argIndex);
+                case "[Ljava.lang.Object;" -> luaToJava(args.arg(argIndex));
+                default -> args.checkuserdata(argIndex, argumentType);
+            };
+        }
+        return Arrays.copyOf(obj, obj.length, (Class<? extends Object[]>) argumentType);
+        
     }
 
     // we need to allow string being numbers here
@@ -354,12 +354,7 @@ public class LuaTypeManager {
         if (val.istable())
             return val.checktable();
         else if (val.isnumber())
-            if (val instanceof LuaInteger i) // dumb
-                return i.checkint();
-            else if (val.isint() && val instanceof LuaString s) // very dumb
-                return s.checkint();
-            else
-                return val.checkdouble();
+            return val.isint() ? val.checkint() : val.checkdouble();
         else if (val.isstring())
             return val.checkjstring();
         else if (val.isboolean())
