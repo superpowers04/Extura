@@ -41,7 +41,7 @@ public abstract class FiguraServer {
         INSTANCE = this;
     }
 
-    private final HashMap<Identifier, C2SPacketHandler<?>> PACKET_HANDLERS = new HashMap<>() {{
+    private final HashMap<Identifier, C2SPacketHandler<? extends Packet>> PACKET_HANDLERS = new HashMap<>() {{
         put(C2SBackendHandshakePacket.PACKET_ID, new C2SHandshakeHandler(FiguraServer.this));
         put(C2SFetchAvatarPacket.PACKET_ID, new C2SFetchAvatarPacketHandler(FiguraServer.this));
         put(C2SFetchUserdataPacket.PACKET_ID, new C2SFetchUserdataPacketHandler(FiguraServer.this));
@@ -102,6 +102,7 @@ public abstract class FiguraServer {
         return getUsersFolder().resolve("%s.pl".formatted(Utils.uuidToHex(user)));
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public final void init() {
         // TODO: reading config
         getFiguraFolder().toFile().mkdirs();
