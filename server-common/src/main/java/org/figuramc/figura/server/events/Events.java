@@ -1,10 +1,10 @@
 package org.figuramc.figura.server.events;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class Events {
-    private static final HashMap<Class<? extends Event>, ArrayList<Handler<?>>> handlers = new HashMap<>();
+    private static final ConcurrentHashMap<Class<? extends Event>, ArrayList<Handler<?>>> handlers = new ConcurrentHashMap<>();
 
     public static <T extends Event> void registerHandler(Class<T> eventClass, Handler<T> handler) {
         registerHandler(eventClass, handler, 0);

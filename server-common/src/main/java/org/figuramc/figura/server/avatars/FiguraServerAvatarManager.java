@@ -17,11 +17,13 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public final class FiguraServerAvatarManager {
     private final FiguraServer parent;
     private final IncomingAvatarHandler incomingAvatarHandler = new IncomingAvatarHandler();
-    private final HashMap<Hash, AvatarHandle> avatars = new HashMap<>();
+    private final ConcurrentHashMap<Hash, AvatarHandle> avatars = new ConcurrentHashMap<>();
 
     public FiguraServerAvatarManager(FiguraServer parent) {
         this.parent = parent;
@@ -267,6 +269,7 @@ public final class FiguraServerAvatarManager {
         }
     }
 
+    @SuppressWarnings({"removal", "ResultOfMethodCallIgnored"})
     private void deleteAvatar(Hash avatarHash) {
         var f = Events.call(new RemoveAvatarDataEvent(avatarHash));
         if (f.isCancelled()) return;
@@ -279,7 +282,7 @@ public final class FiguraServerAvatarManager {
         private final Hash hash;
         private AvatarData data;
         private @Nullable AvatarMetadata metadata;
-        private final ArrayList<AvatarOutcomingStream> streams = new ArrayList<>();
+        private final ConcurrentLinkedDeque<AvatarOutcomingStream> streams = new ConcurrentLinkedDeque<>();
         private boolean markedForDeletion = false;
 
         private AvatarHandle(Hash hash) {
@@ -367,8 +370,8 @@ public final class FiguraServerAvatarManager {
     }
 
     private class IncomingAvatarHandler {
-        private final HashMap<Hash, ArrayList<IncomingAvatarKey>> hashesToUploads = new HashMap<>();
-        private final HashMap<IncomingAvatarKey, AvatarIncomingStream> streams = new HashMap<>();
+        private final ConcurrentHashMap<Hash, ArrayList<IncomingAvatarKey>> hashesToUploads = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<IncomingAvatarKey, AvatarIncomingStream> streams = new ConcurrentHashMap<>();
 
         private void openStream(UUID uploader, String avatarId, int streamId, Hash avatarHash, Hash avatarEHash) {
             var key = new IncomingAvatarKey(uploader, streamId);
@@ -411,6 +414,7 @@ public final class FiguraServerAvatarManager {
             }
 
             // If this function returns true, it closes the stream and removes it from IncomingAvatarHandler
+            // synchronized (streams)
             private boolean acceptDataChunk(byte[] chunk, boolean finalChunk) {
                 size += chunk.length;
                 // In case if avatar size is exceeded - closing the stream and removing it from handler.
