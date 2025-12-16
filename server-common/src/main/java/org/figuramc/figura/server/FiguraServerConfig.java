@@ -9,11 +9,27 @@ public final class FiguraServerConfig {
     private int pingsRateLimit = 32;
     @SerializedName("pingsSizeLimit")
     private int pingsSizeLimit = 1024;
-
     @SerializedName("avatarSizeLimit")
     private int avatarSizeLimit = 102400;
     @SerializedName("avatarCountLimit")
     private int avatarsCountLimit = 1;
+
+    public int getDefaultPingsRateLimit() {
+        return pingsRateLimit;
+    }
+
+    public int getDefaultPingsSizeLimit() {
+        return pingsSizeLimit;
+    }
+
+    public int getDefaultAvatarSizeLimit() {
+        return avatarSizeLimit;
+    }
+
+    public int getDefaultAvatarsCountLimit() {
+        return avatarsCountLimit;
+    }
+
 
     public int pingsRateLimit(FiguraServer server, UUID player) {
         return Integer.parseInt(server.getOption(player, FiguraPermissionNodes.FIGURA_PINGS_RATELIMIT).orElse(pingsRateLimit + ""));

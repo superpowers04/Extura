@@ -10,10 +10,10 @@ public class FiguraPermissions {
             Pair.of(FIGURA_AVATARS_IMMORTALIZE, false),
             Pair.of(FIGURA_AVATARS_SET, false)
     );
-    public static final List<Pair<FiguraPermissionNodes, String>> OPTIONS_LIST = List.of(
-            Pair.of(FIGURA_PINGS_RATELIMIT, 32+""),
-            Pair.of(FIGURA_PINGS_SIZELIMIT, 1024+""),
-            Pair.of(FIGURA_AVATARS_SIZELIMIT, 102400+""),
-            Pair.of(FIGURA_AVATARS_COUNTLIMIT, 1+"")
+    public static final List<FiguraPermissionNodes> OPTIONS_LIST = List.of(
+            FIGURA_PINGS_RATELIMIT,
+            FIGURA_PINGS_SIZELIMIT,
+            FIGURA_AVATARS_SIZELIMIT,
+            FIGURA_AVATARS_COUNTLIMIT
     );
 }
