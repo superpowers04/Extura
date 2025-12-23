@@ -354,7 +354,12 @@ public class LuaTypeManager {
         if (val.istable())
             return val.checktable();
         else if (val.isnumber())
-            return val.isint() ? val.checkint() : val.checkdouble();
+            if (val instanceof LuaInteger i) // dumb
+                return i.checkint();
+            else if (val.isint() && val instanceof LuaString s) // very dumb
+                return s.checkint();
+            else
+                return val.checkdouble();
         else if (val.isstring())
             return val.checkjstring();
         else if (val.isboolean())
