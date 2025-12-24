@@ -134,9 +134,9 @@ public class BlockbenchCommonTypes {
         for (float c : fa) {
             if (c % 1 == 0) {
                 // short?
-                if (c < -127 || c >= 128) type = 1;
+                if (c < -127 || c > 127) type = 1;
                 // full float?
-                if (c < -16383 || c >= 16384) {
+                if (c < -16383 || c > 16383) {
                     type = 2;
                     break;
                 }
@@ -302,10 +302,8 @@ public class BlockbenchCommonTypes {
                 tag.putFloat("rot", rotation);
             if (uv != null && !uv.equals(ZERO4)) {
                 FiguraVec2 size = context.getTextureFixedSize(texture);
-                FiguraVec4 sizeTwice = FiguraVec4.of(size.x, size.y, size.x, size.y);
-                // this is the order it is because otherwise we'd be mutating uv
-                FiguraVec4 corrected = sizeTwice.multiply(uv);
-                tag.put("uv", vecToList(corrected));
+                FiguraVec4 sizeTwice = FiguraVec4.of(size.x, size.y, size.x, size.y).multiply(uv);
+                tag.put("uv", vecToList(sizeTwice));
             }
             return tag;
         }
@@ -337,8 +335,8 @@ public class BlockbenchCommonTypes {
 
             int i = 0;
             for (Map.Entry<String, FiguraVec3> entry : vertices.entrySet()) {
-                FiguraVec3 combined = entry.getValue().copy().add(origin);
                 vert2idx.put(entry.getKey(), i++);
+                FiguraVec3 combined = entry.getValue().copy().add(origin);
                 vert2pos.put(entry.getKey(), combined);
 
                 vtx.add(FloatTag.valueOf((float) combined.x));
@@ -371,6 +369,7 @@ public class BlockbenchCommonTypes {
                 if (face.vertices.length == 4)
                     face.reorder(vert2pos);
 
+                FiguraVec2 fixedSize = context.getTextureFixedSize(face.texture);
                 for (String vertID : face.vertices) {
                     Tag value = switch (intType) {
                         case 0 -> ByteTag.valueOf(vert2idx.get(vertID).byteValue());
@@ -381,7 +380,6 @@ public class BlockbenchCommonTypes {
                     fac.add(value);
 
                     FiguraVec2 uv = face.uv.get(vertID);
-                    FiguraVec2 fixedSize = context.getTextureFixedSize(face.texture);
                     uvs.add(FloatTag.valueOf((float) (uv.x * fixedSize.x)));
                     uvs.add(FloatTag.valueOf((float) (uv.y * fixedSize.y)));
                 }
@@ -441,17 +439,12 @@ public class BlockbenchCommonTypes {
          */
         private static boolean testOppositeSides(FiguraVec3 line1, FiguraVec3 line2, FiguraVec3 point1, FiguraVec3 point2) {
             // why does this work? I don't know
-            temp1.set(line1);
-            temp2.set(line2);
-            temp3.set(point1);
-            temp4.set(point2);
 
-            temp2.subtract(temp1);
-            temp3.subtract(temp1);
-            temp4.subtract(temp1);
+            temp2.set(line2).subtract(line1);
+            temp3.set(point1).subtract(line1);
+            temp4.set(point2).subtract(line1);
 
-            temp1.set(temp2);
-            temp1.cross(temp3);
+            temp1.set(temp2).cross(temp3);
             temp2.cross(temp4);
 
             return temp1.dot(temp2) < 0;
