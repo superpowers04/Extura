@@ -107,9 +107,9 @@ public class LocalAvatarLoader {
 		if (path == null || target == null)
 			return;
 
+		addWatchKey(path, KEYS::put);
 		Avatar targetAvatar = target.loadingAvatar();
 
-		addWatchKey(path, KEYS::put);
 
 		Path finalPath = path;
 
@@ -317,7 +317,7 @@ public class LocalAvatarLoader {
 
         return result;
     }
-	public static Matcher ValidFileMatcher = Pattern.compile("(avatar\\.json|avatar\\.jsonc|avatar\\.extura\\.json|\\.(lua|bbmodel|ogg|png))$").matcher("");
+	public static Matcher ValidFileMatcher = Pattern.compile(".*(avatar\\.json|avatar\\.jsonc|avatar\\.extura\\.json|(\\.lua|\\.bbmodel|\\.ogg|\\.png))$").matcher("");
 	/**
 	 * Tick the watched key for hotswapping avatars
 	 * Reload spans across multiple ticks to prevent a bunch of rapid filechanges causing a bunch of reloads
