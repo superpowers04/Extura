@@ -30,6 +30,7 @@ import org.figuramc.figura.utils.ui.UIHelper;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import org.joml.Vector3f;
 
 public class ImmediateAvatarRenderer extends AvatarRenderer {
 
@@ -381,7 +382,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
                 }
 
                 // render pivot parts
-                if (renderPivotParts && part.parentType.isPivot) {
+                if (renderPivotParts) {
                     FiguraMod.popPushProfiler("savePivotParts");
                     savePivotTransform(part.parentType, peek);
                 }
@@ -520,11 +521,11 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
 
     private VertexData getTexture(PartCustomization customization, FiguraTextureSet textureSet, boolean primary) {
         RenderTypes types = primary ? customization.getPrimaryRenderType() : customization.getSecondaryRenderType();
-        TextureCustomization texture = primary ? customization.primaryTexture : customization.secondaryTexture;
         VertexData ret = new VertexData();
-
         if (types == RenderTypes.NONE)
             return ret;
+        TextureCustomization texture = primary ? customization.primaryTexture : customization.secondaryTexture;
+
 
         // get texture
         ResourceLocation id = textureSet.getOverrideTexture(avatar.owner, texture);
@@ -554,49 +555,50 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
             ret.vertexOffset = FiguraMod.VERTEX_OFFSET;
 
         // Switch to cutout with fullbright if the iris emissive fix is enabled
-        if (doIrisEmissiveFix && types == RenderTypes.EMISSIVE) {
-            ret.fullBright = true;
-            ret.renderType = RenderTypes.TRANSLUCENT_CULL.get(id);
-        } else {
+        if (!doIrisEmissiveFix || types != RenderTypes.EMISSIVE) {
             ret.renderType = types.get(id);
+	        return ret;
         }
-
+        ret.fullBright = true;
+        ret.renderType = RenderTypes.TRANSLUCENT_CULL.get(id);
+        
         return ret;
     }
 
     private static final FiguraVec4 pos = FiguraVec4.of();
     private static final FiguraVec3 normal = FiguraVec3.of();
     private static final FiguraVec3 uv = FiguraVec3.of(0, 0, 1);
+    private static final FiguraVec3 uvFixer = FiguraVec3.of(0, 0, 1);
     private void pushToBuffer(int faceCount, VertexData vertexData, PartCustomization customization, FiguraTextureSet textureSet, List<Vertex> vertices) {
         int vertCount = faceCount * 4;
-
-        FiguraVec3 uvFixer = FiguraVec3.of(textureSet.getWidth(), textureSet.getHeight(), 1); // Dividing by this makes uv 0 to 1
 
         int overlay = customization.overlay;
         int light = vertexData.fullBright ? LightTexture.FULL_BRIGHT : customization.light;
         boolean shade = customization.shade == true;
 
         VERTEX_BUFFER.getBufferFor(vertexData.renderType, vertexData.primary, vertexConsumer -> {
+        	uvFixer.set(textureSet.getWidth(), textureSet.getHeight(), 1); // Dividing by this makes uv 0 to 1
             Vertex vertex;
+            if(!shade) normal.set(0f, 1f, 0f);
+            float r = (float) vertexData.color.x;
+            float g = (float) vertexData.color.y;
+            float b = (float) vertexData.color.z;
             for (int i = 0; i < vertCount; i++) {
                 vertex = vertices.get(i);
 
-                pos.set(vertex.x, vertex.y, vertex.z, 1);
-                pos.transform(customization.positionMatrix);
-                pos.add(pos.normalized().scale(vertexData.vertexOffset));
+                pos.add(pos.set(vertex.x, vertex.y, vertex.z, 1).transform(customization.positionMatrix)
+                        .normalized().scale(vertexData.vertexOffset)
+                    );
                 if (shade) {
-                    normal.set(vertex.nx, vertex.ny, vertex.nz);
-                    normal.transform(customization.normalMatrix);
-                } else {
-                    normal.set(0f, 1f, 0f);
+                    normal.set(vertex.nx, vertex.ny, vertex.nz)
+                        .transform(customization.normalMatrix);
                 }
-                uv.set(vertex.u, vertex.v, 1);
-                uv.divide(uvFixer);
-                uv.transform(customization.uvMatrix);
-
+                uv.x = vertex.u;
+                uv.y = vertex.v;
+                uv.divide(uvFixer).transform(customization.uvMatrix);
                 vertexConsumer
                         .vertex(pos.x, pos.y, pos.z)
-                        .color((float) vertexData.color.x, (float) vertexData.color.y, (float) vertexData.color.z, customization.alpha)
+                        .color(r, g, b, customization.alpha)
                         .uv((float) uv.x, (float) uv.y)
                         .overlayCoords(overlay)
                         .uv2(light)
@@ -628,8 +630,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
             HashMap<RenderType, List<Consumer<VertexConsumer>>> map = primary ? primaryBuffers : secondaryBuffers;
             for (Map.Entry<RenderType, List<Consumer<VertexConsumer>>> entry : map.entrySet()) {
                 VertexConsumer vertexConsumer = bufferSource.getBuffer(entry.getKey());
-                List<Consumer<VertexConsumer>> consumers = entry.getValue();
-                for (Consumer<VertexConsumer> consumer : consumers)
+                for (Consumer<VertexConsumer> consumer : entry.getValue())
                     consumer.accept(vertexConsumer);
             }
             map.clear();

@@ -129,10 +129,8 @@ public abstract class AvatarRenderer {
         if (texture != null)
             return texture;
 
-        for (Map.Entry<String, FiguraTexture> entry : textures.entrySet()) {
-            if (entry.getKey().equals(name))
-                return entry.getValue();
-        }
+        texture = textures.get(name);
+        if (texture != null) return texture;
 
         return null;
     }
@@ -169,32 +167,34 @@ public abstract class AvatarRenderer {
             _sortParts(child);
     }
 
+
+    public static double getYawOffsetRot(Entity e, float delta) {
+        double yaw = e instanceof LivingEntity le ? Mth.lerp(delta, le.yBodyRotO, le.yBodyRot) : e.getViewYRot(Minecraft.getInstance().getFrameTime());
+        return 180 - yaw;
+    }
     /**
      * Returns the matrix for an entity, used to transform from entity space to world space.
      * @param e The entity to get the matrix for.
      * @return A matrix which represents the transformation from entity space to part space.
      */
     public static FiguraMat4 entityToWorldMatrix(Entity e, float delta) {
-        double yaw = e instanceof LivingEntity le ? Mth.lerp(delta, le.yBodyRotO, le.yBodyRot) : e.getViewYRot(Minecraft.getInstance().getFrameTime());
-        return FiguraMat4.of().rotateX(180 - yaw).translate(e.getPosition(delta));
+        return FiguraMat4.of().rotateX(getYawOffsetRot(e,delta)).translate(e.getPosition(delta));
     }
 
-    public static double getYawOffsetRot(Entity e, float delta) {
-        double yaw = e instanceof LivingEntity le ? Mth.lerp(delta, le.yBodyRotO, le.yBodyRot) : e.getViewYRot(Minecraft.getInstance().getFrameTime());
-        return 180 - yaw;
-    }
+
 
     /**
      * Gets a matrix to transform from world space to view space, based on the
      * player's camera position and orientation.
      * @return That matrix.
      */
+    static FiguraMat3 dummyMat3 = FiguraMat3.of();
 	public static FiguraMat4 worldToViewMatrix() {
 		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 		Vec3 cameraPos = camera.getPosition().scale(-1);
 		return FiguraMat4.of()
 				.translate(cameraPos.x, cameraPos.y, cameraPos.z)
-				.multiply(FiguraMat3.of().set(new Matrix3f().rotation(camera.rotation()).invert()).augmented())
+				.multiply(dummyMat3.set(new Matrix3f().rotation(camera.rotation()).invert()).augmented())
 				.scale(-1, 1, -1);
 	}
 
