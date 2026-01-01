@@ -177,7 +177,7 @@ public class FiguraMod {
 
 	public static Style getAccentColor() {
 		Avatar avatar = AvatarManager.getAvatarForPlayer(getLocalPlayerUUID());
-		int color = avatar != null ? ColorUtils.rgbToInt(ColorUtils.userInputHex(avatar.color, ColorUtils.Colors.AWESOME_BLUE.vec)) : ColorUtils.Colors.AWESOME_BLUE.hex;
+		int color = avatar != null ? ColorUtils.rgbToInt(ColorUtils.userInputHex(avatar.color, ColorUtils.Colors.AWESOME_BLUE.vec)) : ColorUtils.Colors.DEFAULT.hex;
 		return Style.EMPTY.withColor(color);
 	}
 
