@@ -35,6 +35,15 @@ public class UserData {
         }
     }
 
+    public Avatar loadingAvatar() {
+        FiguraMod.debug("--- avatar queued loading: " + id + " ---");
+        Avatar avatar = new Avatar(id);
+        this.avatars.add(avatar);
+        avatar.loaded = false;
+        avatar.uploadedTo.setFSB(fromFSB);
+        avatar.uploadedTo.setBackend(fromBackend);
+        return avatar;
+    }
     public void loadAvatar(CompoundTag nbt) {
         FiguraMod.debug("--- avatar loading: " + id + " ---");
         Avatar avatar = new Avatar(id);

@@ -18,8 +18,8 @@ import java.util.Map;
  * One LuaTypeManager per LuaRuntime, so that people can be allowed to edit the metatables within.
  */
 public class LuaTypeManager {
-
     private final Map<Class<?>, LuaTable> metatables = new HashMap<>();
+    
 
     public void generateMetatableFor(Class<?> clazz) {
         if (clazz == null || clazz == Object.class)
