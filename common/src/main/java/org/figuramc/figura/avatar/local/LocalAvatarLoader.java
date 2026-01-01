@@ -8,6 +8,7 @@ import org.apache.commons.lang3.concurrent.Computable;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.avatar.UserData;
+import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.gui.FiguraToast;
 import org.figuramc.figura.parsers.*;
@@ -106,9 +107,12 @@ public class LocalAvatarLoader {
 		if (path == null || target == null)
 			return;
 
+		Avatar targetAvatar = target.loadingAvatar();
+
 		addWatchKey(path, KEYS::put);
 
 		Path finalPath = path;
+
 		async(() -> {
 			try {
 				// load as folder
@@ -164,7 +168,9 @@ public class LocalAvatarLoader {
 				}
 
 				// load
-				target.loadAvatar(nbt);
+				
+				targetAvatar.load(nbt);
+				FiguraMod.debug("--- loaded local " + target.id + " ---");
 			} catch (Throwable e) {
 				loadError = e.getMessage();
 				FiguraMod.LOGGER.error("Failed to load avatar from " + finalPath, e);
@@ -311,17 +317,25 @@ public class LocalAvatarLoader {
 
         return result;
     }
-	public static Matcher ValidFileMatcher = Pattern.compile(".*(avatar\\.json|avatar\\.jsonc|avatar\\.extura\\.json|(\\.lua|\\.bbmodel|\\.ogg|\\.png))$").matcher("");
+	public static Matcher ValidFileMatcher = Pattern.compile("(avatar\\.json|avatar\\.jsonc|avatar\\.extura\\.json|\\.(lua|bbmodel|ogg|png))$").matcher("");
 	/**
 	 * Tick the watched key for hotswapping avatars
+	 * Reload spans across multiple ticks to prevent a bunch of rapid filechanges causing a bunch of reloads
 	 */
+
+	static boolean queuedReload = false;
 	public static void tick() {
 		WatchEvent<?> event = null;
+		if(queuedReload){
+			queuedReload = false;
+			AvatarManager.loadLocalAvatar(lastLoadedPath);
+			return;
+		}
 		try{
 
+			Set<Map.Entry<Path, WatchKey>> entries = KEYS.entrySet();
 			if(IS_WINDOWS){ // This literally just removes one unix-only check, but it prevents some useless looping :3
 
-				var entries = KEYS.entrySet();
 				for (Map.Entry<Path, WatchKey> entry : entries) {
 					if(entry == null) continue;
 					WatchKey key = entry.getValue();
@@ -346,7 +360,6 @@ public class LocalAvatarLoader {
 				return;
 			}
 			boolean reload = false;
-			var entries = KEYS.entrySet();
 			for (Map.Entry<Path, WatchKey> entry : entries) {
 				if(entry == null) continue;
 				WatchKey key = entry.getValue();
@@ -366,6 +379,7 @@ public class LocalAvatarLoader {
 						continue;
 
 					// This is it, this is the Unix-only check. I(superpowers04) dunno why only Unix needs to add paths like this
+					// Learned this is possibly due to a bug with how Windows handles events, requiring the extendedwatchmodifier?
 					if (kind == StandardWatchEventKinds.ENTRY_CREATE) 
 						addWatchKey(path, KEYS::put);
 
@@ -376,8 +390,8 @@ public class LocalAvatarLoader {
 
 			// reload avatar
 			if (reload) {
-				FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), reloading!");
-				AvatarManager.loadLocalAvatar(lastLoadedPath);
+				queuedReload = true;
+				FiguraMod.debug("Detected file changes in the Avatar directory (" + event.context().toString() + "), Reloading on next tick!");
 			}
 		}catch(java.util.ConcurrentModificationException meow){
 			FiguraMod.debug("LocalAvatarLoader.java:tick java.util.ConcurrentModificationException ignored");
@@ -398,6 +412,7 @@ public class LocalAvatarLoader {
 	 * @param path the path to register the watch key
 	 * @param consumer a consumer that will process the watch key and its path
 	 */
+	static final WatchEvent.Kind<?>[] pathEvents = {StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY};
 	protected static void addWatchKey(Path path, BiConsumer<Path, WatchKey> consumer) {
 		if (watcher == null || path == null || path.getFileSystem() != FileSystems.getDefault())
 			return;
@@ -406,8 +421,7 @@ public class LocalAvatarLoader {
 			return;
 
 		try {
-			WatchEvent.Kind<?>[] events = {StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY};
-			WatchKey key = IS_WINDOWS ? path.register(watcher, events, com.sun.nio.file.ExtendedWatchEventModifier.FILE_TREE) : path.register(watcher, events);
+			WatchKey key = IS_WINDOWS ? path.register(watcher, pathEvents, com.sun.nio.file.ExtendedWatchEventModifier.FILE_TREE) : path.register(watcher, pathEvents);
 
 			consumer.accept(path, key);
 			if (IS_WINDOWS)

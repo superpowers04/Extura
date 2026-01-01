@@ -89,7 +89,7 @@ import java.util.function.Consumer;
 // and also related to the owner, like its permissions
 public class Avatar {
 
-	private static CompletableFuture<Void> tasks;
+	public static CompletableFuture<Void> tasks;
 	public static boolean firstPerson;
 
 	// properties
@@ -194,53 +194,54 @@ public class Avatar {
 			return;
 		}
 
-		tasks.thenRun(() -> {
-			try {
-				// metadata
-				CompoundTag metadata = nbt.getCompound("metadata");
-				name = metadata.getString("name");
-				authors = metadata.getString("authors");
-				version = new Version(metadata.getString("ver"));
-				if (metadata.contains("id")) id = metadata.getString("id");
-				if (metadata.contains("color")) color = metadata.getString("color");
-				if (metadata.contains("minify")) minify = metadata.getBoolean("minify");
-				if (nbt.contains("resources")) {
-					CompoundTag res = nbt.getCompound("resources");
-					for (String k :
-							res.getAllKeys()) {
-						resources.put(k, res.getByteArray(k));
-					}
-				}
-				for (String key : metadata.getAllKeys()) {
-					if (!key.contains("badge_color_")) continue;
-					badgeToColor.put(key.substring(12), metadata.getString(key));
-				}
-				uploadedTo.setFSB(metadata.contains("is_fsb") && metadata.getBoolean("is_fsb") || metadata.contains("isFSB") && metadata.getBoolean("isFSB"));
-				uploadedTo.setBackend(metadata.contains("is_backend") && metadata.getBoolean("is_backend") || metadata.contains("isBackend") && metadata.getBoolean("isBackend"));
- 
-				fileSize = getFileSize();
-				versionStatus = getVersionStatus();
-				if (entityName.isBlank())
-					entityName = name;
-
-				// animations and models
-				loadAnimations();
-				renderer = new ImmediateAvatarRenderer(this);
-
-				// sounds and script
-				loadCustomSounds();
-				createLuaRuntime();
-			} catch (Exception e) {
-				FiguraMod.LOGGER.error("", e);
-				clean();
-				this.nbt = null;
-				this.renderer = null;
-				this.luaRuntime = null;
-			}
-
-			loaded = true;
-		});
+		tasks.thenRun(loadnbt);
 	}
+	public final Runnable loadnbt = () -> {
+		try {
+			// metadata
+			CompoundTag metadata = nbt.getCompound("metadata");
+			name = metadata.getString("name");
+			authors = metadata.getString("authors");
+			version = new Version(metadata.getString("ver"));
+			if (metadata.contains("id")) id = metadata.getString("id");
+			if (metadata.contains("color")) color = metadata.getString("color");
+			if (metadata.contains("minify")) minify = metadata.getBoolean("minify");
+			if (nbt.contains("resources")) {
+				CompoundTag res = nbt.getCompound("resources");
+				for (String k :
+						res.getAllKeys()) {
+					resources.put(k, res.getByteArray(k));
+				}
+			}
+			for (String key : metadata.getAllKeys()) {
+				if (!key.contains("badge_color_")) continue;
+				badgeToColor.put(key.substring(12), metadata.getString(key));
+			}
+			uploadedTo.setFSB(metadata.contains("is_fsb") && metadata.getBoolean("is_fsb") || metadata.contains("isFSB") && metadata.getBoolean("isFSB"));
+			uploadedTo.setBackend(metadata.contains("is_backend") && metadata.getBoolean("is_backend") || metadata.contains("isBackend") && metadata.getBoolean("isBackend"));
+
+			fileSize = getFileSize();
+			versionStatus = getVersionStatus();
+			if (entityName.isBlank())
+				entityName = name;
+
+			// animations and models
+			loadAnimations();
+			renderer = new ImmediateAvatarRenderer(this);
+
+			// sounds and script
+			loadCustomSounds();
+			createLuaRuntime();
+		} catch (Exception e) {
+			FiguraMod.LOGGER.error("", e);
+			clean();
+			this.nbt = null;
+			this.renderer = null;
+			this.luaRuntime = null;
+		}
+
+		loaded = true;
+	};
 
 	public void tick() {
 		if (scriptError || luaRuntime == null || !loaded)
