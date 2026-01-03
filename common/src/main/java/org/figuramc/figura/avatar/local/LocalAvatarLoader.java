@@ -279,7 +279,6 @@ public class LocalAvatarLoader {
 		
 	}
 
-
     private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchParser2 parser, CompoundTag textures, ListTag animations, String folders) throws Exception {
         CompoundTag result = new CompoundTag();
         List<Path> subFiles = IOUtils.listPaths(currentFile);
@@ -296,23 +295,25 @@ public class LocalAvatarLoader {
                         BlockbenchCommonTypes.parseParent(name, subfolder);
                         children.add(subfolder);
                     }
-                } else if (file.toString().toLowerCase(Locale.US).endsWith(".bbmodel")) {
-                    ModelParseResult data = parser.parseModel(avatarFolder, file, IOUtils.readFile(file), name.substring(0, name.length() - 8), folders);
-                    children.add(data.modelNbt());
-                    animations.addAll(data.animationList());
-
-                    CompoundTag dataTag = data.textures();
-                    if (dataTag.isEmpty())
-                        continue;
-
-                    if (textures.isEmpty()) {
-                        textures.put("data", new ListTag());
-                        textures.put("src", new CompoundTag());
-                    }
-
-                    textures.getList("data", Tag.TAG_COMPOUND).addAll(dataTag.getList("data", Tag.TAG_COMPOUND));
-                    textures.getCompound("src").merge(dataTag.getCompound("src"));
+                    continue;
                 }
+                if (!name.toLowerCase(Locale.US).endsWith(".bbmodel")) continue;
+                ModelParseResult data = parser.parseModel(avatarFolder, file, IOUtils.readFile(file), name.substring(0, name.length() - 8), folders);
+                children.add(data.modelNbt());
+                animations.addAll(data.animationList());
+
+                CompoundTag dataTag = data.textures();
+                if (dataTag.isEmpty())
+                    continue;
+
+                if (textures.isEmpty()) {
+                    textures.put("data", new ListTag());
+                    textures.put("src", new CompoundTag());
+                }
+
+                textures.getList("data", Tag.TAG_COMPOUND).addAll(dataTag.getList("data", Tag.TAG_COMPOUND));
+                textures.getCompound("src").merge(dataTag.getCompound("src"));
+                
             }
 
         if (children.size() > 0)

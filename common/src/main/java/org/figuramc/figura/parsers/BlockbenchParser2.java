@@ -245,7 +245,8 @@ public class BlockbenchParser2 {
                                 texture.name,
                                 e
                         ));
-                    source = Base64.getDecoder().decode(texture.source.substring("data:image/png;base64,".length()));
+                    // "data:image/png;base64," is 22 characters
+                    source = Base64.getDecoder().decode(texture.source.substring(22));
                     path = locatedWithin + Intermediary.this.name + "." + name;
                     FiguraMod.debug("Loaded {} texture \"{}\" as path {} (bundled)", textureType, name, path);
                 }
