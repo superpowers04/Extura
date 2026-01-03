@@ -2,6 +2,7 @@ package org.figuramc.figura.avatar.local;
 
 import net.minecraft.Util;
 import net.minecraft.nbt.*;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.lang3.concurrent.Computable;
@@ -172,8 +173,10 @@ public class LocalAvatarLoader {
 				targetAvatar.load(nbt);
 				FiguraMod.debug("--- loaded local " + target.id + " ---");
 			} catch (Throwable e) {
+				targetAvatar.loaded=true;
 				loadError = e.getMessage();
 				FiguraMod.LOGGER.error("Failed to load avatar from " + finalPath, e);
+				targetAvatar.errorText = Component.literal(loadError);
 				FiguraToast.sendToast(FiguraText.of("toast.load_error"), FiguraText.of("gui.load_error." + LocalAvatarLoader.getLoadState()), FiguraToast.ToastType.ERROR);
 			}
 		});
