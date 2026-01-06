@@ -295,15 +295,11 @@ public class FiguraModelPartReader {
     }
 
     private static boolean hasCubeData(CompoundTag partCompound) {
-        if (partCompound.contains("cube_data", Tag.TAG_COMPOUND))
-            return !partCompound.getCompound("cube_data").isEmpty();
-        return false;
+        return partCompound.contains("cube_data", Tag.TAG_COMPOUND) && !partCompound.getCompound("cube_data").isEmpty();
     }
 
     private static boolean hasMeshData(CompoundTag partCompound) {
-        if (partCompound.contains("mesh_data", Tag.TAG_COMPOUND))
-            return !partCompound.getCompound("mesh_data").isEmpty();
-        return false;
+        return partCompound.contains("mesh_data", Tag.TAG_COMPOUND) && !partCompound.getCompound("mesh_data").isEmpty();
     }
 
     private static final Map<String, FiguraVec3[]> faceData = ImmutableMap.of( // booze 🥴
@@ -358,12 +354,11 @@ public class FiguraModelPartReader {
             FiguraVec2.of(0, 0)
     };
 
-
+    private static final FiguraVec3 from = FiguraVec3.of();
+    private static final FiguraVec3 to = FiguraVec3.of();
     private static void readCuboid(List<Integer> facesByTexture, CompoundTag data, Map<Integer, List<Vertex>> vertices) {
         // Read from and to
-        FiguraVec3 from = FiguraVec3.of();
         readVec3(from, data, "f");
-        FiguraVec3 to = FiguraVec3.of();
         readVec3(to, data, "t");
 
         // Read inflate
@@ -426,8 +421,8 @@ public class FiguraModelPartReader {
 
         // Determine the best data type to use for the face list based on the size of the vertex list
         int bestType = 0; // byte
-        if (verts.size() > 255 * 3) bestType = 1; // short
-        if (verts.size() > 32767 * 3) bestType = 2; // int
+        if (verts.size() > 765) bestType = 1; // short
+        if (verts.size() > 98301) bestType = 2; // int
 
         // Get the face list using the determined data type
         ListTag fac = switch (bestType) {
@@ -442,6 +437,10 @@ public class FiguraModelPartReader {
         // Create arrays to store temporary vertex and UV data
         float[] posArr = new float[12];
         float[] uvArr = new float[8];
+
+        FiguraVec3 p1 = FiguraVec3.of();
+        FiguraVec3 p2 = FiguraVec3.of();
+        FiguraVec3 p3 = FiguraVec3.of();
 
         // Iterate through the texture list
         for (int ti = 0; ti < tex.size(); ti++) {
@@ -471,34 +470,35 @@ public class FiguraModelPartReader {
             }
 
             // Calculate the normal vector for the current texture
-            FiguraVec3 p1 = FiguraVec3.of(posArr[0], posArr[1], posArr[2]);
-            FiguraVec3 p2 = FiguraVec3.of(posArr[3], posArr[4], posArr[5]);
-            FiguraVec3 p3 = FiguraVec3.of(posArr[6], posArr[7], posArr[8]);
-            p3.subtract(p2);
+			p1.set(posArr[0], posArr[1], posArr[2]);
+			p2.set(posArr[3], posArr[4], posArr[5]);
+			p3.set(posArr[6], posArr[7], posArr[8]);
             p1.subtract(p2);
-            p3.cross(p1);
-            p3.normalize();
+            p3.subtract(p2).cross(p1).normalize();
+            float p3x = (float) p3.x;
+            float p3y = (float) p3.y;
+            float p3z = (float) p3.z;
+
             // p3 now contains the normal vector
 
             // Add the vertex data to the appropriate builder
+            List<Vertex> list = vertices.getOrDefault(texId, new ArrayList<>());
+            vertices.put(texId, list);
+
             for (int j = 0; j < numVerts; j++) {
-                List<Vertex> list = vertices.getOrDefault(texId, new ArrayList<>());
                 list.add(new Vertex(
                         posArr[3 * j], posArr[3 * j + 1], posArr[3 * j + 2],
                         uvArr[2 * j], uvArr[2 * j + 1],
-                        (float) p3.x, (float) p3.y, (float) p3.z
+                        p3x, p3y, p3z
                 ));
-                vertices.put(texId, list);
             }
             // Add a vertex if necessary
             if (numVerts == 3) {
-                List<Vertex> list = vertices.getOrDefault(texId, new ArrayList<>());
                 list.add(new Vertex(
                         posArr[6], posArr[7], posArr[8],
                         uvArr[4], uvArr[5],
-                        (float) p3.x, (float) p3.y, (float) p3.z
+                        p3x, p3y, p3z
                 ));
-                vertices.put(texId, list);
             }
 
             // Increment the counters for the vertex and UV lists
@@ -519,10 +519,11 @@ public class FiguraModelPartReader {
             }
         }
 
+        FiguraVec3 result = FiguraVec3.of();
         // for all separated vertices
         for (List<Vertex> vertices : verticesByPos.values()) {
             // sum their normals
-            FiguraVec3 result = FiguraVec3.of();
+            result.set(0,0,0);
             for (Vertex vertex : vertices)
                 result.add(vertex.getNormal());
             // normalize the normal
