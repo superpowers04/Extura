@@ -15,9 +15,6 @@ import org.figuramc.figura.lua.api.action_wheel.ActionWheelAPI;
 import org.figuramc.figura.lua.api.action_wheel.Page;
 import org.figuramc.figura.lua.api.event.EventsAPI;
 import org.figuramc.figura.lua.api.event.LuaEvent;
-import org.figuramc.figura.lua.api.java.ClassAPI;
-import org.figuramc.figura.lua.api.java.FieldAPI;
-import org.figuramc.figura.lua.api.java.InstanceAPI;
 import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.lua.api.keybind.FiguraKeybind;
 import org.figuramc.figura.lua.api.keybind.KeybindAPI;
@@ -87,9 +84,6 @@ public class FiguraAPIManager {
 		add(LuaEvent.class);
 
 		add(JavaAPI.class);
-		add(ClassAPI.class);
-		add(InstanceAPI.class);
-		add(FieldAPI.class);
 
 		add(Vertex.class);
 		add(FiguraModelPart.class);

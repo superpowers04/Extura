@@ -9,9 +9,6 @@ import net.minecraft.world.entity.EntityType;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.config.Configs;
-import org.figuramc.figura.lua.api.java.ClassAPI;
-import org.figuramc.figura.lua.api.java.FieldAPI;
-import org.figuramc.figura.lua.api.java.InstanceAPI;
 import org.figuramc.figura.lua.api.java.JavaAPI;
 import org.figuramc.figura.permissions.Permissions;
 import org.figuramc.figura.utils.ColorUtils;
@@ -387,9 +384,6 @@ public class FiguraLuaPrinter {
             case LuaValue.TSTRING -> Style.EMPTY.withColor(ChatFormatting.WHITE);
             case LuaValue.TUSERDATA -> {
                 final var data = value.checkuserdata();
-                if (data instanceof ClassAPI<?>) yield Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE);
-                if (data instanceof InstanceAPI<?>) yield Style.EMPTY.withColor(ChatFormatting.AQUA);
-                if (data instanceof FieldAPI<?,?>) yield Style.EMPTY.withColor(ChatFormatting.DARK_GREEN).withItalic(true);
                 yield Style.EMPTY.withColor(ChatFormatting.YELLOW);
             }
             case LuaValue.TTHREAD -> Style.EMPTY.withColor(ChatFormatting.GOLD);
