@@ -53,7 +53,6 @@ public class FiguraLuaRuntime {
 	public AvatarAPI avatar_meta;
 	public PingAPI ping;
 	public TextureAPI texture;
-    public ServerPacketsAPI serverPackets;
     @Nullable public FileAPI file;
 
 	//---------------------------------
