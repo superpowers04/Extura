@@ -446,4 +446,7 @@ public class FiguraLuaPrinter {
             FiguraMod.sendChatMessage(print.endsWith("\n") ? TextUtils.substring(toPrint, 0, print.length() - 1) : toPrint);
         }
     }
+
+
+
 }

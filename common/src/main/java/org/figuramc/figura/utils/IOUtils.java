@@ -141,7 +141,6 @@ public class IOUtils {
             fs.write(data);
         }
     }
-
     public static List<Path> listPaths(Path dir) {
         try (Stream<Path> stream = Files.list(dir)) {
             return stream.sorted(Comparator.comparing(IOUtils::getFileNameOrEmpty)).collect(Collectors.toList());

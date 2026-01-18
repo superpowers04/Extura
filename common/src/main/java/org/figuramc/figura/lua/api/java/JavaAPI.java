@@ -248,7 +248,7 @@ public class JavaAPI {
 
 
 			@Override
-			public String tojstring() {return "function: " + method.getName();}
+			public String tojstring() {return "Static Function: " + method.getName();}
 		}
 		private class InstanceFunctionWithoutArgs extends StaticFunctionWithoutArgs{
 
@@ -276,6 +276,8 @@ public class JavaAPI {
 				getCaller(args);
 				return invokeMethod(caller);
 			}
+			@Override
+			public String tojstring() {return "Instance Function(No args): " + method.getName();}
 		}
 		private class FunctionWithArgs extends InstanceFunctionWithoutArgs{
 			public final Class<?>[] argumentTypes;
@@ -354,6 +356,8 @@ public class JavaAPI {
 
 				return invokeMethod(caller, actualArgs);
 			}
+			@Override
+			public String tojstring() {return "Instance Function(With Args): " + method.getName();}
 		}
 
 
