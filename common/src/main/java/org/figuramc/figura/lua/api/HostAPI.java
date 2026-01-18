@@ -30,6 +30,7 @@ import org.figuramc.figura.mixin.input.KeyMappingAccessor;
 import org.figuramc.figura.permissions.Permissions;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.client.player.Input;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -95,6 +96,21 @@ public class HostAPI {
 	private final boolean isHost;
 	private final Minecraft minecraft;
 	private static Input defaultInput;
+
+	private boolean changedDrag = false;
+	private boolean changedInput = false;
+	private boolean changedGravity = false;
+	private boolean changedPhysics = false;
+
+
+	public void close(){
+		if(!canExturaCheat()) return;
+		LocalPlayer player = this.minecraft.player;
+		if(changedInput) player.input = new ExturaInput(this.minecraft.options);
+		if(changedDrag) player.setDiscardFriction(false);
+		if(changedGravity) player.setNoGravity(false);
+		if(changedPhysics) player.noPhysics = false;
+	}
 
 	@LuaWhitelist
 	@LuaFieldDoc("host.unlock_cursor")
@@ -1040,6 +1056,7 @@ public class HostAPI {
 	public void setPhysics(Boolean physics) {
 		if(!canExturaCheat()) return;
 		this.minecraft.player.noPhysics = !physics;
+		changedPhysics=true;
 	}
 	@LuaWhitelist
 	@LuaMethodDoc(
@@ -1116,6 +1133,8 @@ public class HostAPI {
 	public void setPlayerMovement(Boolean playerMovement) {
 		LocalPlayer player;
 		if (!this.isHost || (player = this.minecraft.player) == null || !canExturaCheat()) return;
+
+		changedInput = !playerMovement;
 		player.input = (playerMovement ? new ExturaInput(this.minecraft.options) : new NoInput());
 
 	}
@@ -1137,6 +1156,7 @@ public class HostAPI {
 		if(!canExturaCheat()) return;
 		LocalPlayer player;
 		if (!this.isHost || (player = this.minecraft.player) == null) return;
+		changedInput = true;
 		if(!(player.input instanceof ExturaInput)){
 			player.input = new ExturaInput(this.minecraft.options);
 		}
@@ -1241,6 +1261,7 @@ public class HostAPI {
 	)
 	public void setGravity(Boolean hasForce) {
 		if(!canExturaCheat()) return;
+		changedGravity = true;
 		LocalPlayer player = this.minecraft.player;
 		if (player == null) return;
 		player.setNoGravity(!hasForce);
@@ -1262,6 +1283,7 @@ public class HostAPI {
 		LocalPlayer player = this.minecraft.player;
 		if (player == null) return;
 		player.setDiscardFriction(hasForce != true);
+		changedDrag = true;
 	}
 
 	@LuaWhitelist

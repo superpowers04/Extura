@@ -531,7 +531,7 @@ public class NetworkStuff {
 		if (checkUUID(target.id)) {
 			return;
 		}
-
+		Avatar avi = target.loadingAvatar();
 		queueStream(target.id, api -> api.getAvatar(owner, id), (code, stream) -> {
 			String s;
 			try {
@@ -542,14 +542,23 @@ public class NetworkStuff {
 			responseDebug("getAvatar", code, s);
 
 			//on error
-			if (code != 200)
-				return;
+			if (code != 200){
 
+				avi.loaded=true;
+				avi.errorText = Component.literal("Invalid Avatar");
+				return;
+			}
+
+			
 			try {
 				CompoundTag nbt = NbtIo.readCompressed(stream);
 				CacheAvatarLoader.save(hash, nbt);
-				target.loadAvatar(nbt);
+				avi.uploadedTo = Destination.BACKEND;
+				avi.load(nbt);
+				
 			} catch (Exception e) {
+				avi.loaded=true;
+				avi.errorText = Component.literal("Unable to load!");
 				FiguraMod.LOGGER.error("Failed to load avatar for " + target.id, e);
 			}
 		});

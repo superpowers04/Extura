@@ -997,13 +997,13 @@ public class Avatar {
 	public void clean() {
 		if (renderer != null)
 			renderer.invalidate();
+		if(luaRuntime != null && luaRuntime.host != null)
+			luaRuntime.host.close();
 
 		clearSounds();
 		clearParticles();
 		closeBuffers();
-
 		closeStreams();
-
 		events.clear();
 	}
 	public void clearSounds() {
