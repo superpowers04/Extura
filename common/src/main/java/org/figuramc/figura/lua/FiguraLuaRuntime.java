@@ -493,6 +493,7 @@ public class FiguraLuaRuntime {
 		FiguraLuaPrinter.sendLuaError(parseError(e), owner);
 		owner.scriptError = true;
 		owner.luaRuntime = null;
+		if(host != null) host.close();
 		owner.clearParticles();
 		owner.clearSounds();
 		owner.closeBuffers();
