@@ -577,7 +577,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
         boolean shade = customization.shade == true;
 
         VERTEX_BUFFER.getBufferFor(vertexData.renderType, vertexData.primary, vertexConsumer -> {
-        	uvFixer.set(textureSet.getWidth(), textureSet.getHeight(), 1); // Dividing by this makes uv 0 to 1
+        	uvFixer.set(textureSet.getWidth(), textureSet.getHeight()); // Dividing by this makes uv 0 to 1
             Vertex vertex;
             if(!shade) normal.set(0f, 1f, 0f);
             float r = (float) vertexData.color.x;
@@ -586,7 +586,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
             for (int i = 0; i < vertCount; i++) {
                 vertex = vertices.get(i);
 
-                pos.add(pos.set(vertex.x, vertex.y, vertex.z, 1).transform(customization.positionMatrix)
+                pos.add(pos.set(vertex.x, vertex.y, vertex.z).transform(customization.positionMatrix)
                         .normalized().scale(vertexData.vertexOffset)
                     );
                 if (shade) {

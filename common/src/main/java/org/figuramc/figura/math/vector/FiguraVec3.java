@@ -59,6 +59,17 @@ public class FiguraVec3 extends FiguraVector<FiguraVec3, FiguraMat3> {
         return set(other.x, other.y, other.z);
     }
 
+    public FiguraVec3 set(double x) {
+        this.x = x;
+        return this;
+    }
+
+    public FiguraVec3 set(double x, double y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+
     public FiguraVec3 set(double x, double y, double z) {
         this.x = x;
         this.y = y;
@@ -81,6 +92,11 @@ public class FiguraVec3 extends FiguraVector<FiguraVec3, FiguraMat3> {
             value = "vector_n.set"
     )
     public FiguraVec3 set(Object x, double y, double z) {
+    	if(x instanceof FiguraVec3 vec){
+    		return set(vec.x,vec.y,vec.z);
+    	}else if(x instanceof Number x_num){
+    		return set(x_num.doubleValue(),y,z);
+    	}
         return set(LuaUtils.parseVec3("set", x, y, z));
     }
 

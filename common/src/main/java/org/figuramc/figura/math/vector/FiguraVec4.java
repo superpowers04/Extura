@@ -58,6 +58,17 @@ public class FiguraVec4 extends FiguraVector<FiguraVec4, FiguraMat4> {
         return set(other.x, other.y, other.z, other.w);
     }
 
+    public FiguraVec4 set(double x, double y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+    public FiguraVec4 set(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        return this;
+    }
     public FiguraVec4 set(double x, double y, double z, double w) {
         this.x = x;
         this.y = y;
