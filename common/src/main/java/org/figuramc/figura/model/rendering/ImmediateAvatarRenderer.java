@@ -586,7 +586,7 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
             for (int i = 0; i < vertCount; i++) {
                 vertex = vertices.get(i);
 
-                pos.add(pos.set(vertex.x, vertex.y, vertex.z).transform(customization.positionMatrix)
+                pos.add(pos.set(vertex.x, vertex.y, vertex.z, 1).transform(customization.positionMatrix)
                         .normalized().scale(vertexData.vertexOffset)
                     );
                 if (shade) {
