@@ -177,35 +177,29 @@ public class LuaUtils {
     }
 
     public static Pair<FiguraVec3, FiguraVec3> parse2Vec3(String methodName, Object x, Object y, Number z, Object w, Number t, Number h, int xIndex) {
-        FiguraVec3 a, b;
-
         if (x instanceof FiguraVec3 vec1) {
-            a = vec1.copy();
             if (y instanceof FiguraVec3 vec2) {
-                b = vec2.copy();
+                return Pair.of(vec1.copy(), vec2.copy());
             } else if (y == null || y instanceof Number) {
                 if (w == null || w instanceof Number) {
-                    b = parseVec3(methodName, y, z, (Number) w);
-                } else {
-                    throw new LuaError("Illegal argument at position" + xIndex+3 + "to " + methodName + "(): " + w);
+                	return Pair.of(vec1.copy(), parseVec3(methodName, y, z, (Number) w));
                 }
-            } else {
-                throw new LuaError("Illegal argument at position "+ xIndex+1 + " to " + methodName + "(): " + y);
+                throw new LuaError("Illegal argument at position" + xIndex+3 + "to " + methodName + "(): " + w);
             }
+            throw new LuaError("Illegal argument at position "+ xIndex+1 + " to " + methodName + "(): " + y);
         } else if (x instanceof Number && y == null || y instanceof Number) {
-            a = parseVec3(methodName, x, (Number) y, z);
+            FiguraVec3 a = parseVec3(methodName, x, (Number) y, z);
             if (w instanceof FiguraVec3 vec1) {
-                b = vec1.copy();
+                return Pair.of(a, vec1.copy());
             } else if (w == null || w instanceof Number) {
-                b = parseVec3(methodName, w, t, h);
-            } else {
-                throw new LuaError("Illegal argument at position "+ xIndex+3 + " to " + methodName + "(): " + w);
+                return Pair.of(a, parseVec3(methodName, w, t, h));
             }
-        } else {
-            throw new LuaError("Illegal argument at position "+ xIndex + " to " + methodName + "(): " + x);
-        }
+            throw new LuaError("Illegal argument at position "+ xIndex+3 + " to " + methodName + "(): " + w);
+            
+        } 
+        throw new LuaError("Illegal argument at position "+ xIndex + " to " + methodName + "(): " + x);
 
-        return Pair.of(a, b);
+        // return Pair.of(a, b);
     }
 
     // These functions allow having vector parsing at the beggining of the function, taking into account other arguments.
@@ -298,12 +292,11 @@ public class LuaUtils {
         } else if (slot instanceof Integer i) {
             if (i == -1 && inventory != null) {
                 return inventory.getFreeSlot();
-            } else {
-                return i;
             }
-        } else {
-            throw new LuaError("Invalid type for getSlot: " + slot.getClass().getSimpleName());
+            return i;
         }
+        throw new LuaError("Invalid type for getSlot: " + slot.getClass().getSimpleName());
+        
     }
 
     public static JsonElement asJsonValue(LuaValue value) {
