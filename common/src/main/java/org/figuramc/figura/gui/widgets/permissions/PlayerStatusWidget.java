@@ -37,12 +37,14 @@ public class PlayerStatusWidget extends StatusWidget {
                     .append("\n• ").append(FiguraText.of("gui.permissions.render.post_entity", avatar.render.post))
                     .append("\n• ").append(FiguraText.of("gui.permissions.render.post_world", avatar.worldRender.post))
                     .append("\n• ").append(FiguraText.of("gui.permissions.render.animations", avatar.animation.pre)),
-            avatar -> FiguraText.of("gui.status.backend")
+            avatar -> FiguraText.of("gui.status.backend"),
+            avatar -> FiguraText.of("gui.status.version")
+                    .append("\n• ").append(FiguraText.of("gui.status.version.tooltip", avatar.version.toString()))
     );
 
     private final UUID owner;
     private Avatar avatar;
-    private int size, complexity, init, tick, render,backend;
+    private int size, complexity, init, tick, render, backend, version;
 
     public PlayerStatusWidget(int x, int y, int width, UUID owner) {
         super(x, y, width, HOVER_TEXT.size());
@@ -76,7 +78,7 @@ public class PlayerStatusWidget extends StatusWidget {
         // script render
         render = avatar.scriptError ? 1 : avatar.luaRuntime == null ? 0 : avatar.render.getTotal() >= avatar.permissions.get(Permissions.RENDER_INST) * 0.75 || avatar.worldRender.getTotal() >= avatar.permissions.get(Permissions.WORLD_RENDER_INST) * 0.75 ? 2 : 3;
     	backend = avatar.scriptError ? 1 : FSB.instance().isPlayerConnected(owner) ? 4 : 3;
-        // HOVER_TEXT[5].append(FiguraText.of("gui.status.backend",))
+    	version = (avatar.version != null && avatar.version.compareTo(FiguraMod.VERSION) == 0) ? 3 : 2;
      }
 
     @Override
@@ -88,6 +90,7 @@ public class PlayerStatusWidget extends StatusWidget {
             case 3 -> tick;
             case 4 -> render;
             case 5 -> backend;
+            case 6 -> version;
             default -> 0;
         }))).setStyle(Style.EMPTY.withFont(UIHelper.UI_FONT));
     }
@@ -101,6 +104,7 @@ public class PlayerStatusWidget extends StatusWidget {
             case 3 -> tick;
             case 4 -> render;
             case 5 -> backend;
+            case 6 -> version;
             default -> 0;
         };
         return avatar == null ? null : HOVER_TEXT.get(i).apply(avatar).setStyle(TEXT_COLORS.get(color));
