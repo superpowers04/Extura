@@ -288,7 +288,7 @@ public class BlockbenchCommonTypes {
 
 		FiguraVec4 uv;
 		float rotation;
-		@Nullable Integer texture = null;
+		@Nullable Integer texture;
 
 		@Override
 		public @Nullable CompoundTag toNBT(BlockbenchParser2.Intermediary context) {
