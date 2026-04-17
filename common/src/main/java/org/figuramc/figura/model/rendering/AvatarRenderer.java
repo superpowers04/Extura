@@ -116,12 +116,10 @@ public abstract class AvatarRenderer {
         String s = tag.getString("d");
         if (!s.isEmpty()) return s;
         s = tag.getString("e");
-        if (!s.isEmpty()) return s.substring(0, s.length() - 2);
-        s = tag.getString("s");
-        if (!s.isEmpty()) return s.substring(0, s.length() - 2);
-        s = tag.getString("n");
-        if (!s.isEmpty()) return s.substring(0, s.length() - 2);
-        return "";
+        if (s.isEmpty()) s = tag.getString("s");
+        if (s.isEmpty()) s = tag.getString("n");
+        if (s.isEmpty()) return null;
+        return s.substring(0, s.length() - 2);
     }
 
     public FiguraTexture getTexture(String name) {

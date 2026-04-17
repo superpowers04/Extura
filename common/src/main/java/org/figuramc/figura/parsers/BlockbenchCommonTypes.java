@@ -292,24 +292,21 @@ public class BlockbenchCommonTypes {
 
 		@Override
 		public @Nullable CompoundTag toNBT(BlockbenchParser2.Intermediary context) {
-			if(texture instanceof Integer){
-				Integer texture = 0; // me when "texture might not have been initialized"
-				texture = (Integer) texture;
-				CompoundTag tag = new CompoundTag();
-				Integer textureID = context.getTextureGlobalID(texture);
-				if (textureID == null) return null;
-				tag.putInt("tex", textureID);
-				if (rotation != 0f)
-					tag.putFloat("rot", rotation);
-				if (uv != null && !uv.equals(ZERO4)) {
-					FiguraVec2 size = context.getTextureFixedSize(texture);
-					FiguraVec4 sizeTwice = FiguraVec4.of(size.x, size.y, size.x, size.y).multiply(uv);
-					tag.put("uv", vecToList(sizeTwice));
-				}
-				return tag;
+			Integer _texture = -1;
+			_texture = texture;
+			if (_texture == null || _texture == -1) return null;
+			CompoundTag tag = new CompoundTag();
+			Integer textureID = context.getTextureGlobalID(_texture);
+			if (textureID == null) return null;
+			tag.putInt("tex", textureID);
+			if (rotation != 0f) tag.putFloat("rot", rotation);
+			if (uv != null && !uv.equals(ZERO4)) {
+				FiguraVec2 size = context.getTextureFixedSize(_texture);
+				FiguraVec4 sizeTwice = FiguraVec4.of(size.x, size.y, size.x, size.y).multiply(uv);
+				tag.put("uv", vecToList(sizeTwice));
 			}
-			texture = null;
-			return null;
+			return tag;
+			
 		}
 	}
 
@@ -545,14 +542,8 @@ public class BlockbenchCommonTypes {
 					kfTag.putString("int", kf3.interpolation != null ? kf3.interpolation : "linear");
 					Keyframe.Keyframe3.Data pre = kf3.data_points[0];
 
-					FiguraVec3 trans;
 					boolean transX = isV5 && (kf3.channel.equals("rotation") || kf3.channel.equals("position"));
 					boolean transY = isV5 && (kf3.channel.equals("rotation"));
-					switch(kf3.channel) {
-						case "rotation" -> trans = rotTrans;
-						case "position" -> trans = posTrans;
-						default -> trans = DO_NOTHING;
-					}
 
 					kfTag.put("pre", pre.toNBT(kf3.channel, transX, transY));
 					if (kf3.data_points.length > 1) {
@@ -560,12 +551,21 @@ public class BlockbenchCommonTypes {
 						kfTag.put("end", post.toNBT(kf3.channel, transX, transY));
 					}
 
+					FiguraVec3 trans = switch(kf3.channel) {
+						case "rotation" -> rotTrans;
+						case "position" -> posTrans;
+						default -> DO_NOTHING;
+					};
 					// Bezier handles
 					if (kf3.bezier_left_value != null && !kf3.bezier_left_value.equals(ZERO)) {
-						kfTag.put("bl", vecToList(kf3.bezier_left_value.copy().multiply(trans)));
+						FiguraVec3 left_value = kf3.bezier_left_value.copy();
+						if(trans != DO_NOTHING) left_value.multiply(trans);
+						kfTag.put("bl", vecToList(left_value));
 					}
 					if (kf3.bezier_right_value != null && !kf3.bezier_right_value.equals(ZERO)) {
-						kfTag.put("br", vecToList(kf3.bezier_right_value.copy().multiply(trans)));
+						FiguraVec3 right_value = kf3.bezier_right_value.copy();
+						if(trans != DO_NOTHING) right_value.multiply(trans);
+						kfTag.put("br", vecToList(right_value));
 					}
 					if (kf3.bezier_left_time != null && !kf3.bezier_left_time.equals(LEFT_TIMING)) {
 						kfTag.put("blt", vecToList(kf3.bezier_left_time));
@@ -581,27 +581,22 @@ public class BlockbenchCommonTypes {
 					}
 				}
 
-			CompoundTag animatorTag = new CompoundTag();
 			CompoundTag channels = new CompoundTag();
 			if (!rot.isEmpty()) {
-				if (Boolean.TRUE.equals(rotation_global)) {
-					// ... does this work at all on the other end?
-					channels.put("grot", rot);
-				} else {
-					channels.put("rot", rot);
-				}
+				// ... does this work at all on the other end?
+				channels.put(Boolean.TRUE.equals(rotation_global) ? "grot" : "rot", rot);
 			}
 			if (!pos.isEmpty()) channels.put("pos", pos);
 			if (!scale.isEmpty()) channels.put("scl", scale);
 
 			if (!channels.isEmpty()) {
+				CompoundTag animatorTag = new CompoundTag();
 				animatorTag.putInt("id", animContext.globalID);
 				animatorTag.put("data", channels);
-			} else {
-				return null;
+				return animatorTag;
 			}
+			return null;
 
-			return animatorTag;
 		}
 	}
 
