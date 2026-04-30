@@ -25,7 +25,6 @@
     "TextDisplayMixin",
     "compat.GeckolibGeoArmorRendererMixin",
     "compat.GeckolibGeoRendererMixin",
-    "compat.SimpleVCMixin",
     "compat.IrisShadowRendererMixin",
     "font.BakedGlyphMixin",
     "font.BitmapGlyphMixin",
